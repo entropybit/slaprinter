@@ -1,0 +1,35 @@
+ZWINGEND AUF CLIENT:
+how do you call functions with parameters inside signals? why do function calls work but not functions with parameters?
+
+
+openGL plotting der stl-datei
+openGL plotting der druckfläche mit zaun - parameter aus der .conf datei nehmen
+slicing routine entwickeln
+
+datentransfer an Raspberry
+datenempfang von Raspberry 
+
+
+ZWINGEND AUF RASP:
+datenempfang von pc
+printing routine: movestepper und bild, abwechselnd
+statusnachrichtentransfer zurück an pc
+
+
+OPTIONAL:
+
+floaterstellung
+supporterstellung
+openGL rotieren
+openGL skalieren
+openGL verschieben
+errorhandling (man kann zb in das feld für die steps "hase" eintragen - das sollte man nicht können)
+
+
+
+
+NIPPES:
+
+SIEGESGERÄUSCH AUSM BEAMER ABSPIELEN bei fertigem druck
+OUCH-geräusch abspielen bei abbruch (claptrap-OW oder portal turret oä)
+"du fährst grade zu weit runter"-switch einbauen
