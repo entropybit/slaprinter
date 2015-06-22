@@ -1,8 +1,7 @@
 __author__ = 'mithrawnuruodo'
 
 import Model.Stepper as Stepper
-import RPi.GPIO as GPIO
-#import Control.snes as snes
+import Control.snes as snes
 import View.Beamer as Beamer
 
 
@@ -14,5 +13,4 @@ import View.Beamer as Beamer
 
 fisch = Stepper.SoncebosStepper()
 fisch.down()
-#fisch.up_wtf()
-#fisch.disable()
+
