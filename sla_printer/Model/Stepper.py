@@ -58,55 +58,55 @@ class SoncebosStepper(Stepper):
 
     def upOneStep(self):
         GPIO.output(self.directionPin, True)
-        GPIO.output(self.enablePin, True)
+        GPIO.output(self.enablePin, False)
         pwm = GPIO.PWM(self.startPin, self.frequency_slow) #last parameter is frequency in Hz, max 70kHz in Python (according to the interwebs)
         pwm.start(50) #number is percentage of duty cycle: 1-50 works without problems or differences
         time.sleep(self.secondsToMove) #number is seconds to go up
-        GPIO.output(self.enablePin, False)
+        GPIO.output(self.enablePin, True)
 
     def downOneStep(self):
         GPIO.output(self.directionPin, False)
-        GPIO.output(self.enablePin, True)
+        GPIO.output(self.enablePin, False)
         pwm = GPIO.PWM(self.startPin, self.frequency_slow) #last parameter is frequency in Hz, max 70kHz in Python (according to the interwebs)
         pwm.start(50) #number is percentage of duty cycle: 1-50 works without problems or differences
         time.sleep(self.secondsToMove) #number is seconds to go up
-        GPIO.output(self.enablePin, False)
+        GPIO.output(self.enablePin, True)
 
     def up_toEnd(self):
         GPIO.output(self.directionPin, True)
-        GPIO.output(self.enablePin, True)
+        GPIO.output(self.enablePin, False)
         while not GPIO.input(self.detectPinTop) or not GPIO.input(self.detectPinBottom):
             GPIO.output(self.startPin, True)
             GPIO.output(self.startPin, False)
             print  #why the fuck does this run so friggin fast? faster than the fastest pwm. this shouldnt be possible. how?
-        GPIO.output(self.enablePin, False)
+        GPIO.output(self.enablePin, True)
 
     def down_toEnd(self):
         GPIO.output(self.directionPin, False)
-        GPIO.output(self.enablePin, True)
+        GPIO.output(self.enablePin, False)
         while not GPIO.input(self.detectPinTop) or not GPIO.input(self.detectPinBottom):
             GPIO.output(self.startPin, True)
             GPIO.output(self.startPin, False)
             print  #why the fuck does this run so friggin fast? faster than the fastest pwm. this shouldnt be possible. how?
-        GPIO.output(self.enablePin, False)
+        GPIO.output(self.enablePin, True)
 
     def down_ssh_manual(self):
         GPIO.output(self.directionPin, False)
-        GPIO.output(self.enablePin, True)
+        GPIO.output(self.enablePin, False)
         pwm = GPIO.PWM(self.startPin, self.frequency_slow) #last parameter is frequency in Hz, max 70kHz in Python (according to the interwebs)
         pwm.start(50) #zahl ist prozentualer duty cycle 1-50 geht ohne unterschied
         raw_input("Press return to stop going down...")
         pwm.stop()
-        GPIO.output(self.enablePin, False)
+        GPIO.output(self.enablePin, True)
 
     def up_ssh_manual(self):
         GPIO.output(self.directionPin, True)
-        GPIO.output(self.enablePin, True)
+        GPIO.output(self.enablePin, False)
         pwm = GPIO.PWM(self.startPin, self.frequency_slow) #last parameter is frequency in Hz, max 70kHz in Python (according to the interwebs)
         pwm.start(50) #zahl ist prozentualer duty cycle 1-50 geht ohne unterschied
         raw_input("Press return to stop going down...")
         pwm.stop()
-        GPIO.output(self.enablePin, False)
+        GPIO.output(self.enablePin, True)
 
 """
     def up_old(self): #probieren verschiedener frequenzen -  nichts geht. warum? WEIL time.sleep() keine werte unter 1/1000 annimmt. shit.

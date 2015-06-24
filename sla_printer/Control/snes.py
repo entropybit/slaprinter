@@ -23,23 +23,19 @@ def main():
 
         for event in pygame.event.get(): # event handling loop
             if event.type == JOYBUTTONUP:
-                button = event.button
-                if button == 9:
+                if event.button == 9:
                     pygame.quit()
                     sys.exit()
                 else:
-                    print(button)
+                    print(event.button)
 
-                #print str(event).split()[4][0]
-                #if str(event).split()[4][0] == "9": #closes the program when you press start
-                #    pygame.quit()
-                #    sys.exit()
 
             elif event.type == JOYAXISMOTION:
-                print "das war eine achse"
-                #print event
-                JumpSound = pygame.mixer.Sound('Portal Sentry - is anyone there.ogg')
-                JumpSound.play()
+                print event.axis
+                print event.value
+
+#                JumpSound = pygame.mixer.Sound('Portal Sentry - is anyone there.ogg')
+ #               JumpSound.play()
                 #pygame.mixer.music.load('Firewell.ogg')
                 #pygame.mixer.music.play(-1, 0)
 
