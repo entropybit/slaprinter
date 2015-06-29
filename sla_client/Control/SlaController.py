@@ -3,7 +3,7 @@ __author__ = 'mithrawnuruodo'
 from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QWidget, QMessageBox, QFileDialog
 from View import Ui_MainWindow, GLWidget, Ui_PrinterSettings, Ui_PrintingDialog, Ui_PrintingWindow
 
-import json
+import json, requests, time
 import sys
 import os.path
 
@@ -11,7 +11,6 @@ class SlaController(QApplication):
 
     def __init__(self, argv):
         QApplication.__init__(self, argv)
-
 
         self.__mainWindow = QMainWindow()
         self.__ui1 = Ui_MainWindow()
@@ -27,18 +26,11 @@ class SlaController(QApplication):
         self.__printerSettings = QDialog()
         self.__ui4 = Ui_PrinterSettings()
 
-
-
-
-
     def start(self):
         self.initWindows()
         self.makeConnections()
-
-
         self.__mainWindow.show()
         sys.exit(self.exec_())
-
 
     def initWindows(self):
 
@@ -57,14 +49,12 @@ class SlaController(QApplication):
         #Initiating general printer settings window (for overarching printer settings that are always the same with the same printer)
         self.__ui4.setupUi(self.__printerSettings)
 
-
     def switchToPrintingMode(self):
         self.__mainWindow.close()
         self.__printerSettings.close() #shouldnt be open at this point, but you never know
         self.__printingDialog.close()
         self.__printingWindow.show()
-
-
+        self.sendToRaspberry()
 
     def savePrinterSettingsToFile(self):
         configfile = open('PrinterSettings.conf', 'w')
@@ -76,7 +66,6 @@ class SlaController(QApplication):
         configfile.close()
 
         self.__printerSettings.close() #closes the window
-
 
     def loadPrinterSettings(self):
 
@@ -104,8 +93,6 @@ class SlaController(QApplication):
 
         configfile.close()
 
-
-
     def MoveStepper(up=True, no_of_steps=1): #This is going to be the motor step function
         print up
         print no_of_steps
@@ -113,7 +100,6 @@ class SlaController(QApplication):
     def MoveStepperToEndPos(self,Endposition=True):
         #False is Startposition
         pass
-
 
     def ManualPrintingAbort(self):
         w = QWidget()
@@ -131,7 +117,6 @@ class SlaController(QApplication):
             print(f.read())
         file.close()
 
-
     def makeConnections(self):
         #Explaining what each button on the StandardWindow does
         self.__ui1.importFileButton.clicked.connect(self.fileDialogFunction)
@@ -139,6 +124,15 @@ class SlaController(QApplication):
         self.__ui1.printerSettingsButton.clicked.connect(self.__printerSettings.show)
         #ui1.DownPosButton.clicked.connect(MoveStepper, [False,2])            #why cant i call functions with parameters?
         #ui1.UpPosButton.clicked.connect(MoveStepper(True, N))
+
+    def sendToRaspberry(self):
+        configfile = open('PrinterSettings.conf', 'r')
+        SettingsList=json.load(configfile)
+        configfile.close()
+
+        sentFile = {'file': ('../View/PrinterSettings.conf', open('../View/PrinterSettings.conf', 'rb'), 'application/vnd.ms-excel', {'Expires': '0'})}
+        r1 = requests.post(str(SettingsList[11]) + ":/home/pi/printerData", files=sentFile)
+        r2 = requests.post(str(SettingsList[11]) + ":/home/pi/printerData", data=str(SettingsList))
 
 
         """
