@@ -26,6 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        validator = QtGui.QDoubleValidator()
         MainWindow.resize(1341, 852)
         self.centralwidget = QtGui.QWidget(MainWindow)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -143,6 +144,9 @@ class Ui_MainWindow(object):
         self.actionPrinter_Settings_2.setObjectName(_fromUtf8("actionPrinter_Settings_2"))
         self.actionFile_Import = QtGui.QAction(MainWindow)
         self.actionFile_Import.setObjectName(_fromUtf8("actionFile_Import"))
+
+        self.ScaleFactor.setValidator(validator)
+        self.N.setValidator(validator)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)

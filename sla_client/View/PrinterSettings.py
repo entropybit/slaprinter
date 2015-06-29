@@ -25,6 +25,7 @@ except AttributeError:
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
+        validator = QtGui.QDoubleValidator()
         Dialog.setObjectName(_fromUtf8("Dialog"))
         Dialog.resize(471, 253)
         self.verticalLayout_5 = QtGui.QVBoxLayout(Dialog)
@@ -149,6 +150,15 @@ class Ui_Dialog(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.horizontalLayout_11.addLayout(self.verticalLayout_2)
         self.verticalLayout_5.addLayout(self.horizontalLayout_11)
+
+        self.AreaLength.setValidator(validator)
+        self.AreaHeight.setValidator(validator)
+        self.AreaWidth.setValidator(validator)
+        self.HeightPerRevolution.setValidator(validator)
+        self.illuminationIntensity.setValidator(validator)
+        self.illuminationTime.setValidator(validator)
+        self.PrinterLiquidPrice.setValidator(validator)
+        self.StepsPerRevolution.setValidator(validator)
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
