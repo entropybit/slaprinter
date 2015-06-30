@@ -37,6 +37,7 @@ class SlaController(QApplication):
         self.__glMain  = GLWidget()
         self.__ui1.setupUi(self.__mainWindow)
         self.__ui1.OpenGlPanel.addWidget(self.__glMain)
+       # self.installEventFilter(self.__glMain)
 
         #Initiating printer settings dialogue (individual options for each print)
         self.__ui2.setupUi(self.__printingDialog)
