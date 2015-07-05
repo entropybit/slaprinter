@@ -1,2 +1,3 @@
 pyopengl
 numpy-stl
+PyQt

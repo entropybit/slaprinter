@@ -29,6 +29,8 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.rot = False
         self.trans = True
 
+        self.moving_mode = False
+
         # object enables itself to receive events
         # like the ones triggered by mouse or keyboard input
 
@@ -70,11 +72,13 @@ class GLWidget(QtOpenGL.QGLWidget):
         glScale(20.0, 20.0, 20.0)
 
 
+
+
+        glTranslate(self.trans_x, self.trans_y, self.trans_z)
+
         glRotate(self.rot_x, 1.0, 0, 0)
         glRotate(self.rot_y,0, 1.0, 0)
         glRotate(self.rot_z,0, 0, 1.0)
-
-        glTranslate(self.trans_x, self.trans_y, self.trans_z)
 
         glScale(self.scale, self.scale, self.scale)
 
@@ -133,37 +137,87 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     def mousePressEvent(self, event):
 
-        pos = event.pos()
-        self.x0, self.y0 = pos.x(), pos.y()
+        self.moving_mode = True
+
+        # on left button go to panning mode
+        if event.button() == QtCore.Qt.LeftButton:
+            self.trans = True
+            self.rot = False
+        # on right button go to rotation mode
+        else:
+            self.trans = False
+            self.rot = True
+
+        #pos = event.pos()
+        #self.x0, self.y0 = pos.x(), pos.y()
         #print("mouse press event (" + str(x) + ", " + str(y) + ")" )
 
 
     def mouseReleaseEvent(self, event):
-        pos = event.pos()
-        x, y = pos.x(), pos.y()
-        print("mouse release event (" + str(x) + ", " + str(y) + ")" )
+
+        self.moving_mode = False
+        self.x0 = 0
+        self.y0 = 0
+        #pos = event.pos()
+        #x, y = pos.x(), pos.y()
+        #print("mouse release event (" + str(x) + ", " + str(y) + ")" )
 
 
     def mouseMoveEvent(self, event):
-        pos = event.pos()
-        x, y = pos.x(), pos.y()
 
-        diffx = x - self.x0
-        diffy = y - self.y0
-        diffy = -1.0*diffy
+        if self.moving_mode:
+            pos = event.pos()
 
-        w = 0.001
+            x, y = pos.x(), pos.y()
 
-        if self.trans:
-            self.trans_x = self.trans_x + diffx*w
-            self.trans_y = self.trans_y + diffy*w
+            # apply difference beweteen last (x0,y0) and recent position
+            # if there is a difference, if this is the first call of mouseMoveEvent after MousePressEvent
+            # do not apply movement since ther is not yet enough data
+            if self.x0 != 0 and self.y0 != 0:
+
+                diffx = x - self.x0
+                diffy = y - self.y0
+                diffy = -1.0*diffy
+
+
+
+                if self.trans:
+                    w = 0.001
+                    self.trans_x = self.trans_x + diffx*w
+                    self.trans_y = self.trans_y + diffy*w
+                else:
+                    w = 0.1
+                    self.rot_y = self.rot_y + diffx*w
+                    self.rot_x = self.rot_x + diffy*w
+
+            # change x0 and y0 to received coordinates either way
+            self.x0 = x
+            self.y0 = y
+
+            # after function refresh window
+            self.update()
+
+        print("mouse move (" + str(x) + ", " + str(y) + ")t")
+
+    def wheelEvent(self, event):
+
+        #print(event.delta()/120.0)
+
+        diff = event.delta()/120.0
+
+        w = 1.01
+
+        if diff >= 0:
+            self.scale = self.scale*w
         else:
-            self.rot_y = self.rot_y + diffx*w
-            self.rot_x = self.rot_x + diffy*w
+            self.scale = self.scale/w
+
 
         self.update()
 
-        print("mouse move (" + str(x) + ", " + str(y) + ")t")
+
+
+
 
 
 
