@@ -1,3 +1,9 @@
-pyopengl
+#pyopengl
+PyOpenGL
+PyOpenGL_accelerate
+numpy
 numpy-stl
-PyQt
+stl
+mercurial
+requests
+
