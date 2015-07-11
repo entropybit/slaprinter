@@ -3,6 +3,14 @@ __author__ = 'mithrawnuruodo'
 
 from OpenGL.GL import *
 from QlWidget import Drawable
+from enum import Enum
+
+class DrawingModes(Enum):
+    '''
+    listing of possible drawing modes for model views
+    '''
+    triangles = 1
+    indexed = 2
 
 
 
@@ -10,60 +18,63 @@ class StlModelView(Drawable):
 
     def __init__(self, model):
         Drawable.__init__(self)
-        self.model = model
+        self._model = model
 
-        print(" x [max, min] = ")
-        print(model.xlims)
-        print("")
+        self._drawing_mode = DrawingModes.triangles
 
-        print(" x [max, min] = ")
-        print(model.ylims)
-        print("")
-
-        print(" x [max, min] = ")
-        print(model.zlims)
-        print("")
 
     def draw(self):
         '''
+            depending on the drawing mode draw the model as connected list of triangles
+            so as GL_TRIANGLES
+            or draw them as indexed list of triangles.
+            This als uses GL_TRIANGLES but together with an indexed buffer.
+        '''
+
+
+        if self._drawing_mode == DrawingModes.triangles:
+            self.simpleTrianglesDraw()
+        else:
+            if self._drawing_mode==DrawingModes.indexed:
+                self.indexedTrianglesDraw()
+
+
+    def simpleTrianglesDraw(self):
+        '''
         draw a visualization of the provided stl file by iterating over the triangles and displaying them
         as a connected triangle list so as GL_TRIANGLES ...
-
-
-
-        :return:
         '''
 
-        '''
-        ToDo: this is very inefficient we need to do this as vertex buffer or something like this because then the data
-        would be written directly into the graphicard memory, therfore transformations like panning, zooming or rotation
-        will be much faster
-        '''
+        scale, sx, sy, sz = self.getScale()
 
-
-        scale = self.getScale()
-        scale = scale[0]
-
+        # do local scaling an translation for better
+        # displaying
         glScale(1.0/scale,1.0/scale,1.0/scale)
+        glTranslate(sx/2.0,sy/2.0,0)
+
 
         glBegin(GL_TRIANGLES)
 
-        n = len(self.model.mesh)
 
-        v0 = self.model.mesh.v0
-        v1 = self.model.mesh.v1
-        v2 = self.model.mesh.v2
+        n = len(self._model.mesh)
+
+        v0 = self._model.mesh.v0
+        v1 = self._model.mesh.v1
+        v2 = self._model.mesh.v2
 
 
         for i in range(0,n):
 
             #v = self.model.mesh.points[i]
-            n = self.model.mesh.normals[i]
+            n = self._model.mesh.normals[i]
 
             self.drawTriangle(v0[i],v1[i],v2[i],n)
 
         glEnd()
 
+        # since translation and scaling were local
+        # reverse them otherwise this will effect all other drawings aftewards
+        glTranslate(-sx/2.0,-sy/2.0,0)
         glScale(scale,scale,scale)
 
     def drawTriangle(self,v0,v1,v2,n):
@@ -94,9 +105,9 @@ class StlModelView(Drawable):
 
         '''
 
-        xmin, xmax = self.model.xlims
-        ymin, ymax = self.model.ylims
-        zmin, zmax = self.model.zlims
+        xmin, xmax = self._model.xlims
+        ymin, ymax = self._model.ylims
+        zmin, zmax = self._model.zlims
 
         scalex = xmax - xmin
         scaley = ymax - ymin
@@ -104,3 +115,11 @@ class StlModelView(Drawable):
 
         return [max(scalex,scaley, scalez), scalex, scaley, scalez]
 
+
+
+    def setDrawingMode(self,mode):
+
+        if isinstance(mode,DrawingModes):
+            self._drawing_mode = mode
+        else:
+            raise Exception("invalid drawing mode supplied")
