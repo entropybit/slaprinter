@@ -19,6 +19,8 @@ class SlaController(QApplication):
         self.__mainWindow = QMainWindow()
         self.__ui1 = Ui_MainWindow()
         self.__glMain = object()
+        self.__stl_model = StlModel()
+        self.__stl_view = None
 
         self.__printingDialog = QDialog()
         self.__ui2 = Ui_PrintingDialog()
@@ -40,7 +42,7 @@ class SlaController(QApplication):
 
 
         #path = PROJECT_PATH + "/brain-gear.stl"
-        path = PROJECT_PATH + "/tire_v.stl"
+        #path = PROJECT_PATH + "/tire_v.stl"
 
         self.__glMain  = GLWidget()
 
@@ -51,11 +53,6 @@ class SlaController(QApplication):
         self.timer.setInterval(1.0/FPS)
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL('timeout()'), self.__glMain.spin)
         self.timer.start()
-
-        stl_model = StlModel(path)
-        stl_view = StlModelView(stl_model)
-
-        self.__glMain.addDrawable(stl_view)
         self.__ui1.setupUi(self.__mainWindow)
         self.__ui1.OpenGlPanel.addWidget(self.__glMain)
        # self.installEventFilter(self.__glMain)
@@ -133,11 +130,21 @@ class SlaController(QApplication):
     def fileDialogFunction(self):
         filename = QFileDialog.getOpenFileName(self.__mainWindow, 'Open File') #LINUX
         #filename = QFileDialog.getOpenFileName(mainWindow, 'Open File', 'C:\') #WINDOWS
-        print filename
+        print("")
+        print("filepath: " + str(filename))
+
+        if filename.contains(".stl") > -1:
+            self.__stl_model.open(filename)
+
+            if not self.__stl_view is None:
+                self.__glMain.delDrawable(self.__stl_view)
+
+            self.__stl_view = StlModelView(self.__stl_model)
+            self.__glMain.addDrawable(self.__stl_view)
         #print file contents
-        with open(filename, 'r') as f:
-            print(f.read())
-        file.close()
+        #with open(filename, 'r') as f:
+        #    print(f.read())
+        #file.close()
 
     def makeConnections(self):
         #Explaining what each button on the StandardWindow does

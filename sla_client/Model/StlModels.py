@@ -5,8 +5,10 @@ from stl import mesh
 
 class StlModel(object):
 
-    def __init__(self, path):
-        self.mesh = mesh.Mesh.from_file(path)
+    def __init__(self, path=""):
+
+
+        self.mesh = None
 
         self.x_min = 0
         self.x_max = 0
@@ -15,6 +17,11 @@ class StlModel(object):
         self.z_min = 0
         self.z_max = 0
 
+        if path != "":
+            self.open(path)
+
+    def open(self,path):
+        self.mesh = mesh.Mesh.from_file(path)
         self.analyse()
 
 

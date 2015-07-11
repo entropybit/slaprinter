@@ -47,9 +47,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.rot_z = 0.0
 
         # rotation flags
-        self.xrotation = True
+        self.xrotation = False
         self.yrotation = True
-        self.zrotation = True
+        self.zrotation = False
 
         self.trans_x = 0.0
         self.trans_y = 0.0
@@ -144,13 +144,17 @@ class GLWidget(QtOpenGL.QGLWidget):
         glScale(self.scale, self.scale, self.scale)
 
         # translate cosy
-        glTranslate(-0.5,-0.5,0)
+        glTranslate(0,-0.3,0)
 
+
+        i = 0
         for d in self.drawables:
+
             d.draw()
+            i = i+1
 
         # redo tranlation
-        glTranslate(0.5,0.5,0)
+        glTranslate(0,0.3,0)
 
         #print("[" + str(time.time()) + "] end of paint " )
 
