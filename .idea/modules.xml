@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$USER_HOME$/Seafile/Meine Bibliothek-1/Scientia/Physik/KDS/[My]Skript/scripts/.idea/scripts.iml" filepath="$USER_HOME$/Seafile/Meine Bibliothek-1/Scientia/Physik/KDS/[My]Skript/scripts/.idea/scripts.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/slaprinter.iml" filepath="$PROJECT_DIR$/.idea/slaprinter.iml" />
     </modules>
   </component>

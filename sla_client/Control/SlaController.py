@@ -1,11 +1,14 @@
 __author__ = 'mithrawnuruodo'
 
 from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QWidget, QMessageBox, QFileDialog
-from View import Ui_MainWindow, GLWidget, Ui_PrinterSettings, Ui_PrintingDialog, Ui_PrintingWindow
-
+from View import Ui_MainWindow, GLWidget, Ui_PrinterSettings, Ui_PrintingDialog, Ui_PrintingWindow, StlModelView
+from Model import StlModel
 import json, requests, time
 import sys
 import os.path
+PROJECT_PATH = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0]
+
+
 
 class SlaController(QApplication):
 
@@ -34,7 +37,15 @@ class SlaController(QApplication):
 
     def initWindows(self):
 
+
+        path = PROJECT_PATH + "/brain-gear.stl"
+
         self.__glMain  = GLWidget()
+
+        stl_model = StlModel(path)
+        stl_view = StlModelView(stl_model)
+
+        self.__glMain.addDrawable(stl_view)
         self.__ui1.setupUi(self.__mainWindow)
         self.__ui1.OpenGlPanel.addWidget(self.__glMain)
        # self.installEventFilter(self.__glMain)

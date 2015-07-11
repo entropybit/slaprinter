@@ -7,6 +7,33 @@ from PyQt4 import QtOpenGL
 from OpenGL import GLU
 from OpenGL.GL import *
 from numpy import array
+from abc import ABCMeta,abstractmethod
+
+
+
+class Drawable(object):
+
+    __metaclass__ = ABCMeta
+
+    udids = []
+
+    def __init__(self):
+
+        if len(self.udids) == 0:
+            self.udid = 1
+            self.udids.append(1)
+        else:
+            self.udid = self.udids[-1] +1
+
+
+    def __hash__(self):
+        return self.udid
+
+    @abstractmethod
+    def draw(self):
+        pass
+
+
 
 class GLWidget(QtOpenGL.QGLWidget):
     def __init__(self, parent=None):
@@ -30,6 +57,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.trans = True
 
         self.moving_mode = False
+        self.drawables = set()
 
         # object enables itself to receive events
         # like the ones triggered by mouse or keyboard input
@@ -88,11 +116,25 @@ class GLWidget(QtOpenGL.QGLWidget):
         glTranslate(-0.5,-0.5,0)
 
         # draw stuff for x in [0,1] and y in [0,1] so that this is centered
-        self.drawStuff()
+        #self.drawStuff()
+
+        for d in self.drawables:
+            d.draw()
 
         # redo tranlation
         glTranslate(0.5,0.5,0)
 
+
+    def addDrawable(self,d):
+
+        if isinstance(d, Drawable):
+            self.drawables.add(d)
+
+
+    def delDrawable(self,d):
+
+        if isinstance(d,Drawable):
+            self.drawables.remove(d)
 
     def drawStuff(self):
         glEnableClientState(GL_VERTEX_ARRAY)
