@@ -8,6 +8,7 @@ from OpenGL import GLU
 from OpenGL.GL import *
 from numpy import array
 from abc import ABCMeta,abstractmethod
+import time
 
 
 
@@ -36,13 +37,19 @@ class Drawable(object):
 
 
 class GLWidget(QtOpenGL.QGLWidget):
-    def __init__(self, parent=None):
+    def __init__(self, fps=60, parent=None):
         self.parent = parent
         QtOpenGL.QGLWidget.__init__(self, parent)
 
+        # rotation variables
         self.rot_x = 0.0
         self.rot_y = 0.0
         self.rot_z = 0.0
+
+        # rotation flags
+        self.xrotation = True
+        self.yrotation = True
+        self.zrotation = True
 
         self.trans_x = 0.0
         self.trans_y = 0.0
@@ -59,6 +66,14 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.moving_mode = False
         self.drawables = set()
 
+
+
+
+        #self._timer = QtCore.QTimer()
+
+        self._fps = fps
+        #QtCore.QObject.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateGL)
+
         # object enables itself to receive events
         # like the ones triggered by mouse or keyboard input
 
@@ -68,7 +83,6 @@ class GLWidget(QtOpenGL.QGLWidget):
     def initializeGL(self):
         # set background color
         self.qglClearColor(QtGui.QColor(60, 63, 65))
-        self.initGeometry()
 
         glEnable(GL_DEPTH_TEST)
 
@@ -80,6 +94,24 @@ class GLWidget(QtOpenGL.QGLWidget):
         # Set alpha blending
         glEnable( GL_BLEND )
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA )
+
+        glEnable(GL_VERTEX_ARRAY)
+
+
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+        #glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        #glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_LIGHTING);
+        glEnable(GL_TEXTURE_2D);
+        glEnable(GL_CULL_FACE);
+
+        # track material ambient and diffuse from surface color, call it before glEnable(GL_COLOR_MATERIAL)
+        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+        glEnable(GL_COLOR_MATERIAL);
+        #self._timer.start(1.0/self._fps)
+
+
 
     def resizeGL(self, width, height):
         if height == 0: height = 1
@@ -93,13 +125,14 @@ class GLWidget(QtOpenGL.QGLWidget):
         glMatrixMode(GL_MODELVIEW)
 
     def paintGL(self):
+
+        #print("[" + str(time.time()) + "] start of paint " )
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glLoadIdentity()
         glTranslate(0.0, 0.0, -50.0)
         glScale(20.0, 20.0, 20.0)
-
-
 
 
         glTranslate(self.trans_x, self.trans_y, self.trans_z)
@@ -110,13 +143,8 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         glScale(self.scale, self.scale, self.scale)
 
-
-
         # translate cosy
         glTranslate(-0.5,-0.5,0)
-
-        # draw stuff for x in [0,1] and y in [0,1] so that this is centered
-        #self.drawStuff()
 
         for d in self.drawables:
             d.draw()
@@ -124,6 +152,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         # redo tranlation
         glTranslate(0.5,0.5,0)
 
+        #print("[" + str(time.time()) + "] end of paint " )
 
     def addDrawable(self,d):
 
@@ -136,42 +165,18 @@ class GLWidget(QtOpenGL.QGLWidget):
         if isinstance(d,Drawable):
             self.drawables.remove(d)
 
-    def drawStuff(self):
-        glEnableClientState(GL_VERTEX_ARRAY)
-        glEnableClientState(GL_COLOR_ARRAY)
-        glVertexPointerf(self.cubeVtxArray)
-        glColorPointerf(self.cubeClrArray)
-        glDrawElementsui(GL_QUADS, self.cubeIdxArray)
-
-    def initGeometry(self):
-        self.cubeVtxArray = array(
-                [[0.0, 0.0, 0.0],
-                 [1.0, 0.0, 0.0],
-                 [1.0, 1.0, 0.0],
-                 [0.0, 1.0, 0.0],
-                 [0.0, 0.0, 1.0],
-                 [1.0, 0.0, 1.0],
-                 [1.0, 1.0, 1.0],
-                 [0.0, 1.0, 1.0]])
-        self.cubeIdxArray = [
-                0, 1, 2, 3,
-                3, 2, 6, 7,
-                1, 0, 4, 5,
-                2, 1, 5, 6,
-                0, 3, 7, 4,
-                7, 6, 5, 4 ]
-        self.cubeClrArray = [
-                [0.0, 0.0, 0.0],
-                [1.0, 0.0, 0.0],
-                [1.0, 1.0, 0.0],
-                [0.0, 1.0, 0.0],
-                [0.0, 0.0, 1.0],
-                [1.0, 0.0, 1.0],
-                [1.0, 1.0, 1.0],
-                [0.0, 1.0, 1.0 ]]
 
     def spin(self):
-        self.yRotDeg = (self.yRotDeg  + 1) % 360.0
+
+        if self.xrotation:
+            self.rot_x = (self.rot_x + 1) % 360.0
+
+        if self.yrotation:
+            self.rot_y = (self.rot_y + 1) % 360.0
+
+        if self.zrotation:
+            self.rot_z = (self.rot_z + 1) % 360.0
+
         #self.parent.statusBar().showMessage('rotation %f' % self.yRotDeg)
         self.updateGL()
 
@@ -190,6 +195,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.trans = False
             self.rot = True
 
+
         #pos = event.pos()
         #self.x0, self.y0 = pos.x(), pos.y()
         #print("mouse press event (" + str(x) + ", " + str(y) + ")" )
@@ -200,6 +206,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.moving_mode = False
         self.x0 = 0
         self.y0 = 0
+
         #pos = event.pos()
         #x, y = pos.x(), pos.y()
         #print("mouse release event (" + str(x) + ", " + str(y) + ")" )
@@ -219,12 +226,11 @@ class GLWidget(QtOpenGL.QGLWidget):
 
                 diffx = x - self.x0
                 diffy = y - self.y0
-                diffy = -1.0*diffy
-
 
 
                 if self.trans:
                     w = 0.001
+                    diffy = -1.0*diffy
                     self.trans_x = self.trans_x + diffx*w
                     self.trans_y = self.trans_y + diffy*w
                 else:
@@ -237,9 +243,10 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.y0 = y
 
             # after function refresh window
-            self.update()
+            #self.update()
+            self.updateGL()
 
-        print("mouse move (" + str(x) + ", " + str(y) + ")t")
+        #print("mouse move (" + str(x) + ", " + str(y) + ")t")
 
     def wheelEvent(self, event):
 
@@ -247,7 +254,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         diff = event.delta()/120.0
 
-        w = 1.01
+        w = 1.1
 
         if diff >= 0:
             self.scale = self.scale*w
@@ -255,57 +262,5 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.scale = self.scale/w
 
 
-        self.update()
-
-
-
-
-
-
-
-
-
-    # def eventFilter(self, source, event):
-    #     if event.type() == QtCore.QEvent.MouseMove:
-    #         if event.buttons() == QtCore.Qt.NoButton:
-    #             x0 = self.geometry().top
-    #             y0 = self.pos().y()
-    #
-    #             pos = event.pos()
-    #             print(" (x,y) = (" + str(pos.x()-x0) + "," + str(pos.y()-y0) + ")")
-    #         else:
-    #             pass # do other stuff
-    #
-    #     if event.type() == QtCore.QEvent.KeyPress:
-    #
-    #
-    #
-    #         if event.key() == QtCore.Qt.Key_Up:
-    #             self.trans_y = self.trans_y + 0.01
-    #             print("key up")
-    #
-    #         elif event.key() == QtCore.Qt.Key_Down:
-    #             self.trans_y = self.trans_y - 0.01
-    #             print("key dwn")
-    #
-    #
-    #         if event.key() == QtCore.Qt.Key_Left:
-    #             self.trans_x = self.trans_x - 0.01
-    #             print("key left")
-    #
-    #         elif event.key() == QtCore.Qt.Key_Right:
-    #             self.trans_x = self.trans_x + 0.01
-    #             print("key right")
-    #
-    #
-    #         if event.key() == QtCore.Qt.Key_Plus:
-    #             self.scale = self.scale*1.05
-    #
-    #         elif event.key() == QtCore.Qt.Key_Minus:
-    #             self.scale = self.scale/1.05
-    #
-    #
-    #
-    #         self.updateGL()
-    #
-    #     return QtGui.QMainWindow.eventFilter(self, source, event)
+        self.updateGL()
+        #self.update()

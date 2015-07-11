@@ -9,18 +9,22 @@ class DrawingModes(Enum):
     '''
     listing of possible drawing modes for model views
     '''
-    triangles = 1
-    indexed = 2
+    triangles = 1   # note: this is very slow don't use it
+    displaylist = 2
+
 
 
 
 class StlModelView(Drawable):
 
-    def __init__(self, model):
+    def __init__(self, model, draw_mode = DrawingModes.displaylist):
         Drawable.__init__(self)
-        self._model = model
+        self.__model = model
 
-        self._drawing_mode = DrawingModes.triangles
+        self.__drawing_mode = draw_mode
+
+        self.__index = None
+        self.__initialized = False
 
 
     def draw(self):
@@ -32,11 +36,11 @@ class StlModelView(Drawable):
         '''
 
 
-        if self._drawing_mode == DrawingModes.triangles:
+        if self.__drawing_mode == DrawingModes.triangles:
             self.simpleTrianglesDraw()
         else:
-            if self._drawing_mode==DrawingModes.indexed:
-                self.indexedTrianglesDraw()
+            if self.__drawing_mode==DrawingModes.displaylist:
+                self.displayListTrianglesDraw()
 
 
     def simpleTrianglesDraw(self):
@@ -50,23 +54,23 @@ class StlModelView(Drawable):
         # do local scaling an translation for better
         # displaying
         glScale(1.0/scale,1.0/scale,1.0/scale)
-        glTranslate(sx/2.0,sy/2.0,0)
+        #glTranslate(sx/2.0,sy/2.0,0)
 
 
         glBegin(GL_TRIANGLES)
 
 
-        n = len(self._model.mesh)
+        n = len(self.__model.mesh)
 
-        v0 = self._model.mesh.v0
-        v1 = self._model.mesh.v1
-        v2 = self._model.mesh.v2
+        v0 = self.__model.mesh.v0
+        v1 = self.__model.mesh.v1
+        v2 = self.__model.mesh.v2
 
 
         for i in range(0,n):
 
             #v = self.model.mesh.points[i]
-            n = self._model.mesh.normals[i]
+            n = self.__model.mesh.normals[i]
 
             self.drawTriangle(v0[i],v1[i],v2[i],n)
 
@@ -74,7 +78,7 @@ class StlModelView(Drawable):
 
         # since translation and scaling were local
         # reverse them otherwise this will effect all other drawings aftewards
-        glTranslate(-sx/2.0,-sy/2.0,0)
+        #glTranslate(-sx/2.0,-sy/2.0,0)
         glScale(scale,scale,scale)
 
     def drawTriangle(self,v0,v1,v2,n):
@@ -95,7 +99,6 @@ class StlModelView(Drawable):
         glVertex3d(v2[0],v2[1],v2[2])
 
 
-
     def getScale(self):
         '''
         This function is used to get the scalings based on the provided stl modells x,y and z dimensions
@@ -105,9 +108,9 @@ class StlModelView(Drawable):
 
         '''
 
-        xmin, xmax = self._model.xlims
-        ymin, ymax = self._model.ylims
-        zmin, zmax = self._model.zlims
+        xmin, xmax = self.__model.xlims
+        ymin, ymax = self.__model.ylims
+        zmin, zmax = self.__model.zlims
 
         scalex = xmax - xmin
         scaley = ymax - ymin
@@ -116,10 +119,67 @@ class StlModelView(Drawable):
         return [max(scalex,scaley, scalez), scalex, scaley, scalez]
 
 
+    def displayListTrianglesDraw(self):
+
+        if not self.__initialized:
+            self.initGeometry()
+
+        scale, sx, sy, sz = self.getScale()
+
+        glScale(1.0/scale,1.0/scale,1.0/scale)
+        #glEnableClientState(GL_VERTEX_ARRAY)
+        #glVertexPointerf(self._vertices)
+        glCallList(1)
+        glScale(scale,scale,scale)
+
 
     def setDrawingMode(self,mode):
 
         if isinstance(mode,DrawingModes):
-            self._drawing_mode = mode
+            self.__drawing_mode = mode
         else:
             raise Exception("invalid drawing mode supplied")
+
+
+    def initGeometry(self):
+
+        print("entering init geometry")
+        n = len(self.__model.mesh)
+
+        v0_points = self.__model.mesh.v0
+        v1_points = self.__model.mesh.v1
+        v2_points = self.__model.mesh.v2
+        n_points  = self.__model.mesh.normals
+
+        #self._index = glGenLists(1)
+
+
+        glNewList(1, GL_COMPILE)
+
+        glBegin(GL_POINTS)
+        for i in range(0,n):
+            v0 = v0_points[i]
+            v1 = v1_points[i]
+            v2 = v2_points[i]
+            n = n_points[i]
+
+            #glNormal3d(n[0],n[1],n[2])
+            glVertex3d(v0[0],v0[1],v0[2])
+            glVertex3d(v1[0],v1[1],v1[2])
+            glVertex3d(v2[0],v2[1],v2[2])
+
+
+        glEnd()
+
+        glEndList()
+
+        self.__initialized = True
+
+        print("leaving init geometry")
+        #print("result : |vertices| = " + str(len(self._vertices)))
+        #print(self._vertices[1:10])
+        #print(self._indexes[1:10])
+
+
+
+

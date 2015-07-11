@@ -1,6 +1,7 @@
 __author__ = 'mithrawnuruodo'
 
 from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QWidget, QMessageBox, QFileDialog
+from PyQt4 import QtCore
 from View import Ui_MainWindow, GLWidget, Ui_PrinterSettings, Ui_PrintingDialog, Ui_PrintingWindow, StlModelView
 from Model import StlModel
 import json, requests, time
@@ -38,9 +39,18 @@ class SlaController(QApplication):
     def initWindows(self):
 
 
-        path = PROJECT_PATH + "/brain-gear.stl"
+        #path = PROJECT_PATH + "/brain-gear.stl"
+        path = PROJECT_PATH + "/tire_v.stl"
 
         self.__glMain  = GLWidget()
+
+        # This could be used to force a FPS rate onto the opengl widget
+        FPS = 50
+        self.timer = QtCore.QTimer(self)
+        #self.timer.setInterval(1.0/FPS)
+        self.timer.setInterval(1.0/FPS)
+        QtCore.QObject.connect(self.timer, QtCore.SIGNAL('timeout()'), self.__glMain.spin)
+        self.timer.start()
 
         stl_model = StlModel(path)
         stl_view = StlModelView(stl_model)
