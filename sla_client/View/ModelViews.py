@@ -1,23 +1,52 @@
 __author__ = 'mithrawnuruodo'
 
-
+import traceback
 from OpenGL.GL import *
 from QlWidget import Drawable
 from enum import Enum
 
-# global displaylist index list
-display_lists = []
+# # global displaylist index list
+# display_lists = []
+#
+#
+# def register_displaylist():
+#     '''
+#     A function used to register any View using a display in the global display_lists array.
+#     This is done to atuomatically generate new indices for new display lists.
+#     Normally this would be done by glGenists(1) or glGenLists(N) for N new display lists
+#     but there seems to be a problem with this under PyQt4
+#
+#     :return: a new index
+#
+#     '''
+#     n = 0
+#
+#     if len(display_lists)==0:
+#         n = 1
+#         display_lists.append(1)
+#     else:
+#         n = display_lists[-1] +1
+#         display_lists.append(n)
+#
+#     print(" new index registered " + str(n))
+#
+#     return n
+#
+#
+# def unregister_displaylist(index):
+#     '''
+#     unregister a disply list upon deletion
+#
+#     :param index: display list index to be deleted
+#
+#     :return: boolean corresponding to successful deletion
+#     '''
+#     if index in display_lists:
+#         display_lists.remove(index)
+#         return True
+#
+#     return False
 
-
-def register_displaylist():
-
-    if len(display_lists)==0:
-        display_lists.append(1)
-        return 1
-    else:
-        n = display_lists[-1] +1
-        display_lists.append(n)
-        return n
 
 class DrawingModes(Enum):
     '''
@@ -37,8 +66,14 @@ class StlModelView(Drawable):
 
         self.__drawing_mode = draw_mode
 
-        self.__index = register_displaylist()
+        self__index = 0
         self.__initialized = False
+
+    def __del__(self):
+        #for indx in self.__indices:
+        #    unregister_displaylist(indx)
+        glDeleteLists(self.__index, 1);
+
 
 
     def draw(self):
@@ -136,14 +171,25 @@ class StlModelView(Drawable):
     def displayListTrianglesDraw(self):
 
         if not self.__initialized:
-            self.initGeometry()
+            try:
+                self.initGeometry()
+            except Exception as e:
+                print(traceback.format_exc())
+                exit()
+
 
         scale, sx, sy, sz = self.getScale()
 
         glScale(1.0/scale,1.0/scale,1.0/scale)
         #glEnableClientState(GL_VERTEX_ARRAY)
         #glVertexPointerf(self._vertices)
+
+        # draw object
         glCallList(self.__index)
+
+        # draw mesh
+        glCallList(self.__index+1)
+
         glScale(scale,scale,scale)
 
 
@@ -157,30 +203,71 @@ class StlModelView(Drawable):
 
     def initGeometry(self):
 
+
         print("entering init geometry")
-        n = len(self.__model.mesh)
+
+        self.__index = glGenLists(2)
+
+
+
 
         v0_points = self.__model.mesh.v0
         v1_points = self.__model.mesh.v1
         v2_points = self.__model.mesh.v2
         n_points  = self.__model.mesh.normals
 
-        #self._index = glGenLists(1)
 
 
-        glNewList(1, GL_COMPILE)
+        glNewList(self.__index, GL_COMPILE)
+        # add triangles
+        glBegin(GL_TRIANGLES)
 
-        glBegin(GL_POINTS)
-        for i in range(0,n):
+        N = len(self.__model.mesh)
+        for i in range(0, N):
             v0 = v0_points[i]
             v1 = v1_points[i]
             v2 = v2_points[i]
             n = n_points[i]
 
             #glNormal3d(n[0],n[1],n[2])
+
+            glColor3d(124.0/255.0, 126.0/255.0, 128.0/255.0)
             glVertex3d(v0[0],v0[1],v0[2])
             glVertex3d(v1[0],v1[1],v1[2])
             glVertex3d(v2[0],v2[1],v2[2])
+
+        glEnd()
+        glEndList()
+
+
+        glNewList(self.__index+1, GL_COMPILE)
+
+        # add mesh
+        glBegin(GL_LINES)
+        for i in range(0, N):
+            v0 = v0_points[i]
+            v1 = v1_points[i]
+            v2 = v2_points[i]
+            n = n_points[i]
+
+            #glNormal3d(n[0],n[1],n[2])
+
+
+            glColor3d(159.0/255.0,159.0/255.0,159.0/255.0)
+            glVertex3d(v0[0], v0[1], v0[2])
+            glVertex3d(v1[0], v1[1], v1[2])
+
+
+
+
+            glVertex3d(v1[0], v1[1], v1[2])
+            glVertex3d(v2[0], v2[1], v2[2])
+
+
+
+
+            glVertex3d(v2[0], v2[1], v2[2])
+            glVertex3d(v0[0], v0[1], v0[2])
 
 
         glEnd()
@@ -188,6 +275,9 @@ class StlModelView(Drawable):
         glEndList()
 
         self.__initialized = True
+
+
+
 
         print("leaving init geometry")
         #print("result : |vertices| = " + str(len(self._vertices)))

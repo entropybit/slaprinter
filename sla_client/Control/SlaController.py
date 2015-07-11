@@ -47,12 +47,12 @@ class SlaController(QApplication):
         self.__glMain  = GLWidget()
 
         # This could be used to force a FPS rate onto the opengl widget
-        FPS = 50
-        self.timer = QtCore.QTimer(self)
+        #FPS = 50
+        #self.timer = QtCore.QTimer(self)
         #self.timer.setInterval(1.0/FPS)
-        self.timer.setInterval(1.0/FPS)
-        QtCore.QObject.connect(self.timer, QtCore.SIGNAL('timeout()'), self.__glMain.spin)
-        self.timer.start()
+        #self.timer.setInterval(1.0/FPS)
+        #QtCore.QObject.connect(self.timer, QtCore.SIGNAL('timeout()'), self.__glMain.spin)
+        #self.timer.start()
         self.__ui1.setupUi(self.__mainWindow)
         self.__ui1.OpenGlPanel.addWidget(self.__glMain)
        # self.installEventFilter(self.__glMain)
@@ -141,6 +141,7 @@ class SlaController(QApplication):
 
             self.__stl_view = StlModelView(self.__stl_model)
             self.__glMain.addDrawable(self.__stl_view)
+            self.__glMain.update()
         #print file contents
         #with open(filename, 'r') as f:
         #    print(f.read())

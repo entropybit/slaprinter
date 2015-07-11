@@ -98,17 +98,31 @@ class GLWidget(QtOpenGL.QGLWidget):
         glEnable(GL_VERTEX_ARRAY)
 
 
-        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+        #glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
         #glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
         #glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_LIGHTING);
-        glEnable(GL_TEXTURE_2D);
-        glEnable(GL_CULL_FACE);
+        #glEnable(GL_DEPTH_TEST);
+        #glEnable(GL_LIGHTING);
+        #glEnable(GL_TEXTURE_2D);
+        #glEnable(GL_CULL_FACE);
+
+        #glEnable(GL_LIGHTING)
+        #glEnable(GL_LIGHT0)
+
+        light0_pos = -12.0, 18.0, 30.0, 0.0
+        diffuse0 = 0.5, 0.5, 0.5, 1.0
+        specular0 = 0.5, 0.5, 0.5, 1.0
+        ambient0 = 0.8, 0.8, 0.8, 1.0
+
+        #glMatrixMode(GL_MODELVIEW)
+        #glLightfv(GL_LIGHT0, GL_POSITION, light0_pos)
+        #glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0)
+        #glLightfv(GL_LIGHT0, GL_SPECULAR, specular0)
+        #glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0)
 
         # track material ambient and diffuse from surface color, call it before glEnable(GL_COLOR_MATERIAL)
-        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-        glEnable(GL_COLOR_MATERIAL);
+        #glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+        #glEnable(GL_COLOR_MATERIAL);
         #self._timer.start(1.0/self._fps)
 
 
