@@ -5,6 +5,20 @@ from OpenGL.GL import *
 from QlWidget import Drawable
 from enum import Enum
 
+# global displaylist index list
+display_lists = []
+
+
+def register_displaylist():
+
+    if len(display_lists)==0:
+        display_lists.append(1)
+        return 1
+    else:
+        n = display_lists[-1] +1
+        display_lists.append(n)
+        return n
+
 class DrawingModes(Enum):
     '''
     listing of possible drawing modes for model views
@@ -23,7 +37,7 @@ class StlModelView(Drawable):
 
         self.__drawing_mode = draw_mode
 
-        self.__index = None
+        self.__index = register_displaylist()
         self.__initialized = False
 
 
@@ -129,7 +143,7 @@ class StlModelView(Drawable):
         glScale(1.0/scale,1.0/scale,1.0/scale)
         #glEnableClientState(GL_VERTEX_ARRAY)
         #glVertexPointerf(self._vertices)
-        glCallList(1)
+        glCallList(self.__index)
         glScale(scale,scale,scale)
 
 
