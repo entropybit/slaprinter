@@ -68,6 +68,7 @@ class StlModelView(Drawable):
 
         self__index = 0
         self.__initialized = False
+        self.scale = 1.5/(self.getScale()[0])
 
     def __del__(self):
         #for indx in self.__indices:
@@ -84,6 +85,21 @@ class StlModelView(Drawable):
             This als uses GL_TRIANGLES but together with an indexed buffer.
         '''
 
+        scale, sx, sy, sz = self.getScale()
+
+        xmin, xmax = self.__model.xlims
+        ymin, ymax = self.__model.ylims
+        zmin, zmax = self.__model.zlims
+
+
+        # do local scaling an translation for better
+        # displaying
+        glTranslate(-xmin , -ymin , -zmin)
+        glTranslate(-sx/2.0, -sy/2.0, -sz/2.0)
+
+
+        #glTranslate(-2.0/sx,-2.0/sy,-2.0/sz)
+        #glTranslate(sx/2.0,sy/2.0,0)
 
         if self.__drawing_mode == DrawingModes.triangles:
             self.simpleTrianglesDraw()
@@ -92,18 +108,24 @@ class StlModelView(Drawable):
                 self.displayListTrianglesDraw()
 
 
+        # since translation and scaling were local
+        # reverse them otherwise this will effect all other drawings aftewards
+        #glTranslate(-sx/2.0,-sy/2.0,0)
+        #glTranslate(2.0/sx,2.0/sy,2.0/sz)
+
+        glTranslate(sx/2.0, sy/2.0, sz/2.0)
+        glTranslate(xmin , ymin , zmin)
+
+
+
+
+
     def simpleTrianglesDraw(self):
         '''
         draw a visualization of the provided stl file by iterating over the triangles and displaying them
         as a connected triangle list so as GL_TRIANGLES ...
         '''
 
-        scale, sx, sy, sz = self.getScale()
-
-        # do local scaling an translation for better
-        # displaying
-        glScale(1.0/scale,1.0/scale,1.0/scale)
-        #glTranslate(sx/2.0,sy/2.0,0)
 
 
         glBegin(GL_TRIANGLES)
@@ -125,10 +147,7 @@ class StlModelView(Drawable):
 
         glEnd()
 
-        # since translation and scaling were local
-        # reverse them otherwise this will effect all other drawings aftewards
-        #glTranslate(-sx/2.0,-sy/2.0,0)
-        glScale(scale,scale,scale)
+
 
     def drawTriangle(self,v0,v1,v2,n):
         '''
@@ -180,7 +199,6 @@ class StlModelView(Drawable):
 
         scale, sx, sy, sz = self.getScale()
 
-        glScale(1.0/scale,1.0/scale,1.0/scale)
         #glEnableClientState(GL_VERTEX_ARRAY)
         #glVertexPointerf(self._vertices)
 
@@ -190,7 +208,6 @@ class StlModelView(Drawable):
         # draw mesh
         glCallList(self.__index+1)
 
-        glScale(scale,scale,scale)
 
 
     def setDrawingMode(self,mode):
@@ -283,6 +300,7 @@ class StlModelView(Drawable):
         #print("result : |vertices| = " + str(len(self._vertices)))
         #print(self._vertices[1:10])
         #print(self._indexes[1:10])
+
 
 
 

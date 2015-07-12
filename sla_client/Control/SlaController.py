@@ -140,6 +140,16 @@ class SlaController(QApplication):
                 self.__glMain.delDrawable(self.__stl_view)
 
             self.__stl_view = StlModelView(self.__stl_model)
+            scale = self.__stl_view.scale
+
+            self.__glMain.reset()
+
+            if scale > -1:
+                self.__glMain.scale = scale
+                print("new scale:" + str(scale))
+            else:
+                print("no new scale")
+
             self.__glMain.addDrawable(self.__stl_view)
             self.__glMain.update()
         #print file contents

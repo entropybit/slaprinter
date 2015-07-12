@@ -6,6 +6,8 @@ from PyQt4 import QtGui
 from PyQt4 import QtOpenGL
 from OpenGL import GLU
 from OpenGL.GL import *
+
+#from ModelViews import StlModelView
 from numpy import array
 from abc import ABCMeta,abstractmethod
 import time
@@ -66,12 +68,10 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.moving_mode = False
         self.drawables = set()
 
-
+        self.drawcosy = True
 
 
         #self._timer = QtCore.QTimer()
-
-        self._fps = fps
         #QtCore.QObject.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateGL)
 
         # object enables itself to receive events
@@ -157,18 +157,17 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         glScale(self.scale, self.scale, self.scale)
 
-        # translate cosy
-        glTranslate(0,-0.3,0)
+        if self.drawcosy:
+            self.drawCosy()
 
 
-        i = 0
+
         for d in self.drawables:
-
             d.draw()
-            i = i+1
 
-        # redo tranlation
-        glTranslate(0,0.3,0)
+
+
+
 
         #print("[" + str(time.time()) + "] end of paint " )
 
@@ -280,5 +279,35 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.scale = self.scale/w
 
 
+        print(" scale = " + str(self.scale))
+
         self.updateGL()
         #self.update()
+
+
+    def drawCosy(self):
+
+        glBegin(GL_LINES)
+        glColor3d(1.0,0,0)
+
+        glVertex3d(0,0,0)
+        glVertex3d(1.0,0,0)
+
+        glVertex3d(0,0,0)
+        glVertex3d(0,1.0,0)
+
+        glVertex3d(0,0,0)
+        glVertex3d(0,0,1.0)
+        glEnd()
+
+
+    def reset(self):
+
+        self.scale = 1.0
+        self.rot_x = 0
+        self.rot_y = 0
+        self.rot_z = 0
+
+        self.trans_x = 0
+        self.trans_y = 0
+        self.trans_z = 0

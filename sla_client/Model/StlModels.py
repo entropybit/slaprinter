@@ -58,6 +58,15 @@ class StlModel(object):
         print("z \in [" + str(self.z_min) + ", " + str(self.z_max)+"]")
 
 
+        sx = self.x_max - self.x_min
+        sy = self.y_max - self.y_min
+        sz = self.z_max - self.z_min
+
+        print("sx : " + str(sx))
+        print("sy : " + str(sy))
+        print("sz : " + str(sz))
+
+
     def update_all_minmax(self,v):
 
         x = v[0]
