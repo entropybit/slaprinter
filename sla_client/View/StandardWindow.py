@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'StandardWindow.ui'
 #
-# Created: Sun Jul 12 05:13:37 2015
-#      by: PyQt4 UI code generator 4.11.2
+# Created: Sun Jul 12 22:24:57 2015
+#      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -103,9 +103,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.verticalLayout_5.addLayout(self.horizontalLayout)
-        self.AutoAlignButton = QtGui.QPushButton(self.centralwidget)
-        self.AutoAlignButton.setObjectName(_fromUtf8("AutoAlignButton"))
-        self.verticalLayout_5.addWidget(self.AutoAlignButton)
+        self.SlicingButton = QtGui.QPushButton(self.centralwidget)
+        self.SlicingButton.setObjectName(_fromUtf8("SlicingButton"))
+        self.verticalLayout_5.addWidget(self.SlicingButton)
         self.BoundingBoxButton = QtGui.QPushButton(self.centralwidget)
         self.BoundingBoxButton.setObjectName(_fromUtf8("BoundingBoxButton"))
         self.verticalLayout_5.addWidget(self.BoundingBoxButton)
@@ -150,7 +150,7 @@ class Ui_MainWindow(object):
         self.StartPosButton.setText(_translate("MainWindow", "to Start Position", None))
         self.EndPosButton.setText(_translate("MainWindow", "to End Position", None))
         self.label_2.setText(_translate("MainWindow", "Editing Options", None))
-        self.AutoAlignButton.setText(_translate("MainWindow", "slicer preview", None))
+        self.SlicingButton.setText(_translate("MainWindow", "slicer preview", None))
         self.BoundingBoxButton.setToolTip(_translate("MainWindow", "<html><head/><body><p>This SLA printer prints from the bottom up - the 3D model has to have its flattest surface on top.</p></body></html>", None))
         self.BoundingBoxButton.setText(_translate("MainWindow", "bounding box", None))
         self.CenterButton.setText(_translate("MainWindow", "center", None))

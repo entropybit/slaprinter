@@ -6,9 +6,6 @@ from abc import ABCMeta,abstractmethod
 
 
 
-
-
-
 class Model(object):
     __metaclass__ = ABCMeta
 
@@ -134,10 +131,10 @@ class StlModel(Model):
         y0, y1 = self.ylims
         z0, z1 = self.zlims
 
-        return BoundingBox([x0,x1,y0,y1,z0,z1])
+        return Box([x0,x1,y0,y1,z0,z1])
 
 
-class BoundingBox(object):
+class Box(object):
 
     def __int__(self, ranges):
 
@@ -161,5 +158,6 @@ class BoundingBox(object):
         z = r[2]
 
         return self.x0 <= x and x <= self.x1 and self.y0 <= y and y <= self.y1 and self.z0 <= z and z <= self.z1
+
 
 

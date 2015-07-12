@@ -3,6 +3,7 @@ __author__ = 'mithrawnuruodo'
 from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QWidget, QMessageBox, QFileDialog
 from PyQt4 import QtCore
 from View import Ui_MainWindow, GLWidget, Ui_PrinterSettings, Ui_PrintingDialog, Ui_PrintingWindow, StlModelView
+from View import Ui_SlicingWindow
 from Model import StlModel
 import json, requests, time
 import sys
@@ -36,6 +37,15 @@ class SlaController(QApplication):
         self.__printerSettings = QDialog()
         self.__ui4 = Ui_PrinterSettings()
 
+        # slicing dialog
+        # ToDo find something working as DropDown or get ComboBox working
+        #self.__ui5 = ...
+
+        # slicing window
+        self.__glSlice = object()
+        self.__slicingwindow = QMainWindow()
+        self.__ui6 = Ui_SlicingWindow()
+
     def start(self):
         self.initWindows()
         self.makeConnections()
@@ -49,6 +59,10 @@ class SlaController(QApplication):
         self.init_printer_settings()
         self.init_printing_window()
         self.init_printing_dialog()
+        # self.init_slicing_dialog()
+        self.init_slicing_window()
+
+
 
     def init_main(self):
         self.__glMain  = GLWidget()
@@ -76,6 +90,17 @@ class SlaController(QApplication):
         self.__ui3.setupUi(self.__printingWindow)
         self.__ui3.OpenGlPanel.addWidget(self.__glStatus)
 
+    def init_slicing_window(self):
+        '''
+            Initializing slicing window
+        '''
+        self.__glSlice  = GLWidget()
+        self.__glSlice.allow_rot = False
+        self.__glSlice.allow_zoom = False
+
+        self.__ui6.setupUi(self.__slicingwindow)
+        self.__ui6.OpenGlPanel.addWidget(self.__glSlice)
+
 
     def makeConnections(self):
         '''
@@ -88,6 +113,7 @@ class SlaController(QApplication):
         self.__ui1.CenterButton.clicked.connect(self.__glMain.reset)
         self.__ui1.MeshButton.clicked.connect(self.__glMain.mesh)
         self.__ui1.BoundingBoxButton.clicked.connect(self.__glMain.bounding_box)
+        self.__ui1.SlicingButton.clicked.connect(self.__slicingwindow.show)
         #ui1.DownPosButton.clicked.connect(MoveStepper, [False,2])            #why cant i call functions with parameters?
         #ui1.UpPosButton.clicked.connect(MoveStepper(True, N))
 

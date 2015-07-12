@@ -52,30 +52,35 @@ class GLWidget(QtOpenGL.QGLWidget):
         QtOpenGL.QGLWidget.__init__(self, parent)
 
         # rotation variables
-        self.rot_x = 0.0
-        self.rot_y = 0.0
-        self.rot_z = 0.0
+        self._rot_x = 0.0
+        self._rot_y = 0.0
+        self._rot_z = 0.0
 
         # rotation flags
         self.xrotation = False
         self.yrotation = True
         self.zrotation = False
 
-        self.trans_x = 0.0
-        self.trans_y = 0.0
-        self.trans_z = 0.0
+        self._trans_x = 0.0
+        self._trans_y = 0.0
+        self._trans_z = 0.0
 
-        self.scale = 1.0
+        self._scale = 1.0
 
-        self.x0 = 0
-        self.y0 = 0
+        self._x0 = 0
+        self._y0 = 0
 
-        self.rot = False
-        self.trans = True
+        self.allow_rot = True
+        self.allow_trans = True
+        self.allow_zoom = True
 
-        self.moving_mode = False
-        self.drawables = set()
 
+        self._rot = False
+        self._trans = True
+        self._moving_mode = False
+
+
+        self._drawables = set()
         self.drawcosy = False
 
 
@@ -156,21 +161,23 @@ class GLWidget(QtOpenGL.QGLWidget):
         glTranslate(0.0, 0.0, -50.0)
         glScale(20.0, 20.0, 20.0)
 
+        if self.allow_trans:
+            glTranslate(self._trans_x, self._trans_y, self._trans_z)
 
-        glTranslate(self.trans_x, self.trans_y, self.trans_z)
+        if self.allow_rot:
+            glRotate(self._rot_x, 1.0, 0, 0)
+            glRotate(self._rot_y,0, 1.0, 0)
+            glRotate(self._rot_z,0, 0, 1.0)
 
-        glRotate(self.rot_x, 1.0, 0, 0)
-        glRotate(self.rot_y,0, 1.0, 0)
-        glRotate(self.rot_z,0, 0, 1.0)
-
-        glScale(self.scale, self.scale, self.scale)
+        if self.allow_zoom:
+            glScale(self._scale, self._scale, self._scale)
 
         if self.drawcosy:
             self.drawCosy()
 
 
 
-        for d in self.drawables:
+        for d in self._drawables:
             d.draw()
 
 
@@ -182,25 +189,25 @@ class GLWidget(QtOpenGL.QGLWidget):
     def addDrawable(self,d):
 
         if isinstance(d, Drawable):
-            self.drawables.add(d)
+            self._drawables.add(d)
 
 
     def delDrawable(self,d):
 
         if isinstance(d,Drawable):
-            self.drawables.remove(d)
+            self._drawables.remove(d)
 
 
     def spin(self):
 
         if self.xrotation:
-            self.rot_x = (self.rot_x + 1) % 360.0
+            self._rot_x = (self._rot_x + 1) % 360.0
 
         if self.yrotation:
-            self.rot_y = (self.rot_y + 1) % 360.0
+            self._rot_y = (self._rot_y + 1) % 360.0
 
         if self.zrotation:
-            self.rot_z = (self.rot_z + 1) % 360.0
+            self._rot_z = (self._rot_z + 1) % 360.0
 
         #self.parent.statusBar().showMessage('rotation %f' % self.yRotDeg)
         self.updateGL()
@@ -209,16 +216,16 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     def mousePressEvent(self, event):
 
-        self.moving_mode = True
+        self._moving_mode = True
 
         # on left button go to panning mode
         if event.button() == QtCore.Qt.LeftButton:
-            self.trans = True
-            self.rot = False
+            self._trans = True
+            self._rot = False
         # on right button go to rotation mode
         else:
-            self.trans = False
-            self.rot = True
+            self._trans = False
+            self._rot = True
 
 
         #pos = event.pos()
@@ -227,9 +234,9 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     def mouseReleaseEvent(self, event):
 
-        self.moving_mode = False
-        self.x0 = 0
-        self.y0 = 0
+        self._moving_mode = False
+        self._x0 = 0
+        self._y0 = 0
 
         #pos = event.pos()
         #x, y = pos.x(), pos.y()
@@ -238,7 +245,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     def mouseMoveEvent(self, event):
 
-        if self.moving_mode:
+        if self._moving_mode:
             pos = event.pos()
 
             x, y = pos.x(), pos.y()
@@ -246,25 +253,25 @@ class GLWidget(QtOpenGL.QGLWidget):
             # apply difference beweteen last (x0,y0) and recent position
             # if there is a difference, if this is the first call of mouseMoveEvent after MousePressEvent
             # do not apply movement since ther is not yet enough data
-            if self.x0 != 0 and self.y0 != 0:
+            if self._x0 != 0 and self._y0 != 0:
 
-                diffx = x - self.x0
-                diffy = y - self.y0
+                diffx = x - self._x0
+                diffy = y - self._y0
 
 
-                if self.trans:
+                if self._trans:
                     w = 0.001
                     diffy = -1.0*diffy
-                    self.trans_x = self.trans_x + diffx*w
-                    self.trans_y = self.trans_y + diffy*w
+                    self._trans_x = self._trans_x + diffx*w
+                    self._trans_y = self._trans_y + diffy*w
                 else:
                     w = 0.1
-                    self.rot_y = self.rot_y + diffx*w
-                    self.rot_x = self.rot_x + diffy*w
+                    self._rot_y = self._rot_y + diffx*w
+                    self._rot_x = self._rot_x + diffy*w
 
             # change x0 and y0 to received coordinates either way
-            self.x0 = x
-            self.y0 = y
+            self._x0 = x
+            self._y0 = y
 
             # after function refresh window
             self.updateGL()
@@ -278,9 +285,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         w = 1.1
 
         if diff >= 0:
-            self.scale = self.scale*w
+            self._scale = self._scale*w
         else:
-            self.scale = self.scale/w
+            self._scale = self._scale/w
 
 
         self.updateGL()
@@ -304,34 +311,37 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     def reset(self):
 
-        self.scale = 1.0
+        self._scale = 1.0
 
-        if len(self.drawables) > 0:
-            for d in self.drawables:
+        if len(self._drawables) > 0:
+            for d in self._drawables:
                 break
-            self.scale = d.scale
+            self._scale = d.scale
 
-        self.rot_x = 0
-        self.rot_y = 0
-        self.rot_z = 0
+        self._rot_x = 0
+        self._rot_y = 0
+        self._rot_z = 0
 
-        self.trans_x = 0
-        self.trans_y = 0
-        self.trans_z = 0
+        self._trans_x = 0
+        self._trans_y = 0
+        self._trans_z = 0
 
         self.updateGL()
 
 
     def mesh(self):
 
-        for d in self.drawables:
+        for d in self._drawables:
             d.mesh()
 
         self.updateGL()
 
     def bounding_box(self):
 
-        for d in self.drawables:
+        for d in self._drawables:
             d.boundingBox()
 
         self.updateGL()
+
+
+

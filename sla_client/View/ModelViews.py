@@ -2,7 +2,7 @@ __author__ = 'mithrawnuruodo'
 
 import traceback
 from OpenGL.GL import *
-from QlWidget import Drawable
+from GlWidget import Drawable
 from enum import Enum
 
 # # global displaylist index list
