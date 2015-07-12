@@ -171,61 +171,36 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QPushButton" name="ScaleButton">
-              <property name="text">
-               <string>Scale by factor of</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="ScaleFactor">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;N=&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>1.1</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <layout class="QHBoxLayout" name="horizontalLayout"/>
           </item>
           <item>
            <widget class="QPushButton" name="AutoAlignButton">
             <property name="text">
-             <string>try to auto-align</string>
+             <string>slicer preview</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="FlipButton">
+           <widget class="QPushButton" name="BoundingBoxButton">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This SLA printer prints from the bottom up - the 3D model has to have its flattest surface on top.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>flip upside down</string>
+             <string>bounding box</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_6">
+           <widget class="QPushButton" name="CenterButton">
             <property name="text">
-             <string>rotate</string>
+             <string>center</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="MeshButton">
             <property name="text">
-             <string>translate</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_5">
-            <property name="text">
-             <string>delete</string>
+             <string>mesh</string>
             </property>
            </widget>
           </item>

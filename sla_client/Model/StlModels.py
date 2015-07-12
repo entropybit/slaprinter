@@ -2,8 +2,26 @@ __author__ = 'mithrawnuruodo'
 
 
 from stl import mesh
+from abc import ABCMeta,abstractmethod
 
-class StlModel(object):
+
+
+
+
+
+class Model(object):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def open(self):
+        pass
+
+    def getBoundingBox(self):
+        pass
+
+
+
+class StlModel(Model):
 
     def __init__(self, path=""):
 
@@ -111,6 +129,37 @@ class StlModel(object):
 
 
 
+    def getBoundingBox(self):
+        x0, x1 = self.xlims
+        y0, y1 = self.ylims
+        z0, z1 = self.zlims
 
+        return BoundingBox([x0,x1,y0,y1,z0,z1])
+
+
+class BoundingBox(object):
+
+    def __int__(self, ranges):
+
+        self.x0 = ranges[0]
+        self.x1 = ranges[1]
+        self.y0 = ranges[2]
+        self.y1 = ranges[3]
+        self.z0 = ranges[4]
+        self.z1 = ranges[4]
+
+
+    def contains(self, r):
+        '''
+        :param r:   a vector fro which it is to be tested wether or not it lies withing the box or not
+        :return: accordingyly truth
+
+        '''
+
+        x = r[0]
+        y = r[1]
+        z = r[2]
+
+        return self.x0 <= x and x <= self.x1 and self.y0 <= y and y <= self.y1 and self.z0 <= z and z <= self.z1
 
 

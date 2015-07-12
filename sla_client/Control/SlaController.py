@@ -16,19 +16,23 @@ class SlaController(QApplication):
     def __init__(self, argv):
         QApplication.__init__(self, argv)
 
+        # main window
         self.__mainWindow = QMainWindow()
         self.__ui1 = Ui_MainWindow()
         self.__glMain = object()
         self.__stl_model = StlModel()
         self.__stl_view = None
 
+        # printing dialog
         self.__printingDialog = QDialog()
         self.__ui2 = Ui_PrintingDialog()
 
+        # printing window
         self.__printingWindow = QMainWindow()
         self.__ui3 = Ui_PrintingWindow()
         self.__glStatus = object()
 
+        # printer settings
         self.__printerSettings = QDialog()
         self.__ui4 = Ui_PrinterSettings()
 
@@ -41,32 +45,51 @@ class SlaController(QApplication):
     def initWindows(self):
 
 
-        #path = PROJECT_PATH + "/brain-gear.stl"
-        #path = PROJECT_PATH + "/tire_v.stl"
+        self.init_main()
+        self.init_printer_settings()
+        self.init_printing_window()
+        self.init_printing_dialog()
 
+    def init_main(self):
         self.__glMain  = GLWidget()
-
-        # This could be used to force a FPS rate onto the opengl widget
-        #FPS = 50
-        #self.timer = QtCore.QTimer(self)
-        #self.timer.setInterval(1.0/FPS)
-        #self.timer.setInterval(1.0/FPS)
-        #QtCore.QObject.connect(self.timer, QtCore.SIGNAL('timeout()'), self.__glMain.spin)
-        #self.timer.start()
         self.__ui1.setupUi(self.__mainWindow)
         self.__ui1.OpenGlPanel.addWidget(self.__glMain)
        # self.installEventFilter(self.__glMain)
 
-        #Initiating printer settings dialogue (individual options for each print)
+    def init_printing_dialog(self):
+        '''
+            Initiating printer settings dialogue (individual options for each print)
+        '''
         self.__ui2.setupUi(self.__printingDialog)
 
-        #Initiating printing window
+    def init_printer_settings(self):
+        '''
+            Initiating general printer settings window (for overarching printer settings that are always the same with the same printer)
+        '''
+        self.__ui4.setupUi(self.__printerSettings)
+
+    def init_printing_window(self):
+        '''
+            Initiating printing window
+        '''
         self.__glStatus = GLWidget()
         self.__ui3.setupUi(self.__printingWindow)
         self.__ui3.OpenGlPanel.addWidget(self.__glStatus)
 
-        #Initiating general printer settings window (for overarching printer settings that are always the same with the same printer)
-        self.__ui4.setupUi(self.__printerSettings)
+
+    def makeConnections(self):
+        '''
+            make connections between signal and slots so that user interactions lead to according
+            actions on the model or view
+        '''
+        self.__ui1.importFileButton.clicked.connect(self.fileDialogFunction)
+        self.__ui1.StartPrintButton.clicked.connect(self.__printingDialog.show)
+        self.__ui1.printerSettingsButton.clicked.connect(self.__printerSettings.show)
+        self.__ui1.CenterButton.clicked.connect(self.__glMain.reset)
+        self.__ui1.MeshButton.clicked.connect(self.__glMain.mesh)
+        self.__ui1.BoundingBoxButton.clicked.connect(self.__glMain.bounding_box)
+        #ui1.DownPosButton.clicked.connect(MoveStepper, [False,2])            #why cant i call functions with parameters?
+        #ui1.UpPosButton.clicked.connect(MoveStepper(True, N))
 
     def switchToPrintingMode(self):
         self.__mainWindow.close()
@@ -152,18 +175,7 @@ class SlaController(QApplication):
 
             self.__glMain.addDrawable(self.__stl_view)
             self.__glMain.update()
-        #print file contents
-        #with open(filename, 'r') as f:
-        #    print(f.read())
-        #file.close()
 
-    def makeConnections(self):
-        #Explaining what each button on the StandardWindow does
-        self.__ui1.importFileButton.clicked.connect(self.fileDialogFunction)
-        self.__ui1.StartPrintButton.clicked.connect(self.__printingDialog.show)
-        self.__ui1.printerSettingsButton.clicked.connect(self.__printerSettings.show)
-        #ui1.DownPosButton.clicked.connect(MoveStepper, [False,2])            #why cant i call functions with parameters?
-        #ui1.UpPosButton.clicked.connect(MoveStepper(True, N))
 
     def sendToRaspberry(self):
         configfile = open('PrinterSettings.conf', 'r')

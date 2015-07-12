@@ -36,6 +36,14 @@ class Drawable(object):
     def draw(self):
         pass
 
+    @abstractmethod
+    def mesh(self):
+        pass
+
+    @abstractmethod
+    def boundingBox(self):
+        pass
+
 
 
 class GLWidget(QtOpenGL.QGLWidget):
@@ -68,7 +76,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.moving_mode = False
         self.drawables = set()
 
-        self.drawcosy = True
+        self.drawcosy = False
 
 
         #self._timer = QtCore.QTimer()
@@ -214,7 +222,6 @@ class GLWidget(QtOpenGL.QGLWidget):
 
 
         #pos = event.pos()
-        #self.x0, self.y0 = pos.x(), pos.y()
         #print("mouse press event (" + str(x) + ", " + str(y) + ")" )
 
 
@@ -260,14 +267,11 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.y0 = y
 
             # after function refresh window
-            #self.update()
             self.updateGL()
 
-        #print("mouse move (" + str(x) + ", " + str(y) + ")t")
+            #print("mouse move (" + str(x) + ", " + str(y) + ")t")
 
     def wheelEvent(self, event):
-
-        #print(event.delta()/120.0)
 
         diff = event.delta()/120.0
 
@@ -279,10 +283,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.scale = self.scale/w
 
 
-        print(" scale = " + str(self.scale))
-
         self.updateGL()
-        #self.update()
 
 
     def drawCosy(self):
@@ -304,6 +305,12 @@ class GLWidget(QtOpenGL.QGLWidget):
     def reset(self):
 
         self.scale = 1.0
+
+        if len(self.drawables) > 0:
+            for d in self.drawables:
+                break
+            self.scale = d.scale
+
         self.rot_x = 0
         self.rot_y = 0
         self.rot_z = 0
@@ -311,3 +318,20 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.trans_x = 0
         self.trans_y = 0
         self.trans_z = 0
+
+        self.updateGL()
+
+
+    def mesh(self):
+
+        for d in self.drawables:
+            d.mesh()
+
+        self.updateGL()
+
+    def bounding_box(self):
+
+        for d in self.drawables:
+            d.boundingBox()
+
+        self.updateGL()

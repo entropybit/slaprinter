@@ -70,6 +70,10 @@ class StlModelView(Drawable):
         self.__initialized = False
         self.scale = 1.5/(self.getScale()[0])
 
+        self.display_solid = True
+        self.display_mesh = True
+        self.bounding_box = False
+
     def __del__(self):
         #for indx in self.__indices:
         #    unregister_displaylist(indx)
@@ -92,27 +96,25 @@ class StlModelView(Drawable):
         zmin, zmax = self.__model.zlims
 
 
-        # do local scaling an translation for better
-        # displaying
+        # do local scaling an translation
+        # for better visualization
         glTranslate(-xmin , -ymin , -zmin)
         glTranslate(-sx/2.0, -sy/2.0, -sz/2.0)
 
-
-        #glTranslate(-2.0/sx,-2.0/sy,-2.0/sz)
-        #glTranslate(sx/2.0,sy/2.0,0)
-
+        # depending on drawing mode draw call according draw method
         if self.__drawing_mode == DrawingModes.triangles:
             self.simpleTrianglesDraw()
         else:
             if self.__drawing_mode==DrawingModes.displaylist:
                 self.displayListTrianglesDraw()
 
+        # if specified draw bounding box
+        if self.bounding_box:
+            self.draw_bounding_box()
+
 
         # since translation and scaling were local
         # reverse them otherwise this will effect all other drawings aftewards
-        #glTranslate(-sx/2.0,-sy/2.0,0)
-        #glTranslate(2.0/sx,2.0/sy,2.0/sz)
-
         glTranslate(sx/2.0, sy/2.0, sz/2.0)
         glTranslate(xmin , ymin , zmin)
 
@@ -203,10 +205,12 @@ class StlModelView(Drawable):
         #glVertexPointerf(self._vertices)
 
         # draw object
-        glCallList(self.__index)
+        if self.display_solid:
+            glCallList(self.__index)
 
         # draw mesh
-        glCallList(self.__index+1)
+        if self.display_mesh:
+            glCallList(self.__index+1)
 
 
 
@@ -302,6 +306,67 @@ class StlModelView(Drawable):
         #print(self._indexes[1:10])
 
 
+    def mesh(self):
+        self.display_mesh = not self.display_mesh
 
+
+    def boundingBox(self):
+        self.bounding_box = not self.bounding_box
+
+
+    def draw_bounding_box(self):
+
+        xmin, xmax = self.__model.xlims
+        ymin, ymax = self.__model.ylims
+        zmin, zmax = self.__model.zlims
+
+
+
+        glBegin(GL_LINES)
+
+        glColor3d(1.0,0,0)
+
+        # front recangle
+        glVertex3d(xmin,ymin,zmin)
+        glVertex3d(xmax,ymin,zmin)
+
+        glVertex3d(xmax,ymin,zmin)
+        glVertex3d(xmax,ymax,zmin)
+
+        glVertex3d(xmax,ymax,zmin)
+        glVertex3d(xmin,ymax,zmin)
+
+        glVertex3d(xmin,ymax,zmin)
+        glVertex3d(xmin,ymin,zmin)
+
+
+        # back rectangle
+        glVertex3d(xmin,ymin,zmax)
+        glVertex3d(xmax,ymin,zmax)
+
+        glVertex3d(xmax,ymin,zmax)
+        glVertex3d(xmax,ymax,zmax)
+
+        glVertex3d(xmax,ymax,zmax)
+        glVertex3d(xmin,ymax,zmax)
+
+        glVertex3d(xmin,ymax,zmax)
+        glVertex3d(xmin,ymin,zmax)
+
+
+        # connecting lines
+        glVertex3d(xmin,ymin,zmin)
+        glVertex3d(xmin,ymin,zmax)
+
+        glVertex3d(xmax,ymin,zmin)
+        glVertex3d(xmax,ymin,zmax)
+
+        glVertex3d(xmax,ymax,zmin)
+        glVertex3d(xmax,ymax,zmax)
+
+        glVertex3d(xmin,ymax,zmin)
+        glVertex3d(xmin,ymax,zmax)
+
+        glEnd()
 
 
