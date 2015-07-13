@@ -79,7 +79,64 @@ class equiSlicer(Slicer):
         zmin, zmax = self._model.zlims
         z_inc = (zmax - zmin)*1.0/self.__partitions
 
+        points = self.getPointsByZincrement(z_inc, self.__partitions)
 
-    
+
+        slices = []
+        for p in points:
+            s = Slice(p)
+            slice.append(s)
+
+        return slices
+
+
+    def getPointsByZincrement(self, z_inc, n):
+
+        points = []
+
+        for i in range(0,n):
+            points.append([])
+
+        N = len(self._model.mesh)
+
+        v0s = self._model.mesh.v0
+        v1s = self._model.mesh.v1
+        v2s = self._model.mesh.v2
+
+        for i in range(0,N):
+
+            v0 = v0s[i]
+            v1 = v1s[i]
+            v2 = v2s[i]
+
+            indx0 = self.getIndex(z_inc,n,v0)
+            indx1 = self.getIndex(z_inc,n,v1)
+            indx2 = self.getIndex(z_inc,n,v2)
+
+            if indx0 > -1:
+                points[indx0].append(v0)
+
+            if indx1 > -1:
+                points[indx1].append(v1)
+
+            if indx2 > -1:
+                points[indx2].append(v2)
+
+        return points
+
+
+    def getIndex(self, z_inc, n, v):
+
+        for i in range(0,n):
+
+            z0 = i*z_inc
+            z1 = (i+1)*z_inc
+
+            z = v[2]
+
+            if z0 <= z and z < z1:
+                return i
+
+        return -1
 
 

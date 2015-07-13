@@ -133,7 +133,6 @@ class StlModel(Model):
 
         return Box([x0,x1,y0,y1,z0,z1])
 
-
 class Box(object):
 
     def __int__(self, ranges):
