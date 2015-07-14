@@ -40,9 +40,10 @@ class Drawable(object):
     def mesh(self):
         pass
 
-    @abstractmethod
-    def boundingBox(self):
-        pass
+    # ToDo: Does this need to be part of abstract class?
+    #@abstractmethod
+    #def boundingBox(self):
+    #    pass
 
 
 
@@ -51,22 +52,17 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.parent = parent
         QtOpenGL.QGLWidget.__init__(self, parent)
 
-        # rotation variables
+        # transformation variables
         self._rot_x = 0.0
         self._rot_y = 0.0
         self._rot_z = 0.0
 
-        # rotation flags
-        self.xrotation = False
-        self.yrotation = True
-        self.zrotation = False
-
         self._trans_x = 0.0
         self._trans_y = 0.0
         self._trans_z = 0.0
-
         self._scale = 1.0
 
+        # used to calculate mouse movement increment
         self._x0 = 0
         self._y0 = 0
 
@@ -74,6 +70,10 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.allow_trans = True
         self.allow_zoom = True
 
+        # rotation flags
+        self.xrotation = False
+        self.yrotation = True
+        self.zrotation = False
 
         self._rot = False
         self._trans = True
@@ -81,7 +81,8 @@ class GLWidget(QtOpenGL.QGLWidget):
 
 
         self._drawables = set()
-        self.drawcosy = False
+        self.draw_cosy = False
+        self.draw_frame = False
 
 
         #self._timer = QtCore.QTimer()
@@ -172,9 +173,11 @@ class GLWidget(QtOpenGL.QGLWidget):
         if self.allow_zoom:
             glScale(self._scale, self._scale, self._scale)
 
-        if self.drawcosy:
+        if self.draw_cosy:
             self.drawCosy()
 
+        if self.draw_frame:
+            self.drawFrame()
 
 
         for d in self._drawables:
@@ -318,6 +321,9 @@ class GLWidget(QtOpenGL.QGLWidget):
                 break
             self._scale = d.scale
 
+
+        print("setted scale = " + str(self._scale))
+
         self._rot_x = 0
         self._rot_y = 0
         self._rot_z = 0
@@ -344,4 +350,20 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.updateGL()
 
 
+
+    def drawFrame(self):
+
+        glBegin(GL_LINES)
+        glVertex3d(-1.0,-1.0,0)
+        glVertex3d(1.0,-1.0,0)
+
+        glVertex3d(1.0,-1.0,0)
+        glVertex3d(1.0,1.0,0)
+
+        glVertex3d(1.0,1.0,0)
+        glVertex3d(-1.0,1.0,0)
+
+        glVertex3d(-1.0,1.0,0)
+        glVertex3d(-1.0,-1.0,0)
+        glEnd()
 

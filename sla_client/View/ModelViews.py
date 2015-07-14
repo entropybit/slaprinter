@@ -225,7 +225,7 @@ class StlModelView(Drawable):
     def initGeometry(self):
 
 
-        print("entering init geometry")
+        #print("entering init geometry")
 
         self.__index = glGenLists(2)
 
@@ -300,7 +300,7 @@ class StlModelView(Drawable):
 
 
 
-        print("leaving init geometry")
+        #print("leaving init geometry")
         #print("result : |vertices| = " + str(len(self._vertices)))
         #print(self._vertices[1:10])
         #print(self._indexes[1:10])
@@ -378,56 +378,15 @@ class SliceModelView(Drawable):
         Drawable.__init__(self)
         self.__model = model
 
-        self.display_solid = True
+        self.__initialized = False
+        self.display_points = True
         self.display_mesh = True
 
     def __del__(self):
         glDeleteLists(self.__index, 1);
 
     def draw(self):
-
-        scale, sx, sy, sz = self.getScale()
-
-        xmin, xmax = self.__model.xlims
-        ymin, ymax = self.__model.ylims
-        zmin, zmax = self.__model.zlims
-
-
-        # do local scaling an translation
-        # for better visualization
-        glTranslate(-xmin , -ymin , -zmin)
-        glTranslate(-sx/2.0, -sy/2.0, -sz/2.0)
-
         self.displayListTrianglesDraw()
-
-
-        # since translation and scaling were local
-        # reverse them otherwise this will effect all other drawings aftewards
-        glTranslate(sx/2.0, sy/2.0, sz/2.0)
-        glTranslate(xmin , ymin , zmin)
-
-
-
-
-    def getScale(self):
-        '''
-        This function is used to get the scalings based on the provided stl modells x,y and z dimensions
-        These can than be used to update the zooming
-
-        :return:    vector containing maximum of scales, xscale, yscale, zscale in this ordering
-
-        '''
-
-        xmin, xmax = self.__model.xlims
-        ymin, ymax = self.__model.ylims
-        zmin, zmax = self.__model.zlims
-
-        scalex = xmax - xmin
-        scaley = ymax - ymin
-        scalez = zmax - zmin
-
-        return [max(scalex,scaley, scalez), scalex, scaley, scalez]
-
 
     def displayListTrianglesDraw(self):
 
@@ -438,14 +397,11 @@ class SliceModelView(Drawable):
                 print(traceback.format_exc())
                 exit()
 
-
-        scale, sx, sy, sz = self.getScale()
-
         #glEnableClientState(GL_VERTEX_ARRAY)
         #glVertexPointerf(self._vertices)
 
         # draw object
-        if self.display_solid:
+        if self.display_points:
             glCallList(self.__index)
 
         # draw mesh
@@ -456,7 +412,7 @@ class SliceModelView(Drawable):
     def initGeometry(self):
 
 
-        print("entering init geometry")
+        #print("entering init geometry")
 
         self.__index = glGenLists(2)
 
@@ -464,11 +420,11 @@ class SliceModelView(Drawable):
 
         glNewList(self.__index, GL_COMPILE)
         # add triangles
-        glBegin(GL_TRIANGLES)
+        glBegin(GL_POINTS)
 
         for p in points:
             #glNormal3d(n[0],n[1],n[2])
-            glColor3d(124.0/255.0, 126.0/255.0, 128.0/255.0)
+            glColor3d(1.0,0,0)
             glVertex3d(p[0],p[1],p[2])
         glEnd()
         glEndList()
@@ -486,17 +442,9 @@ class SliceModelView(Drawable):
         glEnd()
         glEndList()
 
-
-        glEnd()
-
-        glEndList()
-
         self.__initialized = True
 
-
-
-
-        print("leaving init geometry")
+        #print("leaving init geometry")
         #print("result : |vertices| = " + str(len(self._vertices)))
         #print(self._vertices[1:10])
         #print(self._indexes[1:10])
@@ -506,4 +454,4 @@ class SliceModelView(Drawable):
         self.display_mesh = not self.display_mesh
 
     def solid(self):
-        self.display_solid = not self.display_solid
+        self.display_points = not self.display_points

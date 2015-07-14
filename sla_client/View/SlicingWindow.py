@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'SlicingWindow.ui'
 #
-# Created: Sun Jul 12 22:24:57 2015
-#      by: PyQt4 UI code generator 4.11.3
+# Created: Wed Jul 15 01:11:08 2015
+#      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -40,10 +40,12 @@ class Ui_MainWindow(object):
         self.algorithmLabel = QtGui.QLabel(self.centralwidget)
         self.algorithmLabel.setGeometry(QtCore.QRect(20, 525, 761, 41))
         self.algorithmLabel.setObjectName(_fromUtf8("algorithmLabel"))
-        self.slicerScrollBar = QtGui.QScrollBar(self.centralwidget)
-        self.slicerScrollBar.setGeometry(QtCore.QRect(20, 580, 761, 16))
-        self.slicerScrollBar.setOrientation(QtCore.Qt.Horizontal)
-        self.slicerScrollBar.setObjectName(_fromUtf8("slicerScrollBar"))
+        self.prevButton = QtGui.QPushButton(self.centralwidget)
+        self.prevButton.setGeometry(QtCore.QRect(20, 560, 79, 25))
+        self.prevButton.setObjectName(_fromUtf8("prevButton"))
+        self.nextButton = QtGui.QPushButton(self.centralwidget)
+        self.nextButton.setGeometry(QtCore.QRect(110, 560, 79, 25))
+        self.nextButton.setObjectName(_fromUtf8("nextButton"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 796, 20))
@@ -59,4 +61,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
         self.algorithmLabel.setText(_translate("MainWindow", "Algorithm Output", None))
+        self.prevButton.setText(_translate("MainWindow", "Prev", None))
+        self.nextButton.setText(_translate("MainWindow", "Next", None))
 

@@ -9,4 +9,4 @@ from SlicingWindow import Ui_MainWindow as Ui_SlicingWindow
 
 
 from GlWidget import Drawable, GLWidget#GLWidget
-from ModelViews import StlModelView
+from ModelViews import StlModelView, SliceModelView
