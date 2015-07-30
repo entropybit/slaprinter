@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'PrintingDialog.ui'
 #
-# Created: Wed Jun 17 18:42:05 2015
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Wed Jul 15 01:11:08 2015
+#      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,8 +26,6 @@ except AttributeError:
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
-        validator = QtGui.QDoubleValidator()
-
         Dialog.resize(347, 261)
         self.horizontalLayout_6 = QtGui.QHBoxLayout(Dialog)
         self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
@@ -92,10 +90,6 @@ class Ui_Dialog(object):
         self.horizontalLayout_5.addWidget(self.OkButton)
         self.verticalLayout.addLayout(self.horizontalLayout_5)
         self.horizontalLayout_6.addLayout(self.verticalLayout)
-
-        self.sliceThickness.setValidator(validator)
-        self.fillPercentage.setValidator(validator)
-
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)

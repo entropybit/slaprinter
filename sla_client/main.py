@@ -1,4 +1,4 @@
-__author__ = 'mithrawnuruodo'
+c__author__ = 'mithrawnuruodo'
 
 import sys
 from Control import SlaController

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'StandardWindow.ui'
 #
-# Created: Wed Jun 17 18:42:05 2015
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Wed Jul 15 01:11:07 2015
+#      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,6 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        validator = QtGui.QDoubleValidator()
         MainWindow.resize(1341, 852)
         self.centralwidget = QtGui.QWidget(MainWindow)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -103,28 +102,19 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.addWidget(self.label_2)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.ScaleButton = QtGui.QPushButton(self.centralwidget)
-        self.ScaleButton.setObjectName(_fromUtf8("ScaleButton"))
-        self.horizontalLayout.addWidget(self.ScaleButton)
-        self.ScaleFactor = QtGui.QLineEdit(self.centralwidget)
-        self.ScaleFactor.setObjectName(_fromUtf8("ScaleFactor"))
-        self.horizontalLayout.addWidget(self.ScaleFactor)
         self.verticalLayout_5.addLayout(self.horizontalLayout)
-        self.AutoAlignButton = QtGui.QPushButton(self.centralwidget)
-        self.AutoAlignButton.setObjectName(_fromUtf8("AutoAlignButton"))
-        self.verticalLayout_5.addWidget(self.AutoAlignButton)
-        self.FlipButton = QtGui.QPushButton(self.centralwidget)
-        self.FlipButton.setObjectName(_fromUtf8("FlipButton"))
-        self.verticalLayout_5.addWidget(self.FlipButton)
-        self.pushButton_6 = QtGui.QPushButton(self.centralwidget)
-        self.pushButton_6.setObjectName(_fromUtf8("pushButton_6"))
-        self.verticalLayout_5.addWidget(self.pushButton_6)
-        self.pushButton_2 = QtGui.QPushButton(self.centralwidget)
-        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.verticalLayout_5.addWidget(self.pushButton_2)
-        self.pushButton_5 = QtGui.QPushButton(self.centralwidget)
-        self.pushButton_5.setObjectName(_fromUtf8("pushButton_5"))
-        self.verticalLayout_5.addWidget(self.pushButton_5)
+        self.SlicingButton = QtGui.QPushButton(self.centralwidget)
+        self.SlicingButton.setObjectName(_fromUtf8("SlicingButton"))
+        self.verticalLayout_5.addWidget(self.SlicingButton)
+        self.BoundingBoxButton = QtGui.QPushButton(self.centralwidget)
+        self.BoundingBoxButton.setObjectName(_fromUtf8("BoundingBoxButton"))
+        self.verticalLayout_5.addWidget(self.BoundingBoxButton)
+        self.CenterButton = QtGui.QPushButton(self.centralwidget)
+        self.CenterButton.setObjectName(_fromUtf8("CenterButton"))
+        self.verticalLayout_5.addWidget(self.CenterButton)
+        self.MeshButton = QtGui.QPushButton(self.centralwidget)
+        self.MeshButton.setObjectName(_fromUtf8("MeshButton"))
+        self.verticalLayout_5.addWidget(self.MeshButton)
         self.horizontalLayout_4.addLayout(self.verticalLayout_5)
         spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem3)
@@ -145,9 +135,6 @@ class Ui_MainWindow(object):
         self.actionFile_Import = QtGui.QAction(MainWindow)
         self.actionFile_Import.setObjectName(_fromUtf8("actionFile_Import"))
 
-        self.ScaleFactor.setValidator(validator)
-        self.N.setValidator(validator)
-
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -163,15 +150,11 @@ class Ui_MainWindow(object):
         self.StartPosButton.setText(_translate("MainWindow", "to Start Position", None))
         self.EndPosButton.setText(_translate("MainWindow", "to End Position", None))
         self.label_2.setText(_translate("MainWindow", "Editing Options", None))
-        self.ScaleButton.setText(_translate("MainWindow", "Scale by factor of", None))
-        self.ScaleFactor.setToolTip(_translate("MainWindow", "<html><head/><body><p>N=</p></body></html>", None))
-        self.ScaleFactor.setText(_translate("MainWindow", "1.1", None))
-        self.AutoAlignButton.setText(_translate("MainWindow", "try to auto-align", None))
-        self.FlipButton.setToolTip(_translate("MainWindow", "<html><head/><body><p>This SLA printer prints from the bottom up - the 3D model has to have its flattest surface on top.</p></body></html>", None))
-        self.FlipButton.setText(_translate("MainWindow", "flip upside down", None))
-        self.pushButton_6.setText(_translate("MainWindow", "rotate", None))
-        self.pushButton_2.setText(_translate("MainWindow", "translate", None))
-        self.pushButton_5.setText(_translate("MainWindow", "delete", None))
+        self.SlicingButton.setText(_translate("MainWindow", "slicer preview", None))
+        self.BoundingBoxButton.setToolTip(_translate("MainWindow", "<html><head/><body><p>This SLA printer prints from the bottom up - the 3D model has to have its flattest surface on top.</p></body></html>", None))
+        self.BoundingBoxButton.setText(_translate("MainWindow", "bounding box", None))
+        self.CenterButton.setText(_translate("MainWindow", "center", None))
+        self.MeshButton.setText(_translate("MainWindow", "mesh", None))
         self.StartPrintButton.setToolTip(_translate("MainWindow", "<html><head/><body><p>opens the Printing Dialogue</p></body></html>", None))
         self.StartPrintButton.setText(_translate("MainWindow", "Start Printing!", None))
         self.actionImport.setText(_translate("MainWindow", "Import", None))

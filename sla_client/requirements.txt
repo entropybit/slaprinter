@@ -6,4 +6,6 @@ numpy-stl
 stl
 mercurial
 requests
+enum
+sortedcontainers
 

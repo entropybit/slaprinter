@@ -1,30 +1,54 @@
 __author__ = 'mithrawnuruodo'
 
 from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QWidget, QMessageBox, QFileDialog
-from View import Ui_MainWindow, GLWidget, Ui_PrinterSettings, Ui_PrintingDialog, Ui_PrintingWindow
-
+from PyQt4 import QtCore
+from View import Ui_MainWindow, GLWidget, Ui_PrinterSettings, Ui_PrintingDialog, Ui_PrintingWindow, StlModelView
+from View import Ui_SlicingWindow, SliceModelView
+from Model import StlModel, EquiSlicer
 import json, requests, time
 import sys
 import os.path
+PROJECT_PATH = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0]
+
+
 
 class SlaController(QApplication):
 
     def __init__(self, argv):
         QApplication.__init__(self, argv)
 
+        # main window
         self.__mainWindow = QMainWindow()
         self.__ui1 = Ui_MainWindow()
         self.__glMain = object()
+        self.__stl_model = StlModel()
+        self.__stl_view = None
 
+        # printing dialog
         self.__printingDialog = QDialog()
         self.__ui2 = Ui_PrintingDialog()
 
+        # printing window
         self.__printingWindow = QMainWindow()
         self.__ui3 = Ui_PrintingWindow()
         self.__glStatus = object()
 
+        # printer settings
         self.__printerSettings = QDialog()
         self.__ui4 = Ui_PrinterSettings()
+
+        # slicing dialog
+        # ToDo find something working as DropDown or get ComboBox working
+        #self.__ui5 = ...
+
+        # slicing window
+        self.__glSlice = object()
+        self.__slicingwindow = QMainWindow()
+        self.__ui6 = Ui_SlicingWindow()
+        self.__slicing_model = None
+        self.__slicing_view = None
+        self.__slices = None
+        self.__slicing_index = 0
 
     def start(self):
         self.initWindows()
@@ -34,21 +58,77 @@ class SlaController(QApplication):
 
     def initWindows(self):
 
+
+        self.init_main()
+        self.init_printer_settings()
+        self.init_printing_window()
+        self.init_printing_dialog()
+        # self.init_slicing_dialog()
+        self.init_slicing_window()
+
+
+
+    def init_main(self):
         self.__glMain  = GLWidget()
         self.__ui1.setupUi(self.__mainWindow)
         self.__ui1.OpenGlPanel.addWidget(self.__glMain)
        # self.installEventFilter(self.__glMain)
 
-        #Initiating printer settings dialogue (individual options for each print)
+    def init_printing_dialog(self):
+        '''
+            Initiating printer settings dialogue (individual options for each print)
+        '''
         self.__ui2.setupUi(self.__printingDialog)
 
-        #Initiating printing window
+    def init_printer_settings(self):
+        '''
+            Initiating general printer settings window (for overarching printer settings that are always the same with the same printer)
+        '''
+        self.__ui4.setupUi(self.__printerSettings)
+
+    def init_printing_window(self):
+        '''
+            Initiating printing window
+        '''
         self.__glStatus = GLWidget()
         self.__ui3.setupUi(self.__printingWindow)
         self.__ui3.OpenGlPanel.addWidget(self.__glStatus)
 
-        #Initiating general printer settings window (for overarching printer settings that are always the same with the same printer)
-        self.__ui4.setupUi(self.__printerSettings)
+    def init_slicing_window(self):
+        '''
+            Initializing slicing window
+        '''
+        self.__glSlice  = GLWidget()
+        self.__glSlice.allow_rot = False
+        self.__glSlice.allow_zoom = False
+        #self.__glSlice.draw_frame = True
+
+        self.__ui6.setupUi(self.__slicingwindow)
+        self.__ui6.OpenGlPanel.addWidget(self.__glSlice)
+
+
+
+    def makeConnections(self):
+        '''
+            make connections between signal and slots so that user interactions lead to according
+            actions on the model or view
+        '''
+        self.__ui1.importFileButton.clicked.connect(self.fileDialogFunction)
+        self.__ui1.StartPrintButton.clicked.connect(self.__printingDialog.show)
+        self.__ui1.printerSettingsButton.clicked.connect(self.__printerSettings.show)
+        self.__ui1.CenterButton.clicked.connect(self.__glMain.reset)
+        self.__ui1.MeshButton.clicked.connect(self.__glMain.mesh)
+        self.__ui1.BoundingBoxButton.clicked.connect(self.__glMain.bounding_box)
+
+
+        self.__ui1.SlicingButton.clicked.connect(self.__slicingwindow.show)
+        self.__ui1.SlicingButton.clicked.connect(self.doSlicing)
+        #ui1.DownPosButton.clicked.connect(MoveStepper, [False,2])            #why cant i call functions with parameters?
+        #ui1.UpPosButton.clicked.connect(MoveStepper(True, N))
+
+
+        self.__ui6.nextButton.clicked.connect(self.next_slice)
+        self.__ui6.prevButton.clicked.connect(self.prev_slice)
 
     def switchToPrintingMode(self):
         self.__mainWindow.close()
@@ -112,19 +192,32 @@ class SlaController(QApplication):
     def fileDialogFunction(self):
         filename = QFileDialog.getOpenFileName(self.__mainWindow, 'Open File') #LINUX
         #filename = QFileDialog.getOpenFileName(mainWindow, 'Open File', 'C:\') #WINDOWS
-        print filename
-        #print file contents
-        with open(filename, 'r') as f:
-            print(f.read())
-        file.close()
+        print("")
+        print("filepath: " + str(filename))
 
-    def makeConnections(self):
-        #Explaining what each button on the StandardWindow does
-        self.__ui1.importFileButton.clicked.connect(self.fileDialogFunction)
-        self.__ui1.StartPrintButton.clicked.connect(self.__printingDialog.show)
-        self.__ui1.printerSettingsButton.clicked.connect(self.__printerSettings.show)
-        #ui1.DownPosButton.clicked.connect(MoveStepper, [False,2])            #why cant i call functions with parameters?
-        #ui1.UpPosButton.clicked.connect(MoveStepper(True, N))
+        if filename.contains(".stl"):
+            self.__stl_model.open(filename)
+
+            if not self.__stl_view is None:
+                self.__glMain.delDrawable(self.__stl_view)
+
+            self.__stl_view = StlModelView(self.__stl_model)
+            scale = self.__stl_view.scale
+
+            self.__glMain.reset()
+
+            if scale > -1:
+                self.__glMain.scale = scale
+                print("new scale:" + str(scale))
+            else:
+                print("no new scale")
+
+            self.__glMain.addDrawable(self.__stl_view)
+            self.__glMain.update()
+
+            self.__slicing_model = None
+            self.__slices = None
+
 
     def sendToRaspberry(self):
         configfile = open('PrinterSettings.conf', 'r')
@@ -159,3 +252,60 @@ class SlaController(QApplication):
 
         self.__ui4.CancelButton.clicked.connect(self.__printerSettings.close)
         self.__ui4.OkButton.clicked.connect(self.savePrinterSettingsToFile)
+
+
+    def doSlicing(self):
+
+        # only slice if new model has been loaded
+        if  self.__slices is None and self.__slicing_model is None:
+            self.__slicing_model = EquiSlicer(self.__stl_model)
+            self.__slices = self.__slicing_model.slice()
+
+        slice = self.__slices[self.__slicing_index]
+
+        #print(slice)
+
+        n = len(self.__slices)
+
+        s = "Equidistanc slicer used  n= " + str(n) + " slices have been created \n currently displaying slice ["
+        s = s + str(self.__slicing_index+1) + "] \n "
+
+        self.__ui6.algorithmLabel.setText(s)
+        self.__slicing_view = SliceModelView(slice)
+        self.__glSlice.addDrawable(self.__slicing_view)
+
+
+    def next_slice(self):
+        i = self.__slicing_index
+        n = len(self.__slices)
+
+        if i+1 <n:
+            self.update_slice(i+1)
+
+
+    def prev_slice(self):
+        i = self.__slicing_index
+        if i-1 >= 0:
+            self.update_slice(i-1)
+
+    def update_slice(self,i):
+
+        slice = self.__slices[i]
+        self.__slicing_index = i
+        n = len(self.__slices)
+        s = "Equidistanc slicer used  n= " + str(n) + " slices have been created \n currently displaying slice ["
+        s = s + str(self.__slicing_index+1) + "] \n "
+
+        #print("")
+        #print("################################")
+        #print("")
+        #print(slice)
+        #print("")
+        #print("")
+        #print("")
+
+        self.__glSlice.delDrawable(self.__slicing_view)
+        self.__ui6.algorithmLabel.setText(s)
+        self.__slicing_view = SliceModelView(slice)
+        self.__glSlice.addDrawable(self.__slicing_view)
+        self.__glSlice.update()
