@@ -1,5 +1,6 @@
 __author__ = 'aslan'
 
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -10,54 +11,90 @@ class Slicer(object):
         self.filename = filename
         self.your_mesh = mesh.Mesh.from_file(self.filename)
 
-    def slice(self):
-
+    def slice(self, sliceThickness):
         def decide_relevant_triangles_z(triangle):
             if ((triangle[2] >= self.slicingLevel and (triangle[5] < self.slicingLevel or triangle[8] < self.slicingLevel)) or (triangle[2] < self.slicingLevel and (triangle[5] >= self.slicingLevel or triangle[8] >= self.slicingLevel))):
                 return True
-
-        self.slicingLevel = 10.0 # fixed for now. needs to be turned into an iteration in the very end
-        self.save_z = np.array(filter(decide_relevant_triangles_z, self.your_mesh.points))
-        self.results = []
-
-        for triangle in self.save_z:
+        self.allresults = []
+        self.slicingLevelsList = range(min(self.your_mesh.z.flatten()), max(self.your_mesh.z.flatten()), sliceThickness)
+        for self.slicingLevel in self.slicingLevelsList:
+            #self.slicingLevel = 97.70
+            self.save_z = np.array(filter(decide_relevant_triangles_z, self.your_mesh.points)) #todo: optimise this step - it needs 2.3s per slice (@130k triangles), about 99% of total CPU time
+            self.results = []
+            self.results.append([["sliceLevel", self.slicingLevel], [0, 0]]) #basically the file output header.
             #decide which corner point is a (=the single point on the other side of the slicing level). b&c are on the same side of the slicing level
-            if (triangle[2] <= self.slicingLevel and triangle[5] <= self.slicingLevel) or (triangle[2] >= self.slicingLevel and triangle[5] >= self.slicingLevel):
-                self.a = triangle[6:9]
-                self.b = triangle[0:3]
-                self.c = triangle[3:6]
-            elif (triangle[8] <= self.slicingLevel and triangle[5] <= self.slicingLevel) or (triangle[8] >= self.slicingLevel and triangle[5] >= self.slicingLevel):
-                self.a = triangle[0:3]
-                self.b = triangle[6:9]
-                self.c = triangle[3:6]
-            elif (triangle[8] <= self.slicingLevel and triangle[2] <= self.slicingLevel) or (triangle[8] >= self.slicingLevel and triangle[2] >= self.slicingLevel):
-                self.a = triangle[3:6]
-                self.b = triangle[6:9]
-                self.c = triangle[0:3]
-            else:
-                print "Error! Aslan dun fuckd up!"
-                quit()
+            for triangle in self.save_z:
+                if (triangle[2] <= self.slicingLevel and triangle[5] <= self.slicingLevel) or (triangle[2] >= self.slicingLevel and triangle[5] >= self.slicingLevel):
+                    self.a = triangle[6:9]
+                    self.b = triangle[0:3]
+                    self.c = triangle[3:6]
+                elif (triangle[8] <= self.slicingLevel and triangle[5] <= self.slicingLevel) or (triangle[8] >= self.slicingLevel and triangle[5] >= self.slicingLevel):
+                    self.a = triangle[0:3]
+                    self.b = triangle[6:9]
+                    self.c = triangle[3:6]
+                elif (triangle[8] <= self.slicingLevel and triangle[2] <= self.slicingLevel) or (triangle[8] >= self.slicingLevel and triangle[2] >= self.slicingLevel):
+                    self.a = triangle[3:6]
+                    self.b = triangle[6:9]
+                    self.c = triangle[0:3]
+                else:
+                    print "Error! Aslan dun fuckd up!"
+                    quit()
 
-            #calculating the cutpoints via intersecting the two c-a and b-a lines with the slicinglevel
-            #c-a
-            self.t1 = (self.slicingLevel-self.a[2])/(self.c[2]-self.a[2]) #2 means: the first calculation of this Linear Equation System is in the z-plane
-            self.x1 = self.a[0]+self.t1*(self.c[0]-self.a[0]) #0 means: in the x-plane
-            self.y1 = self.a[1]+self.t1*(self.c[1]-self.a[1]) #1 means: in the y-plane
-            #b-a
-            self.t2 = (self.slicingLevel-self.a[2])/(self.b[2]-self.a[2]) #2 means: the first calculation of this Linear Equation System is in the z-plane
-            self.x2 = self.a[0]+self.t2*(self.b[0]-self.a[0]) #0 means: in the x-plane
-            self.y2 = self.a[1]+self.t2*(self.b[1]-self.a[1]) #1 means: in the y-plane
+                #calculating the cutpoints via intersecting the two c-a and b-a lines with the slicinglevel-plane. results are points. drawing a line between those gives me a pice of the slicing edge
+                #c-a
+                self.t1 = (self.slicingLevel-self.a[2])/(self.c[2]-self.a[2]) #2 means: the first calculation of this Linear Equation System is in the z-plane
+                self.x1 = self.a[0]+self.t1*(self.c[0]-self.a[0]) #0 means: in the x-plane
+                self.y1 = self.a[1]+self.t1*(self.c[1]-self.a[1]) #1 means: in the y-plane
+                #b-a
+                self.t2 = (self.slicingLevel-self.a[2])/(self.b[2]-self.a[2]) #2 means: the first calculation of this Linear Equation System is in the z-plane
+                self.x2 = self.a[0]+self.t2*(self.b[0]-self.a[0]) #0 means: in the x-plane
+                self.y2 = self.a[1]+self.t2*(self.b[1]-self.a[1]) #1 means: in the y-plane
 
-            self.results.append([[self.x1, self.y1, self.slicingLevel], [self.x2, self.y2, self.slicingLevel]])
+                self.results.append([[self.x1, self.y1], [self.x2, self.y2]])
 
-        self.result = np.array(self.results)
+            self.results = np.array(self.results)
+            self.allresults.append(self.results)
 
-        return self.result
+        return self.allresults
 
     def plot2DSlice(self):
-        fig1 = plt.figure(1, facecolor='black')
-        ax1 = plt.axes(frameon=False)
-        plt.plot([self.result[:, 0, 0],self.result[:, 1, 0]],[self.result[:, 0, 1], self.result[:, 1, 1]],'white') #[[xstart],[xend]],[[ystart],[yend]]
+
+        h, w = 2, 2
+        plt.figure(1)
+
+        plt.subplot(h, w, 1)
+        self.plot = self.allresults[0]
+        l = len(self.allresults[0])
+        plt.title("Slice Height=" + str(self.plot[0,0,1]))
+        plt.plot([self.plot[1:l, 0, 0], self.plot[1:l, 1, 0]], [self.plot[1:l, 0, 1], self.plot[1:l, 1, 1]], 'black') #[[xstart],[xend]],[[ystart],[yend]]
+        plt.xlim([1.1*self.your_mesh.x.max(), 1.1*self.your_mesh.x.min()])
+        plt.ylim([1.1*self.your_mesh.y.max(), 1.1*self.your_mesh.y.min()])
+
+        plt.subplot(h, w, 2)
+        self.plot = self.allresults[int(len(self.allresults)/3)]
+        l = len(self.allresults[int(len(self.allresults)/3)])
+
+        plt.title("Slice Height=" + str(self.plot[0,0,1]))
+        plt.plot([self.plot[1:l, 0, 0], self.plot[1:l, 1, 0]], [self.plot[1:l, 0, 1], self.plot[1:l, 1, 1]], 'black') #[[xstart],[xend]],[[ystart],[yend]]
+        plt.xlim([1.1*self.your_mesh.x.max(), 1.1*self.your_mesh.x.min()])
+        plt.ylim([1.1*self.your_mesh.y.max(), 1.1*self.your_mesh.y.min()])
+
+        plt.subplot(h, w, 3)
+        self.plot = self.allresults[int(len(self.allresults)*2/3)]
+        l = len(self.allresults[int(len(self.allresults)*2/3)])
+        plt.title("Slice Height=" + str(self.plot[0,0,1]))
+        plt.plot([self.plot[1:l, 0, 0], self.plot[1:l, 1, 0]], [self.plot[1:l, 0, 1], self.plot[1:l, 1, 1]], 'black') #[[xstart],[xend]],[[ystart],[yend]]
+        plt.xlim([1.1*self.your_mesh.x.max(), 1.1*self.your_mesh.x.min()])
+        plt.ylim([1.1*self.your_mesh.y.max(), 1.1*self.your_mesh.y.min()])
+
+        plt.subplot(h, w, 4)
+        self.plot = self.allresults[-1]
+        l = len(self.allresults[-1])
+        plt.title("Slice Height=" + str(self.plot[0,0,1]))
+        plt.plot([self.plot[1:l, 0, 0], self.plot[1:l, 1, 0]], [self.plot[1:l, 0, 1], self.plot[1:l, 1, 1]], 'black') #[[xstart],[xend]],[[ystart],[yend]]
+        plt.xlim([1.1*self.your_mesh.x.max(), 1.1*self.your_mesh.x.min()])
+        plt.ylim([1.1*self.your_mesh.y.max(), 1.1*self.your_mesh.y.min()])
+
         plt.show()
 
         #phillippes x-beam method for slicing (unclean)
@@ -138,7 +175,7 @@ class Slicer(object):
 
 if __name__ == "__main__":
     eiffel = Slicer('EiffelTowerTALL.stl')
-    eiffel.slice()
+    eiffel.slice(100) #distance between slices. careful: 2.5s per and eiffeltower is 240mm high!
     eiffel.plot2DSlice()
 
 
