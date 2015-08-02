@@ -252,7 +252,8 @@ class StlModelView(Drawable):
 
             #glNormal3d(n[0],n[1],n[2])
 
-            glColor3d(124.0/255.0, 126.0/255.0, 128.0/255.0)
+            #glColor3d(124.0/255.0, 126.0/255.0, 128.0/255.0)
+            glColor3d(212.0/255.0, 214.0/255.0, 217.0/255.0)
             glVertex3d(v0[0],v0[1],v0[2])
             glVertex3d(v1[0],v1[1],v1[2])
             glVertex3d(v2[0],v2[1],v2[2])
@@ -274,7 +275,8 @@ class StlModelView(Drawable):
             #glNormal3d(n[0],n[1],n[2])
 
 
-            glColor3d(159.0/255.0,159.0/255.0,159.0/255.0)
+            #glColor3d(159.0/255.0,159.0/255.0,159.0/255.0)
+            glColor3d(0,0,0)
             glVertex3d(v0[0], v0[1], v0[2])
             glVertex3d(v1[0], v1[1], v1[2])
 
