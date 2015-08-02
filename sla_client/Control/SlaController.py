@@ -8,6 +8,7 @@ from Model import StlModel, EquiSlicer
 import json, requests, time
 import sys
 import os.path
+from ServerConnection import ServerConnection
 PROJECT_PATH = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0]
 
 
@@ -15,6 +16,9 @@ PROJECT_PATH = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0]
 class SlaController(QApplication):
 
     def __init__(self, argv):
+
+
+
         QApplication.__init__(self, argv)
 
         # main window
@@ -50,15 +54,18 @@ class SlaController(QApplication):
         self.__slices = None
         self.__slicing_index = 0
 
+        self.connection = ServerConnection("http://10.0.0.1:5000")
+
     def start(self):
         self.initWindows()
         self.makeConnections()
         self.__mainWindow.show()
         sys.exit(self.exec_())
 
+
     def initWindows(self):
 
-
+        self.connection.start()
         self.init_main()
         self.init_printer_settings()
         self.init_printing_window()
@@ -90,9 +97,10 @@ class SlaController(QApplication):
         '''
             Initiating printing window
         '''
-        self.__glStatus = GLWidget()
+        #self.__glStatus = GLWidget()
         self.__ui3.setupUi(self.__printingWindow)
-        self.__ui3.OpenGlPanel.addWidget(self.__glStatus)
+        #self.__ui3.OpenGlPanel.addWidget(self.__glMain)
+
 
     def init_slicing_window(self):
         '''
@@ -120,6 +128,8 @@ class SlaController(QApplication):
         self.__ui1.MeshButton.clicked.connect(self.__glMain.mesh)
         self.__ui1.BoundingBoxButton.clicked.connect(self.__glMain.bounding_box)
 
+        self.__ui2.CancelButton.clicked.connect(self.__printingDialog.close)
+        self.__ui2.OkButton.clicked.connect(self.switchToPrintingMode)
 
         self.__ui1.SlicingButton.clicked.connect(self.__slicingwindow.show)
         self.__ui1.SlicingButton.clicked.connect(self.doSlicing)
@@ -131,9 +141,12 @@ class SlaController(QApplication):
         self.__ui6.prevButton.clicked.connect(self.prev_slice)
 
     def switchToPrintingMode(self):
+
+        self.__ui1.OpenGlPanel.removeWidget(self.__glMain)
         self.__mainWindow.close()
         self.__printerSettings.close() #shouldnt be open at this point, but you never know
         self.__printingDialog.close()
+        self.__ui3.OpenGlPanel.addWidget(self.__glMain)
         self.__printingWindow.show()
         self.sendToRaspberry()
 
