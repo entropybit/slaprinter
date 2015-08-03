@@ -101,12 +101,9 @@ class StlModelView(Drawable):
         glTranslate(-xmin , -ymin , -zmin)
         glTranslate(-sx/2.0, -sy/2.0, -sz/2.0)
 
-        # depending on drawing mode draw call according draw method
-        if self.__drawing_mode == DrawingModes.triangles:
-            self.simpleTrianglesDraw()
-        else:
-            if self.__drawing_mode==DrawingModes.displaylist:
-                self.displayListTrianglesDraw()
+
+        if self.__drawing_mode==DrawingModes.displaylist:
+            self.displayListTrianglesDraw()
 
         # if specified draw bounding box
         if self.bounding_box:
@@ -118,55 +115,6 @@ class StlModelView(Drawable):
         glTranslate(sx/2.0, sy/2.0, sz/2.0)
         glTranslate(xmin , ymin , zmin)
 
-
-
-
-
-    def simpleTrianglesDraw(self):
-        '''
-        draw a visualization of the provided stl file by iterating over the triangles and displaying them
-        as a connected triangle list so as GL_TRIANGLES ...
-        '''
-
-
-
-        glBegin(GL_TRIANGLES)
-
-
-        n = len(self.__model.mesh)
-
-        v0 = self.__model.mesh.v0
-        v1 = self.__model.mesh.v1
-        v2 = self.__model.mesh.v2
-
-
-        for i in range(0,n):
-
-            #v = self.model.mesh.points[i]
-            n = self.__model.mesh.normals[i]
-
-            self.drawTriangle(v0[i],v1[i],v2[i],n)
-
-        glEnd()
-
-
-
-    def drawTriangle(self,v0,v1,v2,n):
-        '''
-        draw a triangle given the edges and a normal vector
-
-        :param v0:  triangle edge 0 in form [x0,y0,z0]
-        :param v1:  triangle edge 1 in form [x1,y1,z1]
-        :param v2:  triangle edge 2 in form [x2,y2,z2]
-        :param n:   normal vector of the trianlge in form [nx,ny,nz]
-
-        :return:    nothing
-        '''
-
-        glNormal3d(n[0],n[1],n[2])
-        glVertex3d(v0[0],v0[1],v0[2])
-        glVertex3d(v1[0],v1[1],v1[2])
-        glVertex3d(v2[0],v2[1],v2[2])
 
 
     def getScale(self):
@@ -250,12 +198,17 @@ class StlModelView(Drawable):
             v2 = v2_points[i]
             n = n_points[i]
 
-            #glNormal3d(n[0],n[1],n[2])
+
 
             #glColor3d(124.0/255.0, 126.0/255.0, 128.0/255.0)
             glColor3d(212.0/255.0, 214.0/255.0, 217.0/255.0)
+            glNormal3d(n[0],n[1],n[2])
             glVertex3d(v0[0],v0[1],v0[2])
+
+            glNormal3d(n[0],n[1],n[2])
             glVertex3d(v1[0],v1[1],v1[2])
+
+            glNormal3d(n[0],n[1],n[2])
             glVertex3d(v2[0],v2[1],v2[2])
 
         glEnd()
@@ -325,6 +278,8 @@ class StlModelView(Drawable):
         zmin, zmax = self.__model.zlims
 
 
+        glDisable(GL_LIGHTING)
+        glDisable(GL_LIGHT0)
 
         glBegin(GL_LINES)
 
@@ -372,6 +327,9 @@ class StlModelView(Drawable):
         glVertex3d(xmin,ymax,zmax)
 
         glEnd()
+
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
 
 
 class SliceModelView(Drawable):
