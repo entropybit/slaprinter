@@ -418,6 +418,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         glEnd()
 
 
+    def update_scale(self,scale):
+        self._scale = scale
+        self.update()
 
 
 # Vertex shader

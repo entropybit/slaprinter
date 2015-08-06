@@ -108,7 +108,7 @@ class SlaController(QApplication):
         '''
         self.__glSlice  = GLWidget()
         self.__glSlice.allow_rot = False
-        self.__glSlice.allow_zoom = False
+        self.__glSlice.allow_zoom = True
         #self.__glSlice.draw_frame = True
 
         self.__ui6.setupUi(self.__slicingwindow)
@@ -275,6 +275,10 @@ class SlaController(QApplication):
             self.__slices = self.__slicing_model.slice()
 
         slice = self.__slices[self.__slicing_index]
+        scale = self.__slicing_model.scale
+
+        self.__glSlice.update_scale(scale)
+
 
         #print(slice)
 

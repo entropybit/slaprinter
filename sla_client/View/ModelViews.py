@@ -341,12 +341,20 @@ class SliceModelView(Drawable):
         self.__initialized = False
         self.display_points = True
         self.display_mesh = True
+        self.bounding_rect = False
 
     def __del__(self):
         glDeleteLists(self.__index, 1);
 
     def draw(self):
+
+        glDisable(GL_LIGHTING)
+        glDisable(GL_LIGHT0)
+
         self.displayListTrianglesDraw()
+
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
 
     def displayListTrianglesDraw(self):
 
@@ -368,6 +376,9 @@ class SliceModelView(Drawable):
         if self.display_mesh:
             glCallList(self.__index+1)
 
+        if self.bounding_rect:
+            self.draw_bounding_box()
+
 
     def initGeometry(self):
 
@@ -380,13 +391,15 @@ class SliceModelView(Drawable):
 
         glNewList(self.__index, GL_COMPILE)
         # add triangles
-        glBegin(GL_POINTS)
-
-        for p in points:
-            #glNormal3d(n[0],n[1],n[2])
-            glColor3d(1.0,0,0)
-            glVertex3d(p[0],p[1],p[2])
-        glEnd()
+        # glBegin(GL_POLYGON)
+        #
+        # i = 0
+        # for p in points:
+        #     #glNormal3d(n[0],n[1],n[2])
+        #     glColor3d(159.0/255.0,159.0/255.0,159.0/255.0)
+        #     glVertex3d(p[0],p[1],p[2])
+        #     i = i+1
+        # glEnd()
         glEndList()
 
 
@@ -397,7 +410,7 @@ class SliceModelView(Drawable):
         glBegin(GL_LINES)
         for p in points:
             #glNormal3d(n[0],n[1],n[2])
-            glColor3d(159.0/255.0,159.0/255.0,159.0/255.0)
+            glColor3d(1.0,1.0,1.0)
             glVertex3d(p[0],p[1],p[2])
         glEnd()
         glEndList()
@@ -410,8 +423,30 @@ class SliceModelView(Drawable):
         #print(self._indexes[1:10])
 
 
+    def draw_bounding_box(self):
+        xmin, xmax = self.__model.xlims
+        ymin, ymax = self.__model.ylims
+        glColor3d(1.0,0,0)
+
+        glBegin(GL_LINES)
+        glVertex3d(xmin, ymin ,0)
+        glVertex3d(xmax, ymin ,0)
+
+        glVertex3d(xmax, ymin ,0)
+        glVertex3d(xmax, ymax ,0)
+
+        glVertex3d(xmax, ymax ,0)
+        glVertex3d(xmin, ymax ,0)
+
+        glVertex3d(xmin, ymax ,0)
+        glVertex3d(xmin, ymin ,0)
+        glEnd()
+
+
     def mesh(self):
         self.display_mesh = not self.display_mesh
 
     def solid(self):
         self.display_points = not self.display_points
+
+
