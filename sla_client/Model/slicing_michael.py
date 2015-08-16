@@ -91,8 +91,7 @@ class Slicer(object):
             return [a,b,c]
 
         self.allresults = []
-        slicingLevelsList = range(min(self.your_mesh.z.flatten()), max(self.your_mesh.z.flatten()), sliceThickness)
-
+        slicingLevelsList = np.arange(self.your_mesh.z.min()+1, self.your_mesh.z.max(), sliceThickness)
 
         for slicingLevel in slicingLevelsList:
             #self.slicingLevel = 97.70
@@ -101,7 +100,7 @@ class Slicer(object):
 
             save_z = np.array(filter(iteration_filter, self.your_mesh.points)) #todo: optimise this step - it needs 2.3s per slice (@130k triangles), about 99% of total CPU time
             results = []
-            results.append([["sliceLevel", slicingLevel], [0, 0]]) #basically the file output header.
+            results.append([[0, slicingLevel], [0, 0]]) #basically the file output header.
             #decide which corner point is a (=the single point on the other side of the slicing level). b&c are on the same side of the slicing level
             for triangle in save_z:
                 a,b,c = select_triangles(triangle, slicingLevel)
@@ -119,6 +118,22 @@ class Slicer(object):
                 results.append([[x1, y1], [x2, y2]])
 
             results = np.array(results)
+            #sorting happens here:
+
+
+            SortedPolyX = [results[0], results[1,0,0], results[1,1,0]]
+            elementsAlreadySeen = [results[1].tolist()]
+            for element in results[1:].tolist():
+                for testelement in results[1:].tolist():
+                    if element[1] == testelement[0] and element not in elementsAlreadySeen:
+                        SortedPolyX.append(testelement[0])
+                        elementsAlreadySeen.append(element)
+                        print "yaaay"
+            print elementsAlreadySeen
+
+                #print [5,1] in [[4,3],[4,1],[5,0]]
+
+
             self.allresults.append(results)
 
         return self.allresults
@@ -241,7 +256,7 @@ class Slicer(object):
 
 if __name__ == "__main__":
     eiffel = Slicer('EiffelTowerTALL.stl')
-    eiffel.slice(100) #distance between slices. careful: 2.5s per and eiffeltower is 240mm high!
+    eiffel.slice(300) #distance between slices. careful: 2.5s per and eiffeltower is 240mm high!
     #eiffel.plot2DSlice()
 
 
