@@ -6,6 +6,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtOpenGL
 from OpenGL import GLU
 from OpenGL.GL import *
+from OpenGL.GL.shaders import *
 
 #from ModelViews import StlModelView
 from numpy import array
@@ -46,7 +47,6 @@ class Drawable(object):
     #    pass
 
 
-
 class GLWidget(QtOpenGL.QGLWidget):
     def __init__(self, fps=60, parent=None):
         self.parent = parent
@@ -84,6 +84,14 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.draw_cosy = False
         self.draw_frame = False
 
+        self.shader = None
+        self.use_shader = True
+
+        self.light0_pos = [-20.0, 100.0, 60.0, 1]
+        self.ambient0 = [0, 0, 0, 1.0]
+        self.diffuse0 = [1.0, 1.0, 1.0, 1.0]
+        self.specular0 = [1.0, 1.0, 1.0, 1.0]
+
 
         #self._timer = QtCore.QTimer()
         #QtCore.QObject.connect(self._timer, QtCore.SIGNAL("timeout()"), self.updateGL)
@@ -98,19 +106,32 @@ class GLWidget(QtOpenGL.QGLWidget):
         # set background color
         self.qglClearColor(QtGui.QColor(60, 63, 65))
 
-        glEnable(GL_DEPTH_TEST)
+        #glEnable(GL_DEPTH_TEST)
 
         # Set antialiasing
         glEnable( GL_LINE_SMOOTH )
-        glEnable( GL_POLYGON_SMOOTH )
-        glHint( GL_LINE_SMOOTH_HINT, GL_NICEST )
+        #glEnable( GL_POLYGON_SMOOTH )
+        #glHint( GL_LINE_SMOOTH_HINT, GL_NICEST )
 
         # Set alpha blending
         glEnable( GL_BLEND )
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA )
 
         glEnable(GL_VERTEX_ARRAY)
+        glEnable(GL_DEPTH_TEST)
 
+
+
+        glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glEnable (GL_BLEND)
+        glEnable (GL_LINE_SMOOTH);
+        glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE)
+        glLineWidth (2)
+
+
+        # use shader bla
+        vs = compile_vertex_shader(VS)
+        self.shaders_program = link_shader_program(vs)
 
         #glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
         #glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -120,19 +141,32 @@ class GLWidget(QtOpenGL.QGLWidget):
         #glEnable(GL_TEXTURE_2D);
         #glEnable(GL_CULL_FACE);
 
-        #glEnable(GL_LIGHTING)
-        #glEnable(GL_LIGHT0)
 
-        light0_pos = -12.0, 18.0, 30.0, 0.0
-        diffuse0 = 0.5, 0.5, 0.5, 1.0
-        specular0 = 0.5, 0.5, 0.5, 1.0
-        ambient0 = 0.8, 0.8, 0.8, 1.0
+        glShadeModel (GL_SMOOTH)
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
+        glEnable(GL_COLOR_MATERIAL)
+        #glColorMaterial ( GL_FRONT_AND_BACK, GL_DIFFUSE )
 
-        #glMatrixMode(GL_MODELVIEW)
-        #glLightfv(GL_LIGHT0, GL_POSITION, light0_pos)
-        #glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0)
-        #glLightfv(GL_LIGHT0, GL_SPECULAR, specular0)
-        #glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0)
+
+        #render_clr = [212.0/255.0, 214.0/255.0, 217.0/255.0, 1.0]
+        render_clr = [1.0,0,0,0,1.0]
+
+        #glMaterialfv(GL_FRONT, GL_DIFFUSE, cyan)
+        #glMaterialfv(GL_FRONT, GL_SPECULAR, white)
+
+
+
+
+        glMatrixMode(GL_MODELVIEW)
+        glLightfv(GL_LIGHT0, GL_POSITION, self.light0_pos)
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, self.diffuse0)
+        glLightfv(GL_LIGHT0, GL_SPECULAR, self.specular0)
+        glLightfv(GL_LIGHT0, GL_AMBIENT, self.ambient0)
+
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, render_clr)
+        #glMaterialf(GL_FRONT, GL_SPECULAR, render_clr)
+        #glMaterialf(GL_FRONT, GL_AMBIENT, render_clr)
 
         # track material ambient and diffuse from surface color, call it before glEnable(GL_COLOR_MATERIAL)
         #glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
@@ -162,6 +196,14 @@ class GLWidget(QtOpenGL.QGLWidget):
         glTranslate(0.0, 0.0, -50.0)
         glScale(20.0, 20.0, 20.0)
 
+        #glUseProgram(self.shaders_program)
+
+        glBegin(GL_LINES)
+        #glVertex3d(-10.0, -10.0, -10.0)
+        #glVertex3d(1.0,1.0,1.0)
+        glEnd()
+
+
         if self.allow_trans:
             glTranslate(self._trans_x, self._trans_y, self._trans_z)
 
@@ -173,11 +215,17 @@ class GLWidget(QtOpenGL.QGLWidget):
         if self.allow_zoom:
             glScale(self._scale, self._scale, self._scale)
 
+        glDisable(GL_LIGHTING)
+        glDisable(GL_LIGHT0)
+
         if self.draw_cosy:
             self.drawCosy()
 
         if self.draw_frame:
             self.drawFrame()
+
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
 
 
         for d in self._drawables:
@@ -322,6 +370,8 @@ class GLWidget(QtOpenGL.QGLWidget):
             self._scale = d.scale
 
 
+        self.light0_pos[3] = self._scale
+
         print("setted scale = " + str(self._scale))
 
         self._rot_x = 0
@@ -367,3 +417,49 @@ class GLWidget(QtOpenGL.QGLWidget):
         glVertex3d(-1.0,-1.0,0)
         glEnd()
 
+
+    def update_scale(self,scale):
+        self._scale = scale
+        self.update()
+
+
+# Vertex shader
+VS = """
+#version 300 es
+// Attribute variable that contains coordinates of the vertices.
+layout(location = 0) in vec2 position;
+
+// Main function, which needs to set `gl_Position`.
+void main()
+{
+    // The final position is transformed from a null signal to a sinewave here.
+    // We pass the position to gl_Position, by converting it into
+    // a 4D vector. The last coordinate should be 0 when rendering 2D figures.
+    gl_Position = vec4(position.x, .2 * sin(20.0f * position.x), 0., 1.);
+}
+"""
+
+
+def compile_vertex_shader(source):
+    """Compile a vertex shader from source."""
+    vertex_shader = glCreateShader(GL_VERTEX_SHADER)
+    glShaderSource(vertex_shader, source)
+    glCompileShader(vertex_shader)
+    # check compilation error
+    result = glGetShaderiv(vertex_shader, GL_COMPILE_STATUS)
+    if not(result):
+        raise RuntimeError(glGetShaderInfoLog(vertex_shader))
+    return vertex_shader
+
+
+def link_shader_program(vertex_shader):
+    """Create a shader program with from compiled shaders."""
+    program = glCreateProgram()
+    glAttachShader(program, vertex_shader)
+    #glAttachShader(program, fragment_shader)
+    glLinkProgram(program)
+    # check linking error
+    result = glGetProgramiv(program, GL_LINK_STATUS)
+    if not(result):
+        raise RuntimeError(glGetProgramInfoLog(program))
+    return program
