@@ -359,7 +359,7 @@ class EquiSlicer(Slicer):
                 results.append([x1, y1, 0])
                 results.append([x2, y2, 0])
 
-                x_dims = self.update_dims(x_dims, x1)
+                x_dims = self.update_dims(x_dims, x1) #used to define bounding boxes in OpenGL
                 x_dims = self.update_dims(x_dims, x2)
 
                 y_dims = self.update_dims(y_dims, y1)
