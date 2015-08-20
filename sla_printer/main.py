@@ -1,6 +1,6 @@
-#__author__ = 'mithrawnuruodo'
+#!/usr/bin/env python
+__author__ = 'mithrawnuruodo'
 
-import Model.Stepper as Stepper
 #import Control.GamePadController as snes
 #import View.Beamer
 from Control import SlaPrinterController

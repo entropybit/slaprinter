@@ -8,5 +8,15 @@
 
 It works!
 
+
+{% if packages %}
+    <h2>Data pool</h2>
+    <ul>
+    {% for p in packages %}
+        <li> {{ p }} </li>
+    {% endfor %}
+    </ul>
+{% endif %}
+
 </body>
 </html>

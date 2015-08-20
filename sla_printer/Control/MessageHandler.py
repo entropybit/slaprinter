@@ -30,8 +30,6 @@ class Observable(object):
 
 
 
-
-
 class Dispatcher(Thread):
 
     def __init__(self, *args, **kwargs):
@@ -49,6 +47,7 @@ class Dispatcher(Thread):
         super(Dispatcher, self).__init__(*args, **kwargs)
         self.__interested_threads = []
         self.__message_stack = Queue()
+        self.running = True
 
     def run(self):
         """
@@ -56,8 +55,8 @@ class Dispatcher(Thread):
         sleep for a short while
 
         """
-        while 1:
-            if not self.__message_stack.empty():
+        while self.running:
+            while not self.__message_stack.empty():
                 msg = self.__message_stack.get()
                 self.dispatch_message(msg)
             #else:
@@ -97,5 +96,15 @@ class Dispatcher(Thread):
         """
         for thread in self.__interested_threads:
             thread.notify(message)
+
+    def stop(self):
+        self.running = False
+
+
+
+    def start(self):
+
+        self.running = True
+        Thread.start(self)
 
 
