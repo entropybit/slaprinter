@@ -1,25 +1,28 @@
 import random, pygame, sys
 from pygame.locals import *
+#from multiprocessing import Process
 from threading import Thread
 from MessageHandler import Observable, Dispatcher
-from Messages import GamePadConnected, GamePadDisconnected, GamePadDownPressed, GamePadUpPressed, GamePadStartPressed
+from Messages import *
+
+import os
+
+DATA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/Data"
 
 
-pygame.init()
 
-class SnesController(Observable, Thread):
+class GamePadController(Observable, Thread):
 
     def __init__(self, dispatcher, fps=30):
         Thread.__init__(self)
         Observable.__init__(self, dispatcher)
 
-        self.fps = 30 # frames per second, the general speed of the program
+        self.fps = fps # frames per second, the general speed of the program
 
 
         self.fpsclock = pygame.time.Clock()
         self.hasGamePad = False
-
-
+        self.running = True
 
 
     def updateGamePad(self, joysticks):
@@ -28,6 +31,7 @@ class SnesController(Observable, Thread):
 
         if not self.hasGamePad and  hasGamePad:
             print("Recognized controller: USB Gamepad ")
+            print("basedir: " + str(DATA_DIR))
             self.put_message(GamePadConnected(self, "USB Gamepad connected"))
 
 
@@ -65,24 +69,49 @@ class SnesController(Observable, Thread):
     def run(self):
 
 
-        while True: # main game loop
+        while self.running: # main game loop
 
+            #print(" ...refreshing gamepad... ")
             self.gamepad = self.refresh_gamepad()
+            #print(" ...refreshing gamepad done... ")
 
             if self.hasGamePad:
                 for event in pygame.event.get(): # event handling loop
-                    if event.type == JOYBUTTONUP:
+
+                    if event.type == JOYBUTTONDOWN:
+                        if event.button == 8:
+                            #print("Select Button Pressed")
+                            self.put_message(GamePadSelectPressed(self,"Select Button Pressed"))
+                            self.stop()
+
+                            #sys.exit()
+                        if event.button == 0:
+                            self.put_message(GamePadXPressed(self,"X Button Pressed"))
+                            #print("X pressed")
+                        if event.button == 1:
+                            self.put_message(GamePadAPressed(self,"A Button Pressed"))
+                            #print("A pressed")
+                        if event.button == 2:
+                            self.put_message(GamePadBPressed(self,"B Button Pressed"))
+                            #print("B pressed")
+                        if event.button == 3:
+                            self.put_message(GamePadYPressed(self,"Y Button Pressed"))
+                            #print("Y pressed")
                         if event.button == 9:
-                            pygame.quit()
-                            sys.exit()
-                        if event.button == 2: #closes the program when you press start
-                            self.put_message(GamePadUpPressed(self,"Up Button Pressed"))
-                        if event.button == 3: #closes the program when you press start
-                            self.put_message(GamePadDownPressed(self,"Down Button Pressed"))
-                        if event.button == 0: #closes the program when you press start
                             self.put_message(GamePadStartPressed(self,"Start Button Pressed"))
-                        else:
-                            print(event.button)
+                            #print("Start Button Pressed")
+
+
+                            path = DATA_DIR + "/Portal Sentry - is anyone there.ogg"
+
+                            #print("playing file " + path)
+
+                            JumpSound = pygame.mixer.Sound(path)
+                            JumpSound.play()
+
+
+                        #else:
+                        #    print(event.button)
 
 
                     elif event.type == JOYAXISMOTION:
@@ -98,7 +127,18 @@ class SnesController(Observable, Thread):
             self.fpsclock.tick(self.fps)
 
 
+    def stop(self):
+        pygame.quit()
+        self.running = False
+
+    def start(self):
+
+        pygame.init()
+        self.running = True
+        Thread.start(self)
+
+
 if __name__ == "__main__":
     disp = Dispatcher()
-    snes = SnesController(disp)
+    snes = GamePadController(disp)
     snes.start()

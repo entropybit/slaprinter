@@ -17,8 +17,10 @@ class Stepper(object):
         #self.__step = 0
         self.init_gpio()
 
-    def __del__(self):
+    def release(self):
+        print("gpio cleanup")
         GPIO.cleanup()
+        print("...done...")
 
     def init_gpio(self):
         GPIO.setmode(GPIO.BOARD)
