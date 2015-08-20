@@ -1,10 +1,9 @@
 __author__ = 'mithrawnuruodo'
 
 from abc import ABCMeta,abstractmethod
-from StlModels import Model
+from StlModels import Model, StlModel
 import numpy as np
-import math
-import traceback
+import matplotlib.pyplot as plt
 
 
 def drange(start,stop,inc):
@@ -110,185 +109,13 @@ class Slice(object):
         return self.__points
 
 
-
-#
-# class EquiSlicer(Slicer):
-#     '''
-#     A simple slicer implementation which works by defining a set of equal height boxes.
-#     The slices are then defined by the vertices lying within the respective box.
-#     '''
-#
-#     def __init__(self, stl_model, partitions=100):
-#
-#         Slicer.__init__(self, stl_model)
-#         self.__partitions = partitions
-#
-#
-#     def slice(self):
-#
-#         zmin, zmax = self._model.zlims
-#         z_inc = (zmax - zmin)*(1.0/self.__partitions)
-#
-#         print(" slicing with data: z_inc = " + str(z_inc) + " [z_min, z_max] = [" + str(zmin) + ", " + str(zmax) + "] " )
-#
-#         points = self.getPointsByZincrement(z_inc, self.__partitions)
-#
-#
-#         slices = []
-#         for p in points:
-#             s = Slice(p)
-#             #print("#################################")
-#             #print("")
-#             #print(s)
-#             #print("")
-#             #print("---------------------------------")
-#             slices.append(s)
-#
-#         return slices
-#
-#
-#     def getPointsByZincrement(self, z_inc, n):
-#         '''
-#         This function sorts all vertices into slices acording to the z-increment and the given target number of
-#         partitions.
-#         So all vertices will be grouped by theire z-value so that n slices of height z are build.
-#
-#         :param z_inc:   z-increment (slice heights)
-#         :param n:       number of partitions / slices
-#         :return:        array of array of normalized points, where each line corresponds to the points in a slice
-#         '''
-#
-#         points = []
-#
-#         for i in range(0,n):
-#             points.append([])
-#
-#         N = len(self._model.mesh)
-#
-#         v0s = self._model.mesh.v0
-#         v1s = self._model.mesh.v1
-#         v2s = self._model.mesh.v2
-#
-#         for i in range(0,N):
-#
-#             v0 = v0s[i]
-#             v1 = v1s[i]
-#             v2 = v2s[i]
-#
-#
-#             indx0 = self.getIndex(z_inc,n,v0)
-#             indx1 = self.getIndex(z_inc,n,v1)
-#             indx2 = self.getIndex(z_inc,n,v2)
-#
-#
-#             v0 = self.normalize(v0s[i], self._model.xlims, self._model.ylims)
-#             v1 = self.normalize(v1s[i], self._model.xlims, self._model.ylims)
-#             v2 = self.normalize(v2s[i], self._model.xlims, self._model.ylims)
-#
-#
-#             #print("reveiced indices (i0,i1,i2) = (" + str(indx0) + ", " + str(indx1) + ", " + str(indx2) + ") ")
-#
-#             if indx0 > -1:
-#                 points[indx0].append(v0)
-#
-#             if indx1 > -1:
-#                 points[indx1].append(v1)
-#
-#             if indx2 > -1:
-#                 points[indx2].append(v2)
-#
-#         return points
-#
-#
-#     def getIndex(self, z_inc, n, v):
-#         '''
-#         :param z_inc: z - increment used to build slices (essentially layer height)
-#         :param n:   number of layers
-#         :param v:   a vertix which is to be sorted wihtin a specific slice
-#         :return:    a index specifying the vertices layer index i stands for (i-1)th slice
-#         '''
-#
-#         z = v[2]
-#         print(v)
-#
-#         for i in range(0,n):
-#
-#             z0 = i*z_inc
-#             z1 = (i+1)*z_inc
-#             print("i: " + str(i) + " (z, z0, z1) = (" + str(z) + ", " + str(z0) + ", " + str(z1) + ") | n = " + str(n))
-#
-#             if z0 <= z and z < z1:
-#                 return i
-#
-#         return -1
-#
-#
-#
-#     def normalize(self, v, xlims, ylims):
-#
-#         '''
-#
-#         This function is used to normalize the points to x/y-ranges [0,1]
-#
-#         :param v:
-#         :param xlims:
-#         :param ylims:
-#         :return:
-#         '''
-#
-#
-#         def normalizer(t, tmin, tmax):
-#             #if tmin >= 0 or t >= 0:
-#             #    t = t/(1.0*tmax)
-#             #else:
-#             #    if t < 0:
-#             #        t = t/(1.0*tmin)
-#
-#             t_scale = max(abs(tmin),abs(tmax))
-#
-#             return t*1.0/t_scale
-#
-#         xmin, xmax = xlims
-#         ymin, ymax = ylims
-#
-#
-#         x = v[0]
-#         y = v[1]
-#         z = v[2]
-#
-#         x = normalizer(x,xmin,xmax)
-#         y = normalizer(y,ymin,ymax)
-#
-#
-#
-#         return [x,y,0]
-
-
-
 class EquiSlicer(Slicer):
 
-
-    def __init__(self, stl_model, partitions=100):
+    def __init__(self, stl_model):
         Slicer.__init__(self, stl_model)
         self.__slices = []
-        self.__partitions = partitions
 
-
-    def getSlicingThickness(self):
-
-        zmin, zmax = self._model.zlims
-
-        thickness = (zmax - zmin)*(1.0/(1.0*self.__partitions))
-
-        return thickness
-
-
-    def slice(self):
-
-        sliceThickness = self.getSlicingThickness()
-
-
-
+    def slice(self, sliceThickness):
 
         if len(self.__slices) > 0:
             self.__slices = []
@@ -320,10 +147,11 @@ class EquiSlicer(Slicer):
 
         #slicingLevelsList = range(min(self._model.z.flatten()), max(self._model.z.flatten()), sliceThickness)
         zmin, zmax = self._model.zlims
-        slicingLevelsList = drange(zmin, zmax, sliceThickness)
+        slicingLevelsList = np.arange(zmin+0.1, zmax-0.1, sliceThickness) #todo: should not be 0.1 but adaptive, but this simply works.
+        print("Number of Slices: " + str(len(slicingLevelsList)))
 
-        x_dims = [0,0]
-        y_dims = [0,0]
+        x_dims = [0, 0]
+        y_dims = [0, 0]
 
         for slicingLevel in slicingLevelsList:
             #self.slicingLevel = 97.70
@@ -332,7 +160,9 @@ class EquiSlicer(Slicer):
 
             save_z = np.array(filter(iteration_filter, self._model.mesh.points)) #todo: optimise this step - it needs 2.3s per slice (@130k triangles), about 99% of total CPU time
             results = []
-            #results.append([["sliceLevel", slicingLevel], [0, 0]]) #basically the file output header.
+            self.PlotListX = []
+            self.PlotListY = []
+            results.append([[0, 0, slicingLevel], [0, 0, slicingLevel]]) #basically the file output header.
             #decide which corner point is a (=the single point on the other side of the slicing level). b&c are on the same side of the slicing level
             for triangle in save_z:
                 a,b,c = select_triangles(triangle, slicingLevel)
@@ -355,9 +185,7 @@ class EquiSlicer(Slicer):
                 x2 = a[0]+t2*(b[0]-a[0]) #0 means: in the x-plane
                 y2 = a[1]+t2*(b[1]-a[1]) #1 means: in the y-plane
 
-
-                results.append([x1, y1, 0])
-                results.append([x2, y2, 0])
+                results.append([[x1, y1, 0],[x2, y2, 0]])
 
                 x_dims = self.update_dims(x_dims, x1) #used to define bounding boxes in OpenGL
                 x_dims = self.update_dims(x_dims, x2)
@@ -367,13 +195,74 @@ class EquiSlicer(Slicer):
 
 
             results = np.array(results)
-            self.allresults.append(Slice(results))
 
+            #SORTING happens here (important for plt.fill() ):
+            AlreadySeen = []
+            shapes_counter = 0 #how many closed objects are in this slice
+            SortedShapesList = []
+            self.currentPlotListX = []
+            self.currentPlotListY = []
+
+            def PickNewStart():
+                i = 1
+                found_start = False
+                while found_start == False:
+                    if results[i].tolist() not in AlreadySeen:
+                        AlreadySeen.append(results[i].tolist())
+                        found_start = True
+                    else:
+                        i += 1
+                return results[i].tolist()
+
+            def FindNextPiece(ki):
+                found_piece = False
+                i = 1
+                while not found_piece:
+                    if results[i].tolist() not in AlreadySeen:
+                        if np.allclose(ki[1], results[i, 0].tolist()):
+                            currentShape.append(results[i].tolist())
+                            AlreadySeen.append(results[i].tolist())
+                            found_piece = True
+                        elif np.allclose(ki[1], results[i, 1].tolist()):
+                            currentShape.append([results[i, 1].tolist(), results[i, 0].tolist()]) #flip in case of endpoint=endpoint
+                            AlreadySeen.append(results[i].tolist())
+                            found_piece = True
+                        else:
+                            i += 1
+                    else:
+                        i += 1
+
+            while len(AlreadySeen) < len(results)-1:
+                currentShape = [PickNewStart()]
+                while not np.allclose(currentShape[0][0], currentShape[-1][1]) or len(currentShape) == 1:
+                    FindNextPiece(currentShape[-1])
+                for i in range(len(currentShape)):
+                    self.currentPlotListX.append(currentShape[i][0][0])
+                    self.currentPlotListY.append(currentShape[i][0][1])
+                self.currentPlotListX.append(None)
+                self.currentPlotListY.append(None)
+                currentShape.append(None)
+                shapes_counter += 1
+                SortedShapesList.append(currentShape)
+            print("Objects in this slice: " + str(shapes_counter))
+            self.PlotListX.append(self.currentPlotListX)
+            self.PlotListY.append(self.currentPlotListY)
+            self.allresults.append(Slice(results))
 
         # compute scale from extremal x and y values
         self._scale = self.compute_scale(x_dims, y_dims)
+        self.x_dims = x_dims
+        self.y_dims = y_dims
 
         return self.allresults
+
+    def PlotSlice(self, slicenummer):
+        plt.figure(1, facecolor='black')
+        plt.subplot(1, 1, 1, axisbg='k')
+        plt.fill(self.PlotListX[slicenummer], self.PlotListY[slicenummer], 'white')
+        plt.xlim(self.x_dims)
+        plt.ylim(self.y_dims)
+        plt.show()
 
 
     def update_dims(self,dims,cmpr):
@@ -393,12 +282,12 @@ class EquiSlicer(Slicer):
         sx = xmax - xmin
         sy = ymax - ymin
 
-        s = max(sx,sy)
+        s = max(sx, sy)
 
         return 1.0/s
 
-
 if __name__ == "__main__":
-    partitions = 4
-    eiffel = EquiSlicer('../Data/EiffelTowerTALL.stl',partitions)
-    eiffel.slice(100)
+    stl_model = StlModel('../Data/EiffelTowerTALL.stl')
+    eiffel = EquiSlicer(stl_model)
+    eiffel.slice(300)
+    eiffel.PlotSlice(0)
