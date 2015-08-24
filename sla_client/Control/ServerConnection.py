@@ -1,7 +1,7 @@
 __author__ = 'aslan'
 
 
-from threading import Thread
+from multiprocessing import Process
 from Queue import Queue
 import json
 import requests as req
@@ -22,13 +22,13 @@ class Message(object):
         self.data = data
 
 @singleton
-class ServerConnection(Thread):
+class ServerConnection(Process):
 
     message_stack = Queue()
 
     def __init__(self, url):
-        Thread.__init__(self)
-        self.__url = url
+        Process.__init__(self)
+        self.__url = "http://http://192.168.178.28/"
 
     def run(self):
 

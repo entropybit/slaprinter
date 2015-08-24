@@ -391,15 +391,16 @@ class SliceModelView(Drawable):
 
         glNewList(self.__index, GL_COMPILE)
         # add triangles
-        # glBegin(GL_POLYGON)
+        glBegin(GL_POLYGON)
         #
-        # i = 0
-        # for p in points:
-        #     #glNormal3d(n[0],n[1],n[2])
-        #     glColor3d(159.0/255.0,159.0/255.0,159.0/255.0)
-        #     glVertex3d(p[0],p[1],p[2])
-        #     i = i+1
-        # glEnd()
+        i = 0
+        for p in points:
+             #glNormal3d(n[0],n[1],n[2])
+             glColor3d(159.0/255.0,159.0/255.0,159.0/255.0)
+             glVertex3d(p[0],p[1],p[2])
+        #    i = i+1
+        
+        glEnd()
         glEndList()
 
 

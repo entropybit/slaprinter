@@ -32,6 +32,8 @@ class StlModel(Model):
         self.z_min = 0
         self.z_max = 0
 
+        self.path = path
+
         if path != "":
             self.open(path)
 
