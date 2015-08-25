@@ -6,6 +6,9 @@ class Message(object):
         self.sender = sender
         self.msg = msg
 
+    def __str__(self):
+        return "[" + str(self.sender) + "]: " + str(self.msg)
+
 class GamePadConnected(Message):
 
     def __init__(self, sender, msg):

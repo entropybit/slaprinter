@@ -62,7 +62,8 @@ class Slice(object):
             upon deletion remove id of this slice object from
             static slice_id array
         '''
-        self.slice_id.remove(self.__id)
+        if self.__id in self.slice_id:
+            self.slice_id.remove(self.__id)
 
     def __hash__(self):
         '''

@@ -4,7 +4,9 @@ import json
 from flask import Flask
 from flask import render_template
 from flask import request
-from Model import RawData
+from flask import Response
+from Model import RawData, PrintingTaskData
+import base64
 
 import json
 from threading import Thread
@@ -18,19 +20,26 @@ app = Flask(__name__)
 @app.route('/index')
 def index():
 
-    data = cntrl.DataPool()
+    data = cntrl.PrintingTaskController()
 
-    return render_template("index.html", packages = data.get_data())
+
+    return render_template("index.html", printing_tasks = data.printing_tasks, active_job= data.active_job())
 
 
 @app.route("/post/raw/",  methods = ['POST'])
 def post_data():
+    '''
+    function used to send simple raw string data to 3D printer
+
+    :return: according success / fail message
+    '''
 
 
-    data = json.loads(request.data)
-    print("[received raw adata]: " + str(data))
-
+    # get current data pool to store new objects
     data_pool = cntrl.DataPool()
+
+    # load data
+    data = json.loads(request.data)
 
 
     if "data" in data:
@@ -40,32 +49,51 @@ def post_data():
     else:
         return "no data received"
 
+@app.route("/post/task/",  methods = ['POST'])
+def post_task():
+    '''
+    Function used to send printing task to 3D printer
 
-@app.route("/input/<pid>",  methods = ['POST','GET'])
-def echo_string_with_id(pid):
+    :return: according success / fail message
+    '''
 
+
+    # get current data pool to store new objects
+    data_pool = cntrl.DataPool()
+
+    # load data
     data = json.loads(request.data)
-    print(data)
 
-    if "text" in data:
-        text  = data["text"]
-        return text
+    # create empty printing task
+    task = PrintingTaskData()
+
+    # if received data parseable to task object store new printing task
+    if task.parse(data):
+        #print(task)
+        data_pool.add(task)
+        return "printing task received"
     else:
-        return "bla"
+        return "no valid printing task received"
 
-    #if request.headers['Content-Type'] == 'text/plain':
-    #    return "Text Message: " + request.data
+@app.route("/download/<tid>/",  methods = ['POST', 'GET'])
+def download_zip(tid):
 
-    #elif request.headers['Content-Type'] == 'application/json':
-    #    return "JSON Message: " + json.dumps(request.json)
-    #elif request.headers['Content-Type'] == 'application/octet-stream':
-    #    f = open('./binary', 'wb')
-    #    f.write(request.data)
-    #    f.close()
-    #    return "Binary message written!"
+    data_pool = cntrl.DataPool()
 
-    #else:
-    #    return "415 Unsupported Media Type ;)"
+
+    task = data_pool.get_by_id(tid)
+
+    if task is not None:
+
+        zip = task.stl_file
+        zip = base64.decodestring(zip)
+
+    else:
+        zip = ''
+
+    return Response(zip,
+            mimetype='application/zip',
+            headers={'Content-Disposition':'attachment;filename=' + str(task.file_name) + '.zip'})
 
 
 

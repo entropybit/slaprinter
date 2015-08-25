@@ -1,0 +1,36 @@
+
+.stack {
+    background: white;
+    min-height: 300px;
+
+-webkit-box-shadow: 5px 7px 7px 1px rgba(0,0,0,0.75);
+-moz-box-shadow: 5px 7px 7px 1px rgba(0,0,0,0.75);
+box-shadow: 5px 7px 7px 1px rgba(0,0,0,0.75);
+
+    margin: 20px 0 20px 0;
+}
+
+td span.glyphicon {
+    font-size: 17px;
+}
+
+
+table {
+
+width: 100%;
+
+}
+
+table td {
+
+    width: 33%;
+}
+
+.progress {
+    margin-top: 10px;
+}
+
+li span {
+
+    margin-right: 5px;
+}

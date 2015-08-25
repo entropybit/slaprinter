@@ -1,22 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-
-It works!
+{% extends "base.html" %}
 
 
-{% if packages %}
-    <h2>Data pool</h2>
-    <ul>
-    {% for p in packages %}
-        <li> {{ p }} </li>
-    {% endfor %}
-    </ul>
-{% endif %}
 
-</body>
-</html>
+{% block menu %}
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/"><span class="glyphicon glyphicon-info-sign"></span>Info</a></li>
+            <li><a href="/enqueue"><span class="glyphicon glyphicon-import"></span>Enqueue File</a></li>
+          </ul>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-12 stack">
+            <h1>
+                <span class="glyphicon glyphicon-inbox" aria-hidden="true"></span>
+                Printer Queue
+            </h1>
+
+            <table class="table">
+                <tr>
+                   <th>File</th>
+                   <th>3D File</th>
+                   <th>enqueue time</th>
+                </tr>
+                {% if printing_tasks %}
+
+                    {% for task in printing_tasks %}
+                    <tr {% if task.active %}
+                            class="active"
+                        {% else %}
+                            {% if task.finished %}
+                                class="success"
+                            {% endif %}
+                        {% endif %}>
+                        <td>
+                        <span class="glyphicon glyphicon-file"></span> {{ task.filename }}
+                        </td>
+                        <td>
+                            <a href="/download/{{ task.id }}/"><span class="glyphicon glyphicon-download-alt"></span></a>
+                        </td>
+                        <td>
+                            {{ task.time }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="active">
+                        <td>
+                        <span class="glyphicon glyphicon-file"></span> no files enqueued
+                        </td>
+                        <td>
+                            -
+                        </td>
+                        <td>
+                            -
+                        </td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12 stack">
+
+            <h1><span class="glyphicon glyphicon-print"></span> Current Job</h1>
+            {% if active_job %}
+            <p>
+                Currently printing <b> {{ active_job.filename }}</b>
+                submitted <i>{{active_job.time}}</i>.
+                Estimated time average till completion <b>ETA</b> is <i>{{ active_job.eta }}</i>
+            </p>
+            <br />
+            <br />
+            <p>Current overall progress:</p>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ active_job.progress }}%;">
+                   {{active_job.progress}}% Complete
+                </div>
+            </div>
+
+            <table class="table">
+                <tr>
+                    <th>Slice</th><th>Processing Time</th><th>progress</th>
+                </tr>
+
+                {% for s in active_job.slices %}
+
+                <tr {% if s[1] %}
+                    class="success"
+                    {% endif %}
+                        >
+                    <td>
+                        <span class="glyphicon glyphicon-picture"></span>  {{loop.index}}
+                    </td>
+                    <td>
+                       <i> {{ active_job.illumination_time}}s </i>
+                    </td>
+                    <td>
+                        <div class="progress">
+                        {% if s[1] %}
+                            <div class="progress-bar-success progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+                        {% else %}
+                            <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                        {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </table>
+            {% else %}
+
+            <p> Currently no active printing job, printer is waiting for files.</p>
+
+            {% endif %}
+
+            {% if packages %}
+            <h2>Data pool</h2>
+            <ul>
+                {% for p in packages %}
+                <li> {{ p }} </li>
+                {% endfor %}
+            </ul>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+{% endblock %}

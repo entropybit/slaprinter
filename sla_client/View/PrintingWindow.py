@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'PrintingWindow.ui'
 #
-# Created: Wed Jul 15 01:11:07 2015
-#      by: PyQt4 UI code generator 4.11.2
+# Created: Mon Aug 24 21:04:17 2015
+#      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 

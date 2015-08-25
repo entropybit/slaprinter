@@ -4,7 +4,8 @@ from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QWidget, QMessageBox
 from PyQt4 import QtCore
 from View import Ui_MainWindow, GLWidget, Ui_PrinterSettings, Ui_PrintingDialog, Ui_PrintingWindow, StlModelView
 from View import Ui_SlicingWindow, SliceModelView
-from Model import StlModel, EquiSlicer
+from Model import StlModel, EquiSlicer, ConfigurationModel
+#from Model import
 import json, requests, time
 import sys
 import os.path
@@ -54,7 +55,8 @@ class SlaController(QApplication):
         self.__slices = None
         self.__slicing_index = 0
 
-        self.connection = ServerConnection("http://10.0.0.1:5000")
+        self.__connection = None
+        self.__config = ConfigurationModel()
 
     def start(self):
         self.initWindows()
@@ -65,7 +67,7 @@ class SlaController(QApplication):
 
     def initWindows(self):
 
-        self.connection.start()
+        #self.connection.start()
         self.init_main()
         self.init_printer_settings()
         self.init_printing_window()
@@ -92,6 +94,9 @@ class SlaController(QApplication):
             Initiating general printer settings window (for overarching printer settings that are always the same with the same printer)
         '''
         self.__ui4.setupUi(self.__printerSettings)
+
+        # initial settings load
+        self.loadPrinterSettings()
 
     def init_printing_window(self):
         '''
@@ -131,11 +136,16 @@ class SlaController(QApplication):
         self.__ui2.CancelButton.clicked.connect(self.__printingDialog.close)
         self.__ui2.OkButton.clicked.connect(self.switchToPrintingMode)
 
+
+
         self.__ui1.SlicingButton.clicked.connect(self.__slicingwindow.show)
         self.__ui1.SlicingButton.clicked.connect(self.doSlicing)
         #ui1.DownPosButton.clicked.connect(MoveStepper, [False,2])            #why cant i call functions with parameters?
         #ui1.UpPosButton.clicked.connect(MoveStepper(True, N))
 
+
+        self.__ui4.OkButton.clicked.connect(self.savePrinterSettingsToFile)
+        self.__ui4.CancelButton.clicked.connect(self.__printerSettings.close)
 
         self.__ui6.nextButton.clicked.connect(self.next_slice)
         self.__ui6.prevButton.clicked.connect(self.prev_slice)
@@ -151,39 +161,55 @@ class SlaController(QApplication):
         self.sendToRaspberry()
 
     def savePrinterSettingsToFile(self):
-        configfile = open('PrinterSettings.conf', 'w')
-        SettingsList= ['AreaWidth=', float(self.__ui4.AreaWidth.text()), 'AreaLength=', float(self.__ui4.AreaLength.text()),'AreaHeight=', float(self.__ui4.AreaHeight.text()),
-            'HeightPerRevolution=', float(self.__ui4.HeightPerRevolution.text()), 'StepsPerRevolution=', float(self.__ui4.StepsPerRevolution.text()),
-            'ipAdress=', str(self.__ui4.ipAdress.text()), 'illuminationTime=', float(self.__ui4.illuminationTime.text()),
-            'illuminationIntensity=', float(self.__ui4.illuminationIntensity.text()), 'PrinterLiquidPrice=', float(self.__ui4.PrinterLiquidPrice.text())]
-        json.dump(SettingsList, configfile)
-        configfile.close()
 
-        self.__printerSettings.close() #closes the window
+        # update values in config file
+        self.__config.width = float(self.__ui4.AreaWidth.text())
+        self.__config.length = float(self.__ui4.AreaLength.text())
+        self.__config.height = float(self.__ui4.AreaHeight.text())
+
+        self.__config.height_per_rev = float(self.__ui4.HeightPerRevolution.text())
+        self.__config.steps_per_rev = float(self.__ui4.StepsPerRevolution.text())
+        self.__config.server_ip = str(self.__ui4.ipAdress.text())
+        #self.__config.ssl()
+        self.__config.illumination_time = float(self.__ui4.illuminationTime.text())
+        self.__config.illumination_intentsity = float(self.__ui4.illuminationIntensity.text())
+        self.__config.liquid_price = float(self.__ui4.PrinterLiquidPrice.text())
+
+        # save config to standard path
+        self.__config.save()
+
+        #close the window
+        self.__printerSettings.close()
 
     def loadPrinterSettings(self):
 
+        #ToDo: Implement this with a XML file
+
         configfile = open('PrinterSettings.conf', 'r')
-        SettingsList=json.load(configfile)
+        settings=json.load(configfile)
+
+        # parse file to configuration object
+        self.__config.parse(settings)
+
 
         self.__ui4.AreaWidth.clear()
-        self.__ui4.AreaWidth.insert('%d' % SettingsList[1])
+        self.__ui4.AreaWidth.insert('%.2f' % self.__config.width)
         self.__ui4.AreaLength.clear()
-        self.__ui4.AreaLength.insert('%d' % SettingsList[3])
+        self.__ui4.AreaLength.insert('%.2f' % self.__config.length)
         self.__ui4.AreaHeight.clear()
-        self.__ui4.AreaHeight.insert('%d' % SettingsList[5])
+        self.__ui4.AreaHeight.insert('%.2f' % self.__config.height)
         self.__ui4.HeightPerRevolution.clear()
-        self.__ui4.HeightPerRevolution.insert('%d' % SettingsList[7])
+        self.__ui4.HeightPerRevolution.insert('%.2f' % self.__config.height_per_rev)
         self.__ui4.StepsPerRevolution.clear()
-        self.__ui4.StepsPerRevolution.insert('%d' % SettingsList[9])
+        self.__ui4.StepsPerRevolution.insert('%.2f' % self.__config.steps_per_rev)
         self.__ui4.ipAdress.clear()
-        self.__ui4.ipAdress.insert(SettingsList[11])
+        self.__ui4.ipAdress.insert(self.__config.server_ip)
         self.__ui4.illuminationTime.clear()
-        self.__ui4.illuminationTime.insert('%d' % SettingsList[13])
+        self.__ui4.illuminationTime.insert('%.2f' % self.__config.illumination_time)
         self.__ui4.illuminationIntensity.clear()
-        self.__ui4.illuminationIntensity.insert('%d' % SettingsList[15])
+        self.__ui4.illuminationIntensity.insert('%.2f' % self.__config.illumination_intentsity)
         self.__ui4.PrinterLiquidPrice.clear()
-        self.__ui4.PrinterLiquidPrice.insert('%d' % SettingsList[17])
+        self.__ui4.PrinterLiquidPrice.insert('%.2f' % self.__config.liquid_price)
 
         configfile.close()
 
@@ -233,38 +259,30 @@ class SlaController(QApplication):
 
 
     def sendToRaspberry(self):
+
+
         configfile = open('PrinterSettings.conf', 'r')
-        SettingsList=json.load(configfile)
-        configfile.close()
-
-        sentFile = {'file': ('../View/PrinterSettings.conf', open('../View/PrinterSettings.conf', 'rb'), 'application/vnd.ms-excel', {'Expires': '0'})}
-        r1 = requests.post(str(SettingsList[11]) + ":/home/pi/printerData", files=sentFile)
-        r2 = requests.post(str(SettingsList[11]) + ":/home/pi/printerData", data=str(SettingsList))
-
-
-        """
-        #Das hier sind die Zeilen die editLine-objekten ihre Werte ein bzw ausgibt.
-        fisch= int(ui1.N.text())
-        N=6
-        ui1.N.clear()
-        ui1.N.insert('%d' % N)
-        print fisch
-        print fisch.__class__
-        """
-
-        #Explaining what each button on the PrintingDialog does
-        self.__ui2.OkButton.clicked.connect(self.switchToPrintingMode)
-        self.__ui2.CancelButton.clicked.connect(self.__printingDialog.close)
-
-        #Explaining what each button on the PrintingWindow does
-        self.__ui3.StopPrintButton.clicked.connect(self.ManualPrintingAbort)
-
-        #Explaining what each button on the  printingSettingsWindow does
-        if os.path.isfile('PrinterSettings.conf'):
-            self.loadPrinterSettings()
-
-        self.__ui4.CancelButton.clicked.connect(self.__printerSettings.close)
-        self.__ui4.OkButton.clicked.connect(self.savePrinterSettingsToFile)
+        # SettingsList=json.load(configfile)
+        # configfile.close()
+        #
+        # sentFile = {'file': ('../View/PrinterSettings.conf', open('../View/PrinterSettings.conf', 'rb'), 'application/vnd.ms-excel', {'Expires': '0'})}
+        # r1 = requests.post(str(SettingsList[11]) + ":/home/pi/printerData", files=sentFile)
+        # r2 = requests.post(str(SettingsList[11]) + ":/home/pi/printerData", data=str(SettingsList))
+        #
+        #
+        # #Explaining what each button on the PrintingDialog does
+        # self.__ui2.OkButton.clicked.connect(self.switchToPrintingMode)
+        # self.__ui2.CancelButton.clicked.connect(self.__printingDialog.close)
+        #
+        # #Explaining what each button on the PrintingWindow does
+        # self.__ui3.StopPrintButton.clicked.connect(self.ManualPrintingAbort)
+        #
+        # #Explaining what each button on the  printingSettingsWindow does
+        # if os.path.isfile('PrinterSettings.conf'):
+        #     self.loadPrinterSettings()
+        #
+        # self.__ui4.CancelButton.clicked.connect(self.__printerSettings.close)
+        # self.__ui4.OkButton.clicked.connect(self.savePrinterSettingsToFile)
 
 
     def doSlicing(self):
@@ -272,7 +290,7 @@ class SlaController(QApplication):
         # only slice if new model has been loaded
         if  self.__slices is None and self.__slicing_model is None:
             self.__slicing_model = EquiSlicer(self.__stl_model)
-            self.__slices = self.__slicing_model.slice()
+            self.__slices = self.__slicing_model.slice(3)
 
         slice = self.__slices[self.__slicing_index]
         scale = self.__slicing_model.scale
@@ -323,6 +341,7 @@ class SlaController(QApplication):
 
         self.__glSlice.delDrawable(self.__slicing_view)
         self.__ui6.algorithmLabel.setText(s)
+
         self.__slicing_view = SliceModelView(slice)
         self.__glSlice.addDrawable(self.__slicing_view)
         self.__glSlice.update()

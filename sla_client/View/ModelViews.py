@@ -388,20 +388,29 @@ class SliceModelView(Drawable):
         self.__index = glGenLists(2)
 
         points = self.__model.points
+        #print("points:")
+        #print(points)
 
-        glNewList(self.__index, GL_COMPILE)
-        # add triangles
-        glBegin(GL_POLYGON)
+        # glNewList(self.__index, GL_COMPILE)
+        # # add triangles
+        # glBegin(GL_POLYGON)
+        # #
+        # i = 0
+        # for l in points:
+        #     #glNormal3d(n[0],n[1],n[2])
+        #     glColor3d(159.0/255.0,159.0/255.0,159.0/255.0)
+        #     #print("    p:")
+        #     #print("    "+ str(p))
         #
-        i = 0
-        for p in points:
-             #glNormal3d(n[0],n[1],n[2])
-             glColor3d(159.0/255.0,159.0/255.0,159.0/255.0)
-             glVertex3d(p[0],p[1],p[2])
-        #    i = i+1
-        
-        glEnd()
-        glEndList()
+        #     p = l[0]
+        #     q = l[1]
+        #
+        #     glVertex3d(p[0],p[1],p[2])
+        #     glVertex3d(q[0],q[1],q[2])
+        # #    i = i+1
+        #
+        # glEnd()
+        # glEndList()
 
 
         glNewList(self.__index+1, GL_COMPILE)
@@ -409,10 +418,15 @@ class SliceModelView(Drawable):
         # add mesh
 
         glBegin(GL_LINES)
-        for p in points:
+        for l in points:
             #glNormal3d(n[0],n[1],n[2])
+
+            p0 = l[0]
+            p1 = l[1]
+
             glColor3d(1.0,1.0,1.0)
-            glVertex3d(p[0],p[1],p[2])
+            glVertex3d(p0[0],p0[1],p0[2])
+            glVertex3d(p1[0],p1[1],p1[2])
         glEnd()
         glEndList()
 
