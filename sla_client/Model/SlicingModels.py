@@ -231,8 +231,9 @@ class EquiSlicer(Slicer):
                             i += 1
                     else:
                         i += 1
-
+            print("anzahl results:" + str(len(results)))
             while len(AlreadySeen) < len(results)-1:
+
                 currentShape = [PickNewStart()]
                 while not np.allclose(currentShape[0][0], currentShape[-1][1]) or len(currentShape) == 1:
                     FindNextPiece(currentShape[-1])
@@ -243,6 +244,8 @@ class EquiSlicer(Slicer):
                 self.currentPlotListY.append(None)
                 currentShape.append(None)
                 shapes_counter += 1
+                print("shapes_counter:" + str(shapes_counter))
+                print("finished with this slice:" + str(100*len(AlreadySeen)/len(results))+"%")
                 SortedShapesList.append(currentShape)
             print("Objects in this slice: " + str(shapes_counter))
             self.PlotListX.append(self.currentPlotListX)
@@ -289,5 +292,5 @@ class EquiSlicer(Slicer):
 if __name__ == "__main__":
     stl_model = StlModel('../Data/EiffelTowerTALL.stl')
     eiffel = EquiSlicer(stl_model)
-    eiffel.slice(300)
+    eiffel.slice(60)
     eiffel.PlotSlice(0)
