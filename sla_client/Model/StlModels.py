@@ -37,6 +37,10 @@ class StlModel(Model):
         if path != "":
             self.open(path)
 
+    @property
+    def filename(self):
+        return self.path.split("/")[-1]
+
     def open(self,path):
         self.mesh = mesh.Mesh.from_file(path)
         self.analyse()

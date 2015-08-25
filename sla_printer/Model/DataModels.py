@@ -2,6 +2,7 @@ __author__ = 'mithrawnuruodo'
 
 
 from datetime import datetime
+import numpy as np
 
 class Data(object):
 
@@ -40,12 +41,79 @@ class RawData(Data):
 
 
     def __str__(self):
-        return "[" + self.timestamp + "]" + "raw data object: " + str(self.data)
+        return "[" + self.timestamp + "] raw data object: " + str(self.data)
 
 
-class SlicesData(Data):
+class PrintingTaskData(Data):
 
-    def __init__(self, slices):
+    def __init__(self):
 
-        Data.__init__()
+        Data.__init__(self)
+
+
+        self.slices = None
+        self.slice_number = 0
+        self.stl_file = None
+        self.step_width = -1
+        self.illumination_time = -1
+        self.stl_model = None
+        self.finished = False
+        self.slices_todo = None
+
+
+
+    def is_valid(self,json_dump):
+
+        valid = 'step_width' in json_dump and 'illumination_time' in json_dump
+        valid = valid and 'slices' in json_dump and 'slice_number' in json_dump
+        valid = valid and 'stl_file' in json_dump and 'file_name' in json_dump
+
+        return valid
+
+
+    def __str__(self):
+        return "[" + self.timestamp + "] printing task data object: " + str(self.file_name)
+
+
+    def parse(self, json_dump):
+
+
+        valid = self.is_valid(json_dump)
+
+        if valid:
+
+            self.step_width = float(json_dump["step_width"])
+            self.illumination_time = float(json_dump["illumination_time"])
+
+            self.slices = json_dump["slices"]
+            self.slices_todo = list(np.zeros(len(self.slices), dtype=bool))
+
+            self. slice_number = int(json_dump["slice_number"])
+
+            self.stl_file = json_dump["stl_file"]
+            self.file_name = json_dump["file_name"]
+
+
+        return valid
+
+
+    @property
+    def time(self):
+        ts = self.timestamp
+        ts = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S.%f")
+
+        now = datetime.now()
+
+        diff = now - ts
+
+        [mins, secs] = divmod(diff.days * 86400 + diff.seconds, 60)
+
+        return str(mins) + "mins " + str(secs) + "s ago"
+
+
+
+
+
+
+
 

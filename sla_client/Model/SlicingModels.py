@@ -62,7 +62,8 @@ class Slice(object):
             upon deletion remove id of this slice object from
             static slice_id array
         '''
-        self.slice_id.remove(self.__id)
+        if self.__id in self.slice_id:
+            self.slice_id.remove(self.__id)
 
     def __hash__(self):
         '''
@@ -289,5 +290,5 @@ class EquiSlicer(Slicer):
 if __name__ == "__main__":
     stl_model = StlModel('../Data/EiffelTowerTALL.stl')
     eiffel = EquiSlicer(stl_model)
-    eiffel.slice(300)
+    eiffel.slice(80)
     eiffel.PlotSlice(0)

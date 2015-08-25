@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'PrinterSettings.ui'
 #
-# Created: Wed Jul 15 01:11:07 2015
-#      by: PyQt4 UI code generator 4.11.2
+# Created: Mon Aug 24 21:04:17 2015
+#      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
-        Dialog.resize(471, 253)
+        Dialog.resize(646, 332)
         self.verticalLayout_5 = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout_5.setObjectName(_fromUtf8("verticalLayout_5"))
         self.horizontalLayout_11 = QtGui.QHBoxLayout()
@@ -104,6 +104,16 @@ class Ui_Dialog(object):
         self.ipAdress.setObjectName(_fromUtf8("ipAdress"))
         self.horizontalLayout_2.addWidget(self.ipAdress)
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+        self.horizontalLayout_12 = QtGui.QHBoxLayout()
+        self.horizontalLayout_12.setObjectName(_fromUtf8("horizontalLayout_12"))
+        self.label_13 = QtGui.QLabel(Dialog)
+        self.label_13.setObjectName(_fromUtf8("label_13"))
+        self.horizontalLayout_12.addWidget(self.label_13)
+        self.checkBox = QtGui.QCheckBox(Dialog)
+        self.checkBox.setText(_fromUtf8(""))
+        self.checkBox.setObjectName(_fromUtf8("checkBox"))
+        self.horizontalLayout_12.addWidget(self.checkBox)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_12)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.label_5 = QtGui.QLabel(Dialog)
@@ -169,6 +179,7 @@ class Ui_Dialog(object):
         self.HeightPerRevolution.setText(_translate("Dialog", "0.8", None))
         self.label_4.setText(_translate("Dialog", "Printer IP adress:", None))
         self.ipAdress.setText(_translate("Dialog", "192.168.2.101", None))
+        self.label_13.setText(_translate("Dialog", "Use SSL", None))
         self.label_5.setText(_translate("Dialog", "Illumination time per Slice (s):", None))
         self.illuminationTime.setText(_translate("Dialog", "10", None))
         self.label_7.setText(_translate("Dialog", "Illumination intensity:", None))
