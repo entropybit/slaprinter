@@ -142,7 +142,7 @@ class EquiSlicer(Slicer):
                 print "Error! Aslan dun fuckd up!"
                 quit()
 
-            return [a,b,c]
+            return [a, b, c]
 
         self.allresults = []
 
@@ -154,6 +154,8 @@ class EquiSlicer(Slicer):
         x_dims = [0, 0]
         y_dims = [0, 0]
 
+        self.PlotListX = []
+        self.PlotListY = []
         for slicingLevel in slicingLevelsList:
             #self.slicingLevel = 97.70
             # this a specific filter for the current slicingLevel
@@ -161,8 +163,7 @@ class EquiSlicer(Slicer):
 
             save_z = np.array(filter(iteration_filter, self._model.mesh.points)) #todo: optimise this step - it needs 2.3s per slice (@130k triangles), about 99% of total CPU time
             results = []
-            self.PlotListX = []
-            self.PlotListY = []
+
             results.append([[0, 0, slicingLevel], [0, 0, slicingLevel]]) #basically the file output header.
             #decide which corner point is a (=the single point on the other side of the slicing level). b&c are on the same side of the slicing level
             for triangle in save_z:
@@ -196,6 +197,20 @@ class EquiSlicer(Slicer):
 
 
             results = np.array(results)
+
+            #test if all vertices appear twice (if its a closed loop)
+            gesamtkanten = {}
+            for kante in results.tolist():
+                for j in [0, 1]:
+                    if str(kante[j]) in gesamtkanten:
+                        gesamtkanten[str(kante[j])] += 1
+                    else:
+                        gesamtkanten[str(kante[j])] = 1
+            counter = 0
+            for key in gesamtkanten:
+                if gesamtkanten[key] != 2:
+                    counter += 1
+            print("Anteil closed triangles: " + str(100*len(gesamtkanten)/len(results)) + "%")
 
             #SORTING happens here (important for plt.fill() ):
             AlreadySeen = []
@@ -245,19 +260,19 @@ class EquiSlicer(Slicer):
                 self.currentPlotListY.append(None)
                 currentShape.append(None)
                 shapes_counter += 1
-                print("shapes_counter:" + str(shapes_counter))
-                print("finished with this slice:" + str(100*len(AlreadySeen)/len(results))+"%")
+                #print("shapes_counter:" + str(shapes_counter))
+                #print("finished with this slice:" + str(100*len(AlreadySeen)/len(results))+"%")
                 SortedShapesList.append(currentShape)
-            print("Objects in this slice: " + str(shapes_counter))
             self.PlotListX.append(self.currentPlotListX)
             self.PlotListY.append(self.currentPlotListY)
+            print("Objects in this slice: " + str(shapes_counter))
+
             self.allresults.append(Slice(results))
 
         # compute scale from extremal x and y values
         self._scale = self.compute_scale(x_dims, y_dims)
         self.x_dims = x_dims
         self.y_dims = y_dims
-
         return self.allresults
 
     def PlotSlice(self, slicenummer):
@@ -293,5 +308,5 @@ class EquiSlicer(Slicer):
 if __name__ == "__main__":
     stl_model = StlModel('../Data/EiffelTowerTALL.stl')
     eiffel = EquiSlicer(stl_model)
-    eiffel.slice(60)
-    eiffel.PlotSlice(0)
+    eiffel.slice(80)
+    eiffel.PlotSlice(2)
