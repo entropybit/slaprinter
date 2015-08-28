@@ -32,7 +32,7 @@ def main():
         for event in pygame.event.get(): # event handling loop
             if event.type == JOYBUTTONUP:
                 print event
-                if str(event).split()[4][0] == "8":
+                #if str(event).split()[4][0] == "8":
                     #print "beende programm"
                     #pygame.quit()
                     #sys.exit()
@@ -43,27 +43,28 @@ def main():
                 if str(event).split()[4][0] == "9":
                     printingmode = not printingmode
                     if printingmode == True:
-                        print "printing started!"
+                        print("printing started!")
                         JumpSound = pygame.mixer.Sound('hakuna matata.ogg')
                         JumpSound.play()
                     else:
-                        print "printing ended!"
+                        print("printing ended!")
                 #if str(event).split()[4][0] == "1":
                  #   fisch.down_toEnd()
             elif event.type == JOYAXISMOTION:
                 if event.joy ==0 and event.axis == 1 and event.value > 0.5:
+                    print("Moving downwards")
                     fisch.downOneStep()
                 if event.joy ==0 and event.axis == 1 and event.value < -0.5:
+                    print("Moving upwards")
                     fisch.upOneStep()
 
 
-                JumpSound = pygame.mixer.Sound('Portal Sentry - is anyone there.ogg')
-                JumpSound.play()
-
         if printingmode == True:
             picture = pygame.image.load("/home/pi/druckerskripte/sla_printer/white.png")
+            print("moving 1 step")
             fisch.upOneStep()
-            time.sleep(120)
+            time.sleep(3)
+
 
         else:
             picture = pygame.image.load("/home/pi/druckerskripte/sla_printer/black.png")
