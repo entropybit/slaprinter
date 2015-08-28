@@ -31,9 +31,9 @@ def main():
 
         for event in pygame.event.get(): # event handling loop
             if event.type == JOYBUTTONUP:
-                print str(event).split()[4][0]
+                print event
                 if str(event).split()[4][0] == "8":
-                    print "beende programm"
+                    #print "beende programm"
                     #pygame.quit()
                     #sys.exit()
                 if str(event).split()[4][0] == "2":
@@ -51,15 +51,19 @@ def main():
                 #if str(event).split()[4][0] == "1":
                  #   fisch.down_toEnd()
             elif event.type == JOYAXISMOTION:
-                print event.value
-                if  event.value == 1:
-                    print "das war eine achse"
+                if event.joy ==0 and event.axis == 1 and event.value > 0.5:
+                    fisch.downOneStep()
+                if event.joy ==0 and event.axis == 1 and event.value < -0.5:
+                    fisch.upOneStep()
+
 
                 JumpSound = pygame.mixer.Sound('Portal Sentry - is anyone there.ogg')
                 JumpSound.play()
 
         if printingmode == True:
             picture = pygame.image.load("/home/pi/druckerskripte/sla_printer/white.png")
+            fisch.upOneStep()
+            time.sleep(120)
 
         else:
             picture = pygame.image.load("/home/pi/druckerskripte/sla_printer/black.png")
