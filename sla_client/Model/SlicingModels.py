@@ -145,7 +145,7 @@ class EquiSlicer(Slicer):
             return [a, b, c]
 
         self.allresults = []
-
+        self.allresults2 = []
         #slicingLevelsList = range(min(self._model.z.flatten()), max(self._model.z.flatten()), sliceThickness)
         zmin, zmax = self._model.zlims
         slicingLevelsList = np.arange(zmin+0.1, zmax-0.1, sliceThickness) #todo: should not be 0.1 but adaptive, but this simply works.
@@ -196,86 +196,90 @@ class EquiSlicer(Slicer):
                 y_dims = self.update_dims(y_dims, y2)
 
 
-            results = np.array(results)
+            self.results = np.array(results)
+            self.allresults.append(Slice(results)) #todo: what is this line used for? is it still necessary?
+            self.allresults2.append(results)
 
             #test if all vertices appear twice (if its a closed loop)
-            gesamtkanten = {}
-            for kante in results.tolist():
-                for j in [0, 1]:
-                    if str(kante[j]) in gesamtkanten:
-                        gesamtkanten[str(kante[j])] += 1
-                    else:
-                        gesamtkanten[str(kante[j])] = 1
-            counter = 0
-            for key in gesamtkanten:
-                if gesamtkanten[key] != 2:
-                    counter += 1
-            print("Anteil closed triangles: " + str(100*len(gesamtkanten)/len(results)) + "%")
+            # gesamtkanten = {}
+            # for kante in results.tolist():
+            #     for j in [0, 1]:
+            #         if str(kante[j]) in gesamtkanten:
+            #             gesamtkanten[str(kante[j])] += 1
+            #         else:
+            #             gesamtkanten[str(kante[j])] = 1
+            # counter = 0
+            # for key in gesamtkanten:
+            #     if gesamtkanten[key] != 2:
+            #         counter += 1
+            # print("Anteil closed triangles: " + str(100*len(gesamtkanten)/len(results)) + "%")
 
             #SORTING happens here (important for plt.fill() ):
-            AlreadySeen = []
             shapes_counter = 0 #how many closed objects are in this slice
             SortedShapesList = []
             self.currentPlotListX = []
             self.currentPlotListY = []
 
-            def PickNewStart():
-                i = 1
-                found_start = False
-                while found_start == False:
-                    if results[i].tolist() not in AlreadySeen:
-                        AlreadySeen.append(results[i].tolist())
-                        found_start = True
-                    else:
-                        i += 1
-                return results[i].tolist()
-
             def FindNextPiece(ki):
                 found_piece = False
-                i = 1
+                i = 1 #not zero because results[0] is the slice header, containing only zeros and the z coordinate
                 while not found_piece:
-                    if results[i].tolist() not in AlreadySeen:
-                        if np.allclose(ki[1], results[i, 0].tolist()):
-                            currentShape.append(results[i].tolist())
-                            AlreadySeen.append(results[i].tolist())
-                            found_piece = True
-                        elif np.allclose(ki[1], results[i, 1].tolist()):
-                            currentShape.append([results[i, 1].tolist(), results[i, 0].tolist()]) #flip in case of endpoint=endpoint
-                            AlreadySeen.append(results[i].tolist())
-                            found_piece = True
-                        else:
-                            i += 1
+                 #   if len(results) <= i:
+                #        print("fuck, index error! showing a plot of the problem: (green crosses mark the problem)")
+                #        plt.fill(self.currentPlotListX, self.currentPlotListY, 'k')
+                #        plt.plot(results[1:, 0, 0], results[1:, 0, 1], 'r*')
+                 #       plt.plot(self.currentShape[-1][0][0], self.currentShape[-1][0][1], 'g+')
+                #        plt.plot(self.currentShape[-1][1][0], self.currentShape[-1][1][1], 'g+')
+                #        plt.show()
+
+                    if np.allclose(ki[1], self.results[i, 0]):
+                        print "yep"
+                        self.currentShape.append(self.results[i].tolist())
+                        self.results = np.delete(self.results, i)
+                        found_piece = True
+                    elif np.allclose(ki[1], self.results[i, 1]):
+                        print i , self.results[i, 1]
+                        print "yup" #todo: question: why does this not append anything? why isnt the "self" marked purple? *confused
+                        self.currentShape.append([self.results[i, 1].tolist(), self.results[i, 0].tolist()]) #flip in case of endpoint=endpoint
+                        self.results = np.delete(self.results, i)
+                        found_piece = True
                     else:
                         i += 1
-            print("anzahl results:" + str(len(results)))
-            while len(AlreadySeen) < len(results)-1:
 
-                currentShape = [PickNewStart()]
-                while not np.allclose(currentShape[0][0], currentShape[-1][1]) or len(currentShape) == 1:
-                    FindNextPiece(currentShape[-1])
-                for i in range(len(currentShape)):
-                    self.currentPlotListX.append(currentShape[i][0][0])
-                    self.currentPlotListY.append(currentShape[i][0][1])
+
+            print("anzahl results:" + str(len(self.results)))
+
+            while len(self.results) > 0:
+                self.currentShape = [results[1]]
+                while not np.allclose(self.currentShape[0][0], self.currentShape[-1][1]) or len(self.currentShape) == 1:
+                    print len(self.currentShape), 6
+                    FindNextPiece(self.currentShape[-1])
+                for i in range(len(self.currentShape)):
+                    self.currentPlotListX.append(self.currentShape[i][0][0])
+                    self.currentPlotListY.append(self.currentShape[i][0][1])
                 self.currentPlotListX.append(None)
                 self.currentPlotListY.append(None)
-                currentShape.append(None)
+                self.currentShape.append(None)
                 shapes_counter += 1
                 #print("shapes_counter:" + str(shapes_counter))
                 #print("finished with this slice:" + str(100*len(AlreadySeen)/len(results))+"%")
-                SortedShapesList.append(currentShape)
+                SortedShapesList.append(self.currentShape)
             self.PlotListX.append(self.currentPlotListX)
             self.PlotListY.append(self.currentPlotListY)
             print("Objects in this slice: " + str(shapes_counter))
 
-            self.allresults.append(Slice(results))
-
-        # compute scale from extremal x and y values
+                    # compute scale from extremal x and y values
         self._scale = self.compute_scale(x_dims, y_dims)
         self.x_dims = x_dims
         self.y_dims = y_dims
         return self.allresults
 
-    def PlotSlice(self, slicenummer):
+
+
+
+
+
+    def plotSlice(self, slicenummer):
         plt.figure(1, facecolor='black')
         plt.subplot(1, 1, 1, axisbg='k')
         plt.fill(self.PlotListX[slicenummer], self.PlotListY[slicenummer], 'white')
@@ -283,6 +287,9 @@ class EquiSlicer(Slicer):
         plt.ylim(self.y_dims)
         plt.show()
 
+    def PlotSlice_cheapPlot(self, slicenummer):
+        plt.plot(self.allresults2[slicenummer, 1:, :, 0], self.allresults2[slicenummer, 1:, :, 1], 'b')
+        plt.show()
 
     def update_dims(self,dims,cmpr):
 
@@ -310,3 +317,68 @@ if __name__ == "__main__":
     eiffel = EquiSlicer(stl_model)
     eiffel.slice(80)
     eiffel.PlotSlice(2)
+
+
+'''
+ def PickNewStart():
+                i = 1
+                found_start = False
+                while found_start == False:
+                    if results[i].tolist() not in AlreadySeen:
+                        #results.remove(results[i])
+                        AlreadySeen.append(results[i].tolist())
+                        found_start = True
+                    else:
+                        i += 1
+                return results[i].tolist()
+
+            def FindNextPiece(ki):
+                found_piece = False
+                i = 1 #not zero because results[0] is the slice header, containing only zeros and the z coordinate
+                while not found_piece:
+                    if len(results) <= i:
+                        print("fuck, index error! showing a plot of the problem: (green crosses mark the problem)")
+#                        self.currentPlotListX.append(currentShape[:][0][0])
+ #                       self.currentPlotListY.append(currentShape[:][0][1])
+                        plt.fill(self.currentPlotListX, self.currentPlotListY, 'k')
+                        plt.plot(results[1:, 0, 0], results[1:, 0, 1], 'r*')
+                        plt.plot(self.currentShape[-1][0][0], self.currentShape[-1][0][1], 'g+')
+                        plt.plot(self.currentShape[-1][1][0], self.currentShape[-1][1][1], 'g+')
+                        plt.show()
+
+                    if results[i].tolist() not in AlreadySeen:
+                        if np.allclose(ki[1], results[i, 0]):
+                            self.currentShape.append(results[i].tolist())
+                            AlreadySeen.append(results[i].tolist())
+                            found_piece = True
+                        elif np.allclose(ki[1], results[i, 1]):
+                            self.currentShape.append([results[i, 1].tolist(), results[i, 0].tolist()]) #flip in case of endpoint=endpoint
+                            AlreadySeen.append(results[i].tolist())
+                            found_piece = True
+                        else:
+                            i += 1
+                    else:
+                        i += 1
+
+            print("anzahl results:" + str(len(results)))
+
+            while len(AlreadySeen) < len(results)-1:
+                self.currentShape = [PickNewStart()]
+                while not np.allclose(self.currentShape[0][0], self.currentShape[-1][1]) or len(self.currentShape) == 1:
+                    FindNextPiece(self.currentShape[-1])
+                for i in range(len(self.currentShape)):
+                    self.currentPlotListX.append(self.currentShape[i][0][0])
+                    self.currentPlotListY.append(self.currentShape[i][0][1])
+                self.currentPlotListX.append(None)
+                self.currentPlotListY.append(None)
+                self.currentShape.append(None)
+                shapes_counter += 1
+                #print("shapes_counter:" + str(shapes_counter))
+                #print("finished with this slice:" + str(100*len(AlreadySeen)/len(results))+"%")
+                SortedShapesList.append(self.currentShape)
+            self.PlotListX.append(self.currentPlotListX)
+            self.PlotListY.append(self.currentPlotListY)
+            print("Objects in this slice: " + str(shapes_counter))
+
+
+'''
