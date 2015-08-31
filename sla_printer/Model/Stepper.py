@@ -53,7 +53,7 @@ class SoncebosStepper(Stepper):
         GPIO.setup(self.detectPinBottom, GPIO.IN)
 
         self.secondsToMove = 1
-        self.frequency_slow = 5000
+        self.frequency_slow = 300 #5000Hz @ 20s = 2,3cm
 
     def __str__(self):
         return self.__name + " version " + str(self.__version)
@@ -75,6 +75,25 @@ class SoncebosStepper(Stepper):
             pwm.start(50) #number is percentage of duty cycle: 1-50 works without problems or differences
             time.sleep(self.secondsToMove) #number is seconds to go up
             GPIO.output(self.enablePin, True)
+
+    def upOneStepManual(self):
+        if GPIO.input(self.detectPinTop) == False:
+            GPIO.output(self.directionPin, True)
+            GPIO.output(self.enablePin, False)
+            pwm = GPIO.PWM(self.startPin, 5000) #last parameter is frequency in Hz, max 70kHz in Python (according to the interwebs)
+            pwm.start(50) #number is percentage of duty cycle: 1-50 works without problems or differences
+            time.sleep(self.secondsToMove) #number is seconds to go up
+            GPIO.output(self.enablePin, True)
+
+    def downOneStepManual(self):
+        if GPIO.input(self.detectPinBottom) == False:
+            GPIO.output(self.directionPin, False)
+            GPIO.output(self.enablePin, False)
+            pwm = GPIO.PWM(self.startPin, 5000) #last parameter is frequency in Hz, max 70kHz in Python (according to the interwebs)
+            pwm.start(50) #number is percentage of duty cycle: 1-50 works without problems or differences
+            time.sleep(self.secondsToMove) #number is seconds to go up
+            GPIO.output(self.enablePin, True)
+
 
     def up_toEnd(self):
         GPIO.output(self.directionPin, True)

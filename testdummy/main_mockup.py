@@ -24,6 +24,7 @@ def main():
 
     fisch = Stepper.SoncebosStepper()
 
+    Belichtungszeit = 600
     scale = 0.8
     main_surface = pygame.display.set_mode((int(1920*scale), int(1080*scale)))
     printingmode = False
@@ -36,10 +37,10 @@ def main():
                     #print "beende programm"
                     #pygame.quit()
                     #sys.exit()
-                if str(event).split()[4][0] == "2":
-                    fisch.upOneStep()
-                if str(event).split()[4][0] == "3":
-                    fisch.downOneStep()
+          #      if str(event).split()[4][0] == "2":
+         #           fisch.upOneStep()
+        #        if str(event).split()[4][0] == "3":
+       #             fisch.downOneStep()
                 if str(event).split()[4][0] == "9":
                     printingmode = not printingmode
                     if printingmode == True:
@@ -53,24 +54,28 @@ def main():
             elif event.type == JOYAXISMOTION:
                 if event.joy ==0 and event.axis == 1 and event.value > 0.5:
                     print("Moving downwards")
-                    fisch.downOneStep()
+                    fisch.downOneStepManual()
                 if event.joy ==0 and event.axis == 1 and event.value < -0.5:
                     print("Moving upwards")
-                    fisch.upOneStep()
+                    fisch.upOneStepManual()
+                if event.joy ==0 and event.axis == 0 and event.value > 0.5:
+                    print("belichtungszeit +60s, now: ", Belichtungszeit)
+                    Belichtungszeit += 60
+                if event.joy ==0 and event.axis == 0 and event.value < -0.5:
+                    print("belichtungszeit -60s, now: ", Belichtungszeit)
+                    Belichtungszeit -= 60
 
 
         if printingmode == True:
             picture = pygame.image.load("/home/pi/druckerskripte/sla_printer/white.png")
-            print("moving 1 step")
-            fisch.upOneStep()
-            time.sleep(3)
-
-
         else:
             picture = pygame.image.load("/home/pi/druckerskripte/sla_printer/black.png")
         main_surface.blit(picture, (0, 0))
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+        if printingmode == True:
+            fisch.upOneStep()
+            time.sleep(Belichtungszeit)
 
 
 """
