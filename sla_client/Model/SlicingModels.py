@@ -4,7 +4,7 @@ from abc import ABCMeta,abstractmethod
 from StlModels import Model, StlModel
 import numpy as np
 import matplotlib.pyplot as plt
-
+import time
 
 def drange(start,stop,inc):
 
@@ -219,7 +219,7 @@ class EquiSlicer(Slicer):
             SortedShapesList = []
             self.currentPlotListX = []
             self.currentPlotListY = []
-
+            a = time.time()
             def FindNextPiece(ki):
                 found_piece = False
                 i = 1 #not zero because results[0] is the slice header, containing only zeros and the z coordinate
@@ -231,17 +231,16 @@ class EquiSlicer(Slicer):
                  #       plt.plot(self.currentShape[-1][0][0], self.currentShape[-1][0][1], 'g+')
                 #        plt.plot(self.currentShape[-1][1][0], self.currentShape[-1][1][1], 'g+')
                 #        plt.show()
-
                     if np.allclose(ki[1], self.results[i, 0]):
-                        print "yep"
                         self.currentShape.append(self.results[i].tolist())
-                        self.results = np.delete(self.results, i)
+                        self.results = np.delete(self.results, i, axis=0)
                         found_piece = True
+                        #print "yep"
                     elif np.allclose(ki[1], self.results[i, 1]):
-                        print i , self.results[i, 1]
-                        print "yup" #todo: question: why does this not append anything? why isnt the "self" marked purple? *confused
+
+                        #print "yup", ki, self.results[i]
                         self.currentShape.append([self.results[i, 1].tolist(), self.results[i, 0].tolist()]) #flip in case of endpoint=endpoint
-                        self.results = np.delete(self.results, i)
+                        self.results = np.delete(self.results, i, axis=0)
                         found_piece = True
                     else:
                         i += 1
@@ -249,11 +248,12 @@ class EquiSlicer(Slicer):
 
             print("anzahl results:" + str(len(self.results)))
 
-            while len(self.results) > 0:
-                self.currentShape = [results[1]]
+            while len(self.results) > 1:
+                self.currentShape = [self.results[1]]
+                self.results = np.delete(self.results, 1, axis=0)
                 while not np.allclose(self.currentShape[0][0], self.currentShape[-1][1]) or len(self.currentShape) == 1:
-                    print len(self.currentShape), 6
                     FindNextPiece(self.currentShape[-1])
+
                 for i in range(len(self.currentShape)):
                     self.currentPlotListX.append(self.currentShape[i][0][0])
                     self.currentPlotListY.append(self.currentShape[i][0][1])
@@ -267,7 +267,7 @@ class EquiSlicer(Slicer):
             self.PlotListX.append(self.currentPlotListX)
             self.PlotListY.append(self.currentPlotListY)
             print("Objects in this slice: " + str(shapes_counter))
-
+            print "time needed: ", time.time()-a
                     # compute scale from extremal x and y values
         self._scale = self.compute_scale(x_dims, y_dims)
         self.x_dims = x_dims
@@ -316,10 +316,13 @@ if __name__ == "__main__":
     stl_model = StlModel('../Data/EiffelTowerTALL.stl')
     eiffel = EquiSlicer(stl_model)
     eiffel.slice(80)
-    eiffel.PlotSlice(2)
+    eiffel.plotSlice(2)
 
 
 '''
+#the old, inefficient sorting algorithm with intersection of alreadyseen and results
+
+
  def PickNewStart():
                 i = 1
                 found_start = False
