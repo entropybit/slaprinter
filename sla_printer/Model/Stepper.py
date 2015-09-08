@@ -46,7 +46,6 @@ class SoncebosStepper(Stepper):
         GPIO.setup(self.directionPin, GPIO.OUT)
         GPIO.setup(self.startPin, GPIO.OUT)
         GPIO.setup(self.enablePin, GPIO.OUT)
-        GPIO.setup(self.laserPin, GPIO.OUT)
         GPIO.output(self.enablePin, False)
 
         GPIO.setup(self.detectPinTop, GPIO.IN)

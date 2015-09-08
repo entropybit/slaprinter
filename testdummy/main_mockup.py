@@ -3,7 +3,7 @@
 
 __author__ = 'mithrawnuruodo'
 
-import random, pygame, sys, time
+import pygame, time
 import pygame.image, pygame.display
 from pygame.locals import *
 import Model.Stepper as Stepper
@@ -22,7 +22,7 @@ def main():
     else:
         print "Error: did not recognize controller"
 
-    fisch = Stepper.SoncebosStepper()
+    motor = Stepper.SoncebosStepper()
 
     Belichtungszeit = 600
     scale = 0.8
@@ -38,30 +38,31 @@ def main():
                     #pygame.quit()
                     #sys.exit()
           #      if str(event).split()[4][0] == "2":
-         #           fisch.upOneStep()
+         #           motor.upOneStep()
         #        if str(event).split()[4][0] == "3":
-       #             fisch.downOneStep()
+       #             motor.downOneStep()
                 if str(event).split()[4][0] == "9":
                     printingmode = not printingmode
                     if printingmode == True:
                         print("printing started!")
+                        zeit = time.time()
                         JumpSound = pygame.mixer.Sound('hakuna matata.ogg')
                         JumpSound.play()
                     else:
                         print("printing ended!")
                 #if str(event).split()[4][0] == "1":
-                 #   fisch.down_toEnd()
+                 #   motor.down_toEnd()
             elif event.type == JOYAXISMOTION:
-                if event.joy ==0 and event.axis == 1 and event.value > 0.5:
+                if event.joy == 0 and event.axis == 1 and event.value > 0.5:
                     print("Moving downwards")
-                    fisch.downOneStepManual()
-                if event.joy ==0 and event.axis == 1 and event.value < -0.5:
+                    motor.downOneStepManual()
+                if event.joy == 0 and event.axis == 1 and event.value < -0.5:
                     print("Moving upwards")
-                    fisch.upOneStepManual()
-                if event.joy ==0 and event.axis == 0 and event.value > 0.5:
+                    motor.upOneStepManual()
+                if event.joy == 0 and event.axis == 0 and event.value > 0.5:
                     print("belichtungszeit +60s, now: ", Belichtungszeit)
                     Belichtungszeit += 60
-                if event.joy ==0 and event.axis == 0 and event.value < -0.5:
+                if event.joy == 0 and event.axis == 0 and event.value < -0.5:
                     print("belichtungszeit -60s, now: ", Belichtungszeit)
                     Belichtungszeit -= 60
 
@@ -73,9 +74,13 @@ def main():
         main_surface.blit(picture, (0, 0))
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
         if printingmode == True:
-            fisch.upOneStep()
-            time.sleep(Belichtungszeit)
+            if time.time()-zeit > Belichtungszeit:
+                motor.upOneStep()
+                zeit = time.time()
+
+#            time.sleep(Belichtungszeit)
 
 
 """
