@@ -197,7 +197,24 @@ class GLWidget(QtOpenGL.QGLWidget):
 
 
         for d in self._drawables:
-            d.draw()
+
+            if isinstance(d, mv.PlaneCutView):
+
+                #if self.allow_zoom:
+                #    glScale(1.0/self._scale, 1.0/self._scale, 1.0/self._scale)
+
+                #if self.allow_trans:
+                #    glTranslate(0, 0, -self._trans_z)
+
+                d.draw()
+
+                #if self.allow_trans:
+                #    glTranslate(0, 0, self._trans_z)
+
+                #if self.allow_zoom:
+                #    glScale(self._scale, self._scale, self._scale)
+            else:
+                d.draw()
 
 
 
@@ -334,8 +351,9 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         if len(self._drawables) > 0:
             for d in self._drawables:
-                break
-            self._scale = d.scale
+                if isinstance(d, mv.StlModelView):
+                    self._scale = d.scale
+                    break
 
 
         self.light0_pos[3] = self._scale

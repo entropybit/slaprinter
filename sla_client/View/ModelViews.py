@@ -501,18 +501,38 @@ class SliceModelView(Drawable):
 
 class PlaneCutView(Drawable):
 
-    def __init__(self, z, dimx, dimy):
+    def __init__(self, z, dimx, dimy, stl_model):
 
 
         Drawable.__init__(self)
         self.__z = z
         self.__dimx = dimx
         self.__dimy = dimy
+        self.__stl_model = stl_model
         self.display_mesh = False
 
 
 
     def draw(self):
+
+
+
+
+        xmin, xmax = self.__stl_model.xlims
+        ymin, ymax = self.__stl_model.ylims
+        zmin, zmax = self.__stl_model.zlims
+
+
+        sx = xmax - xmin
+        sy = ymax - ymin
+        sz = zmax - zmin
+
+        scale = max(sx,sy, sz)
+
+        # do local scaling an translation
+        # for better visualization
+        glTranslate(-xmin , -ymin , -zmin)
+        glTranslate(-sx/2.0, -sy/2.0, -sz/2.0)
 
         glBegin(GL_POLYGON)
         glColor3d(1.0,96.0/255.0,96.0/255.0)
@@ -547,7 +567,10 @@ class PlaneCutView(Drawable):
 
             glEnd()
 
-
+        # since translation and scaling were local
+        # reverse them otherwise this will effect all other drawings aftewards
+        glTranslate(sx/2.0, sy/2.0, sz/2.0)
+        glTranslate(xmin , ymin , zmin)
 
     def mesh(self):
         self.display_mesh = not self.display_mesh

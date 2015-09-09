@@ -22,8 +22,6 @@ class SlaController(QApplication):
 
         QApplication.__init__(self, argv)
 
-        self.show_cut = False
-
         # main window
         self.__mainWindow = QMainWindow()
         self.__ui1 = Ui_MainWindow()
@@ -352,15 +350,11 @@ class SlaController(QApplication):
 
     def showcut(self):
 
-        self.show_cut = not self.show_cut
+        x0, x1 = self.__stl_model.xlims
+        y0, y1 = self.__stl_model.ylims
 
-        if self.show_cut:
+        dimx = x1-x0
+        dimy = y1-y0
 
-            x0, x1 = self.__stl_model.xlims
-            y0, y1 = self.__stl_model.ylims
-
-            dimx = x1-x0
-            dimy = y1-y0
-
-            self.current_z = float(self.__ui1.cutZCoordinate.text())
-            self.__glMain.addDrawable(PlaneCutView(z=self.current_z, dimx=2*dimx, dimy=2*dimy))
+        self.current_z = float(self.__ui1.cutZCoordinate.text())
+        self.__glMain.addDrawable(PlaneCutView(z=self.current_z, dimx=2*dimx, dimy=2*dimy, stl_model=self.__stl_model))
