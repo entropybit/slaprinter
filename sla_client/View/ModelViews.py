@@ -2,8 +2,42 @@ __author__ = 'mithrawnuruodo'
 
 import traceback
 from OpenGL.GL import *
-from GlWidget import Drawable
+#from GlWidget import Drawable
 from enum import Enum
+from abc import ABCMeta,abstractmethod
+
+
+
+class Drawable(object):
+
+    __metaclass__ = ABCMeta
+
+    udids = []
+
+    def __init__(self):
+
+        if len(self.udids) == 0:
+            self.udid = 1
+            self.udids.append(1)
+        else:
+            self.udid = self.udids[-1] +1
+
+
+    def __hash__(self):
+        return self.udid
+
+    @abstractmethod
+    def draw(self):
+        pass
+
+    @abstractmethod
+    def mesh(self):
+        pass
+
+    # ToDo: Does this need to be part of abstract class?
+    #@abstractmethod
+    #def boundingBox(self):
+    #    pass
 
 # # global displaylist index list
 # display_lists = []
@@ -465,3 +499,55 @@ class SliceModelView(Drawable):
         self.display_points = not self.display_points
 
 
+class PlaneCutView(Drawable):
+
+    def __init__(self, z, dimx, dimy):
+
+
+        Drawable.__init__(self)
+        self.__z = z
+        self.__dimx = dimx
+        self.__dimy = dimy
+        self.display_mesh = False
+
+
+
+    def draw(self):
+
+        glBegin(GL_POLYGON)
+        glColor3d(1.0,96.0/255.0,96.0/255.0)
+
+        dimx = self.__dimx
+        dimy = self.__dimy
+        z = self.__z
+        glVertex3d(-1 * dimx, 1*dimy, z)
+        glVertex3d( dimx, 1*dimy, z)
+        glVertex3d( dimx, -1*dimy, z)
+        glVertex3d( -1*dimx, -1*dimy, z)
+
+        glEnd()
+
+        if self.display_mesh:
+
+            glBegin(GL_LINES)
+            glColor3d(1.0,0.0,0.0)
+
+
+            glVertex3d(-1 * dimx, 1*dimy, z)
+            glVertex3d( dimx, 1*dimy, z)
+
+            glVertex3d( dimx, 1*dimy, z)
+            glVertex3d( dimx, -1*dimy, z)
+
+            glVertex3d( dimx, -1*dimy, z)
+            glVertex3d( -1*dimx, -1*dimy, z)
+
+            glVertex3d( -1*dimx, -1*dimy, z)
+            glVertex3d(-1 * dimx, 1*dimy, z)
+
+            glEnd()
+
+
+
+    def mesh(self):
+        self.display_mesh = not self.display_mesh

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'StandardWindow.ui'
 #
-# Created: Mon Aug 24 21:04:17 2015
+# Created: Wed Sep  9 23:12:28 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -115,6 +115,18 @@ class Ui_MainWindow(object):
         self.MeshButton = QtGui.QPushButton(self.centralwidget)
         self.MeshButton.setObjectName(_fromUtf8("MeshButton"))
         self.verticalLayout_5.addWidget(self.MeshButton)
+        self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
+        self.showCutButton = QtGui.QPushButton(self.centralwidget)
+        self.showCutButton.setObjectName(_fromUtf8("showCutButton"))
+        self.horizontalLayout_2.addWidget(self.showCutButton)
+        self.label_3 = QtGui.QLabel(self.centralwidget)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.horizontalLayout_2.addWidget(self.label_3)
+        self.cutZCoordinate = QtGui.QLineEdit(self.centralwidget)
+        self.cutZCoordinate.setObjectName(_fromUtf8("cutZCoordinate"))
+        self.horizontalLayout_2.addWidget(self.cutZCoordinate)
+        self.verticalLayout_5.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_4.addLayout(self.verticalLayout_5)
         spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem3)
@@ -155,6 +167,9 @@ class Ui_MainWindow(object):
         self.BoundingBoxButton.setText(_translate("MainWindow", "bounding box", None))
         self.CenterButton.setText(_translate("MainWindow", "center", None))
         self.MeshButton.setText(_translate("MainWindow", "mesh", None))
+        self.showCutButton.setText(_translate("MainWindow", "Show Cut", None))
+        self.label_3.setText(_translate("MainWindow", "z coordinate:", None))
+        self.cutZCoordinate.setText(_translate("MainWindow", "0.0", None))
         self.StartPrintButton.setToolTip(_translate("MainWindow", "<html><head/><body><p>opens the Printing Dialogue</p></body></html>", None))
         self.StartPrintButton.setText(_translate("MainWindow", "Start Printing!", None))
         self.actionImport.setText(_translate("MainWindow", "Import", None))

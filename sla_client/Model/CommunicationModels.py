@@ -5,6 +5,10 @@ from StlModels import StlModel
 from abc import ABCMeta,abstractmethod
 from Compression import compressFileToString
 import base64
+import os
+DATA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/Data"
+
+
 
 class SerializablePackage(object):
     __metaclass__ = ABCMeta
@@ -110,17 +114,20 @@ class PrintingTask(SerializablePackage):
 if __name__=="__main__":
 
     from SlicingModels import EquiSlicer, Slice
-
     import Control
+
+    print("Data dir : " + DATA_DIR)
+
+
     import time
 
-    server = Control.ServerConnection("http://192.168.178.28/")
-    #server = Control.ServerConnection("http://127.0.0.1/")
+    #server = Control.ServerConnection("http://192.168.178.28/")
+    server = Control.ServerConnection("http://127.0.0.1/")
     server.start()
 
-    stl_model = StlModel("../Data/pimpstickv2.stl")
+    stl_model = StlModel(DATA_DIR + "/pimpstickv2.stl")
     #stl_model = StlModel("../Data/EiffelTowerTALL.stl")
-    slices = EquiSlicer(stl_model).slice(3)
+    slices = EquiSlicer(stl_model).slice(30)
 
     task = PrintingTask(path="/post/task/")
     task.stl_model = stl_model
@@ -136,17 +143,17 @@ if __name__=="__main__":
     print("valid? : " + str(task.is_valid()))
     print("path: " + task.path)
 
-    #print(task.json())
+    print(task.json())
+
+
 
 
     server.post_data(task)
 
-    time.sleep(4)
-    #print("sleep over")
+    time.sleep(3)
+    print("sleep over")
     server.stop()
-    #print("server stopped")
-
-
+    print("server stopped")
 
 
 

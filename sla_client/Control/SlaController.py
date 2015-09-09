@@ -3,7 +3,7 @@ __author__ = 'mithrawnuruodo'
 from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QWidget, QMessageBox, QFileDialog
 from PyQt4 import QtCore
 from View import Ui_MainWindow, GLWidget, Ui_PrinterSettings, Ui_PrintingDialog, Ui_PrintingWindow, StlModelView
-from View import Ui_SlicingWindow, SliceModelView
+from View import Ui_SlicingWindow, SliceModelView, PlaneCutView
 from Model import StlModel, EquiSlicer, ConfigurationModel
 #from Model import
 import json, requests, time
@@ -21,6 +21,8 @@ class SlaController(QApplication):
 
 
         QApplication.__init__(self, argv)
+
+        self.show_cut = False
 
         # main window
         self.__mainWindow = QMainWindow()
@@ -57,6 +59,7 @@ class SlaController(QApplication):
 
         self.__connection = None
         self.__config = ConfigurationModel()
+        self.current_z = 0
 
     def start(self):
         self.initWindows()
@@ -132,6 +135,8 @@ class SlaController(QApplication):
         self.__ui1.CenterButton.clicked.connect(self.__glMain.reset)
         self.__ui1.MeshButton.clicked.connect(self.__glMain.mesh)
         self.__ui1.BoundingBoxButton.clicked.connect(self.__glMain.bounding_box)
+        self.__ui1.showCutButton.clicked.connect(self.showcut)
+
 
         self.__ui2.CancelButton.clicked.connect(self.__printingDialog.close)
         self.__ui2.OkButton.clicked.connect(self.switchToPrintingMode)
@@ -252,8 +257,6 @@ class SlaController(QApplication):
                 print("no new scale")
 
             self.__glMain.addDrawable(self.__stl_view)
-            self.__glMain.update()
-
             self.__slicing_model = None
             self.__slices = None
 
@@ -345,3 +348,19 @@ class SlaController(QApplication):
         self.__slicing_view = SliceModelView(slice)
         self.__glSlice.addDrawable(self.__slicing_view)
         self.__glSlice.update()
+
+
+    def showcut(self):
+
+        self.show_cut = not self.show_cut
+
+        if self.show_cut:
+
+            x0, x1 = self.__stl_model.xlims
+            y0, y1 = self.__stl_model.ylims
+
+            dimx = x1-x0
+            dimy = y1-y0
+
+            self.current_z = float(self.__ui1.cutZCoordinate.text())
+            self.__glMain.addDrawable(PlaneCutView(z=self.current_z, dimx=2*dimx, dimy=2*dimy))

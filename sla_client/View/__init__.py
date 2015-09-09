@@ -8,5 +8,5 @@ from PrinterSettings import Ui_Dialog as Ui_PrinterSettings
 from SlicingWindow import Ui_MainWindow as Ui_SlicingWindow
 
 
-from GlWidget import Drawable, GLWidget#GLWidget
-from ModelViews import StlModelView, SliceModelView
+from GlWidget import GLWidget#GLWidget
+from ModelViews import StlModelView, SliceModelView, PlaneCutView, Drawable

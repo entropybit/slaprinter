@@ -9,42 +9,10 @@ from OpenGL.GL import *
 from OpenGL.GL.shaders import *
 
 #from ModelViews import StlModelView
+import ModelViews as mv
 from numpy import array
-from abc import ABCMeta,abstractmethod
+
 import time
-
-
-
-class Drawable(object):
-
-    __metaclass__ = ABCMeta
-
-    udids = []
-
-    def __init__(self):
-
-        if len(self.udids) == 0:
-            self.udid = 1
-            self.udids.append(1)
-        else:
-            self.udid = self.udids[-1] +1
-
-
-    def __hash__(self):
-        return self.udid
-
-    @abstractmethod
-    def draw(self):
-        pass
-
-    @abstractmethod
-    def mesh(self):
-        pass
-
-    # ToDo: Does this need to be part of abstract class?
-    #@abstractmethod
-    #def boundingBox(self):
-    #    pass
 
 
 class GLWidget(QtOpenGL.QGLWidget):
@@ -239,13 +207,13 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     def addDrawable(self,d):
 
-        if isinstance(d, Drawable):
+        if isinstance(d, mv.Drawable):
             self._drawables.add(d)
 
 
     def delDrawable(self,d):
 
-        if isinstance(d,Drawable):
+        if isinstance(d,mv.Drawable):
             self._drawables.remove(d)
 
 
@@ -395,7 +363,8 @@ class GLWidget(QtOpenGL.QGLWidget):
     def bounding_box(self):
 
         for d in self._drawables:
-            d.boundingBox()
+            if not isinstance(d, mv.PlaneCutView):
+                d.boundingBox()
 
         self.updateGL()
 
