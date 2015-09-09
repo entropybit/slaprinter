@@ -1,16 +1,23 @@
 __author__ = 'mithrawnuruodo'
 
 
-__author__ = 'mithrawnuruodo'
-
-from threading import Thread
-from time import sleep
-from Queue import Queue
+from multiprocessing import Process, Queue
 from abc import ABCMeta, abstractmethod
+
+class Message(object):
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self, sender, description):
+        self.sender = sender
+        self.description = description
 
 class Observer(object):
 
     __metaclass__ = ABCMeta
+
+    def __init__(self, bus):
+        bus.register(self)
 
     @abstractmethod
     def notify(self,Message):
@@ -19,85 +26,68 @@ class Observer(object):
 
 class Observable(object):
 
+    bus = None
 
-    def __init__(self, dispatcher):
-        self.__dispatcher = dispatcher
-
+    def __init__(self, bus):
+        self.__bus = bus
 
     def put_message(self,message):
-        self.__dispatcher.put_message(message)
+        self.__bus.put(message)
+
+class MessageBus(Process):
+
+    msg_que = Queue()
+    observers = []
 
 
+    def __init__(self):
+        self.running = False
+        Process.__init__(self)
 
-
-class Dispatcher(Thread):
-
-    def __init__(self, *args, **kwargs):
-        """
-
-        Init the Dispatcher object by defining a lisf of interested threads and a message stack
-        where latter is realized by a Queue.
-        Thus, messages are put at the top and taken from the bottom which is suitable for a
-        secure communication between several threads.
-        The objects from the queue package also seem to have the property of being thread secure.
-        Since the Dispatcher is also derived from Thread it runs in parallel with the other threaded
-        objects.
-
-        """
-        super(Dispatcher, self).__init__(*args, **kwargs)
-        self.__interested_threads = []
-        self.__message_stack = Queue()
+    def start(self):
         self.running = True
+        Process.start(self)
 
-    def run(self):
-        """
-        For all eternity look if there is still a message on the message stack. If so dispatch it, else
-        sleep for a short while
-
-        """
-        while self.running:
-            while not self.__message_stack.empty():
-                msg = self.__message_stack.get()
-                self.dispatch_message(msg)
-            #else:
-            #    sleep(0.1)
-
-    def register_observer(self, thread):
-        """
-
-        :param thread: A thread which needs to synchronize with the sending thread of this dispatcher.
-                       By registering it ot the list of interested threads it will receive each message
-                       send by the sending object. Thus, a synchronization between the objects is achieved.
-
-        """
-        self.__interested_threads.append(thread)
-
-
-    def put_message(self,message):
-        """
-        The put message function is used by the sending object to send a message.
-        Effectively a message is send by putting it to the top of the message stack, the actual sending or
-        dispatching will be done in the run function so within the thread of the Dispatcher.
-        While the call to put_message happens from within the Thread of the sending object.
-
-        :param message: message which is to be send to observers
-
-        """
-        self.__message_stack.put(message)
-
-
-
-    def dispatch_message(self, message):
-        """
-        This function is used within run to actually send / dispatch a specific message to all interested threads.
-
-        :param message: message which is to be send
-        :return:
-        """
-        for thread in self.__interested_threads:
-            thread.notify(message)
 
     def stop(self):
+        self.running = False
+        Process.join(self)
+
+    def register(self, observer):
+
+        if isinstance(observer, Observer):
+            self.observers.append(observer)
+
+    def put(self, msg):
+        self.msg_que.put(msg)
+
+
+    def run(self):
+
+        while self.running:
+
+            while not self.msg_que.empty():
+                msg = self.msg_que.get()
+
+                for obs in self.observers:
+                    obs.notify(msg)
+
+
+
+
+import string
+import random
+
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+class Worker(Process, Observable):
+
+    def __init__(self, bus):
+
+        Observable.__init__(self, bus=bus)
+        Process.__init__(self)
         self.running = False
 
 
@@ -105,6 +95,83 @@ class Dispatcher(Thread):
     def start(self):
 
         self.running = True
-        Thread.start(self)
+        Process.start(self)
+
+    def stop(self):
+
+        self.running = False
+        Process.join(self)
+
+    def run(self):
+        import numpy as np
+        np.random.seed(42)
+        import time
+        while self.running:
+
+
+            t = np.random.rand()
+
+            text = id_generator(20)
+            self.put_message(text)
+
+            time.sleep(t)
+
+
+class PrintingObserver(Observer):
+
+
+    def notify(self,Message):
+
+        print("received msg: " + str(Message))
+
+
+class Runner(Process):
+
+    def __init__(self):
+        self.running = False
+        Process.__init__(self)
+
+    def start(self):
+        self.running = True
+        Process.start(self)
+
+    def stop(self):
+        self.running = False
+        Process.join()
+
+    def run(self):
+
+        bus = MessageBus()
+
+        obs = PrintingObserver(bus=bus)
+        worker = Worker(bus=bus)
+
+        t = 10
+
+        bus.start()
+        worker.start()
+        time.sleep(t)
+
+
+        worker.stop()
+        bus.stop()
+
+        print("stopped after " + str(t) +"s")
+
+
+
+import time
+
+if __name__=="__main__":
+
+
+    run = Runner()
+    run.start()
+
+
+
+
+
+
 
 

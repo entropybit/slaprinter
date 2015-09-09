@@ -1,46 +1,82 @@
 __author__ = 'mithrawnuruodo'
 
-from MessageHandler import Dispatcher, Observer
+on_raspberry_pi = False
+
+from MessageHandler import MessageBus, Observer
 from Messages import GamePadStartPressed
 from GamePadController import GamePadController
-from StepperController import StepperController
+
+if on_raspberry_pi:
+    from StepperController import StepperController
+    from BeamerController import BeamerController
 import Server
 from Messages import GamePadSelectPressed
-from DataController import DataPool, PrintingTaskController
+#from DataController import DataPool, PrintingTaskController
 from multiprocessing import Process
 
 class SlaPrinterController(Observer):
 
     def __init__(self):
 
-        self.io_dispatcher = Dispatcher()
-        self.io_dispatcher.register_observer(self)
-        self.stepperController = StepperController(self.io_dispatcher)
-        self.pygameController = GamePadController(self.io_dispatcher)
+        self.io_bus = MessageBus()
+        self.io_bus.register_observer(self)
+
+        if on_raspberry_pi:
+            self.stepperController = StepperController(self.io_bus)
+
+        self.pygameIoController = GamePadController(self.io_bus)
 
 
-        self.data_dispatcher = Dispatcher()
-        self.data_dispatcher.register_observer(self)
-        self.data = DataPool(dispatcher=self.data_dispatcher)
-        self.task_controller = PrintingTaskController(dispatcher=self.data_dispatcher)
+
+        self.data_bus = MessageBus()
+
+        print("initialized data_dispatcher : " + str(self.data_bus))
+        self.data_bus.register_observer(self)
+        self.data = DataPool(dispatcher=self.data_bus)
+        self.task_controller = PrintingTaskController(dispatcher=self.data_bus)
+
+
+        if on_raspberry_pi:
+            self.pygameRenderController = BeamerController(dispatcher=self.data_bus)
 
         self.server = Process(target=Server.start_flask)
 
+
+
     def start(self):
 
-        self.io_dispatcher.start()
-        self.pygameController.start()
-        self.data_dispatcher.start()
+        # start msg buses
+        self.io_bus.start()
+        self.data_bus.start()
+
+        self.task_controller.start()
+        self.data.start()
+
+
+        self.pygameIoController.start()
+
+        if on_raspberry_pi:
+            self.pygameRenderController.start()
+
         self.server.start()
+
 
 
     def release(self):
 
-        self.pygameController.stop()
+        # stop msg buses
+        self.io_bus.stop()
+        self.data_bus.stop()
 
-        self.stepperController.stop()
-        self.io_dispatcher.stop()
-        self.data_dispatcher.stop()
+        self.pygameIoController.stop()
+
+        if on_raspberry_pi:
+            self.pygameRenderController.stop()
+            self.stepperController.stop()
+
+        self.task_controller.stop()
+        self.data.stop()
+
 
         # stop server
         self.server.terminate()

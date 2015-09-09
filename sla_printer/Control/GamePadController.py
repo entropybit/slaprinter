@@ -2,7 +2,7 @@ import random, pygame, sys
 from pygame.locals import *
 #from multiprocessing import Process
 from threading import Thread
-from MessageHandler import Observable, Dispatcher
+from MessageHandler import Observable, MessageBus
 from Messages import *
 
 import os
@@ -13,9 +13,9 @@ DATA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/Data"
 
 class GamePadController(Observable, Thread):
 
-    def __init__(self, dispatcher, fps=30):
+    def __init__(self, bus, fps=30):
         Thread.__init__(self)
-        Observable.__init__(self, dispatcher)
+        Observable.__init__(self, bus=bus)
 
         self.fps = fps # frames per second, the general speed of the program
 
@@ -115,8 +115,8 @@ class GamePadController(Observable, Thread):
 
 
                     elif event.type == JOYAXISMOTION:
-                        print event.axis
-                        print event.value
+                        print(event.axis)
+                        print(event.value)
 
                 #JumpSound = pygame.mixer.Sound('Portal Sentry - is anyone there.ogg')
                 #JumpSound.play()

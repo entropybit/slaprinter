@@ -59,6 +59,7 @@ class PrintingTaskData(Data):
         self.stl_model = None
         self.finished = False
         self.slices_todo = None
+        self.file_name = ""
 
 
 
