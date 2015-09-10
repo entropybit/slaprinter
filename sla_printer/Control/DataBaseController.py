@@ -2,28 +2,24 @@ __author__ = 'mithrawnuruodo'
 
 
 import sqlite3
-from MessageHandler import Observable, MessageBus, Message
-
-
-class NewPrintingTaskMsg(Message):
-
-    def __init__(self, sender, description, task):
-        Message.__init__(self, sender=sender, description=description)
-        self.task
+import Control.MessageHandler as handler
+import Control.Messages as messages
+import pickle
 
 
 
+class DataBaseController(handler.Observable):
 
-class DataBaseController(Observable):
 
+    def __init__(self, in_memory_mode=True, bus=None, connect_on_init=True):
 
-    def __init__(self, in_memory_mode=True, bus=None):
-
-        Observable.__init__(self, bus=bus)
+        handler.Observable.__init__(self, bus=bus)
         self.__in_memory_mode = in_memory_mode
         self.__database = None
 
-        self.start_db()
+
+        if connect_on_init:
+            self.start_db()
 
 
     def start_db(self):
@@ -32,30 +28,52 @@ class DataBaseController(Observable):
         if self.__in_memory_mode:
             #print('file:server_database?mode=memory&cache=shared')
             #self.__database = sqlite3.connect('file:server_database?mode=memory&cache=shared')
-            self.__database = sqlite3.connect(":memory:")
+            self.__database = sqlite3.connect(":memory:", check_same_thread=False)
         else:
-            self.__database = sqlite3.connect("server.db")
+            self.__database = sqlite3.connect("server.db",  check_same_thread=False)
             #print("server.db")
+
+
+        self.make_init_tables()
 
 
 
 
     def make_init_tables(self):
 
+            #print("make tables")
             c = self.__database.cursor()
 
-            c.execute('''CREATE TABLE jobs
-                (jid integer primary key autoincrement, step_width real, illumination_time real,
-                    illumination_intensity real, file_name text, stl_file text, slices text)
-            ''')
+            r = c.execute("SELECT * FROM sqlite_master WHERE name ='jobs' and type='table'")
+            if r.fetchone() is None:
 
-            c.execute('''CREATE TABLE slices
-                (sid integer primary key autoincrement, job int)
-            ''')
+                c.execute('''CREATE TABLE jobs
+                    (jid integer primary key autoincrement, step_width real, illumination_time real,
+                        illumination_intensity real, file_name text, stl_file text, slices text)
+                ''')
 
-            c.execute('''CREATE TABLE points
-                (pid integer primary key autoincrement, x real, y real, sid integer)
-            ''')
+
+            r = c.execute("SELECT * FROM sqlite_master WHERE name ='slices' and type='table'")
+            if r.fetchone() is None:
+
+                c.execute('''CREATE TABLE slices
+                    (sid integer primary key autoincrement, job int)
+                ''')
+
+
+            r = c.execute("SELECT * FROM sqlite_master WHERE name ='points' and type='table'")
+            if r.fetchone() is None:
+
+                c.execute('''CREATE TABLE points
+                    (pid integer primary key autoincrement, x real, y real, sid integer)
+                ''')
+
+            r = c.execute("SELECT * FROM sqlite_master WHERE name ='lines' and type='table'")
+            if r.fetchone() is None:
+
+                c.execute('''CREATE TABLE lines
+                    (lid integer primary key autoincrement, sid integer,p_start integer, p_end integer)
+                ''')
 
             self.__database.commit()
 
@@ -64,7 +82,13 @@ class DataBaseController(Observable):
     def save_printing_task(self, task):
 
 
-        msg = NewPrintingTaskMsg(self, "new printing task found", task)
+        msg = messages.NewPrintingTaskMsg(DataBaseController(),"new printing task found", task)
+
+
+
+        #print(msg)
+        #print(pickle.dumps(msg))
+
         self.put_message(msg)
         c = self.__database.cursor()
 
@@ -79,7 +103,7 @@ class DataBaseController(Observable):
                 )
 
         jid = c.lastrowid
-        #print("inserted :" + str() jid))
+        #print("inserted :" + str(jid))
 
         slices = task.slices
 
@@ -96,16 +120,40 @@ class DataBaseController(Observable):
             sid = c.lastrowid
             #print("sid="+str(sid))
 
-            for p in slice:
+            for line in slice:
                 # insert point row
+
+                pid0 = -1
+                pid1 = -1
+                i = 0
+                for p in line:
+
+
+                    #c.execute('SELECT pid from points WHERE sid=' + str(sid) + ' AND x = ' + str(p[0]) + ' AND y = ' + str(p[1]) + '')
+
+                    c.execute(
+                    'INSERT INTO points' +
+                    '  (x,y, sid)' +
+                        ' VALUES ' +
+                        '(' + str(p[0]) + ', ' + str(p[1]) + ',' + str(sid) + ')'
+                    )
+
+                    if i == 0:
+                        pid0 = c.lastrowid
+                        i = i+1
+                    else:
+                        pid1 = c.lastrowid
+
                 c.execute(
-                  'INSERT INTO points' +
-                  '  (x,y, sid)' +
+                    'INSERT INTO lines' +
+                    ' (p_start, p_end)' +
                     ' VALUES ' +
-                    '(' + str(p[0]) + ', ' + str(p[1]) + ',' + str(sid) + ')'
+                    '(' + str(pid0) + ', ' + str(pid1) + ')'
                 )
 
         self.__database.commit()
+
+        return jid
 
 
     def last_insert_id(self):
@@ -130,6 +178,15 @@ class DataBaseController(Observable):
         result = c.fetchone()
         return result
 
+
+    def printing_tasks(self):
+
+        return []
+
+
+    def active_job(self):
+
+        return 0
 
 
 

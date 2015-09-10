@@ -1,3 +1,3 @@
 __author__ = 'aslan'
 
-from Routing import start_flask
+from Routing import SlaPrinterApp

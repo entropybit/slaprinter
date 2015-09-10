@@ -36,13 +36,12 @@ class Observable(object):
 
 class MessageBus(Process):
 
-    msg_que = Queue()
-    observers = []
-
 
     def __init__(self):
         self.running = False
         Process.__init__(self)
+        self.msg_que = Queue()
+        self.observers = []
 
     def start(self):
         self.running = True
@@ -66,11 +65,22 @@ class MessageBus(Process):
 
         while self.running:
 
+            i =0
             while not self.msg_que.empty():
+
+
                 msg = self.msg_que.get()
 
+                #print("ith element [" + str(i) +" from msg stack " + str(msg))
+
+                #j = 0
                 for obs in self.observers:
+
+                    #print("jth observer [" + str(j) + " | " + str(obs) + " notified")
                     obs.notify(msg)
+                    #j = j +1
+
+                #i = i +1
 
 
 

@@ -150,7 +150,7 @@ if __name__=="__main__":
 
     server.post_data(task)
 
-    time.sleep(3)
+    time.sleep(1.8)
     print("sleep over")
     server.stop()
     print("server stopped")

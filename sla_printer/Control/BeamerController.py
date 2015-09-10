@@ -4,7 +4,7 @@ import random, pygame, sys
 from pygame.locals import *
 #from multiprocessing import Process
 from threading import Thread
-from MessageHandler import Observer, Dispatcher
+from MessageHandler import Observer, MessageBus
 from Messages import *
 import time
 import Control
@@ -17,12 +17,12 @@ DATA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/Data"
 
 class BeamerController(Thread, Observer):
 
-    def __init__(self, fps=30, dispatcher=Dispatcher()):
+    def __init__(self, fps=30, bus=MessageBus()):
         Thread.__init__(self)
 
         self.fps = fps # frames per second, the general speed of the program
-        self.dispatcher=dispatcher
-        self.dispatcher.register_observer(self)
+        self.bus=bus
+        self.bus.register_observer(self)
 
 
         self.fpsclock = pygame.time.Clock()

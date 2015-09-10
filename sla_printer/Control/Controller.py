@@ -1,9 +1,10 @@
 __author__ = 'mithrawnuruodo'
 
+in_memory_database=False
 on_raspberry_pi = False
 
 from MessageHandler import MessageBus, Observer
-from Messages import GamePadStartPressed
+from Messages import NewPrintingTaskMsg
 from GamePadController import GamePadController
 
 if on_raspberry_pi:
@@ -12,14 +13,17 @@ if on_raspberry_pi:
 import Server
 from Messages import GamePadSelectPressed
 #from DataController import DataPool, PrintingTaskController
-from multiprocessing import Process
+from DataBaseController import DataBaseController
+
+
+
 
 class SlaPrinterController(Observer):
 
     def __init__(self):
 
         self.io_bus = MessageBus()
-        self.io_bus.register_observer(self)
+        self.io_bus.register(self)
 
         if on_raspberry_pi:
             self.stepperController = StepperController(self.io_bus)
@@ -29,17 +33,13 @@ class SlaPrinterController(Observer):
 
 
         self.data_bus = MessageBus()
-
-        print("initialized data_dispatcher : " + str(self.data_bus))
-        self.data_bus.register_observer(self)
-        self.data = DataPool(dispatcher=self.data_bus)
-        self.task_controller = PrintingTaskController(dispatcher=self.data_bus)
-
+        self.data_bus.register(self)
+        self.db_controller = DataBaseController(in_memory_database, bus=self.data_bus)
 
         if on_raspberry_pi:
             self.pygameRenderController = BeamerController(dispatcher=self.data_bus)
 
-        self.server = Process(target=Server.start_flask)
+        self.server =  Server.SlaPrinterApp(__name__, db_controller = self.db_controller)
 
 
 
@@ -49,16 +49,14 @@ class SlaPrinterController(Observer):
         self.io_bus.start()
         self.data_bus.start()
 
-        self.task_controller.start()
-        self.data.start()
-
 
         self.pygameIoController.start()
 
         if on_raspberry_pi:
             self.pygameRenderController.start()
+            #self.stepperController.start() -> currently not used as process
 
-        self.server.start()
+        self.server.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False)
 
 
 
@@ -74,13 +72,11 @@ class SlaPrinterController(Observer):
             self.pygameRenderController.stop()
             self.stepperController.stop()
 
-        self.task_controller.stop()
         self.data.stop()
 
 
         # stop server
-        self.server.terminate()
-        self.server.join()
+        self.server.stop()
 
 
 
@@ -89,6 +85,13 @@ class SlaPrinterController(Observer):
 
         if isinstance(message, GamePadSelectPressed):
             self.release()
+
+
+        if isinstance(message.sender, DataBaseController):
+            print("[Controller] :: received message from Database >> " + message.msg)
+
+            if isinstance(message, NewPrintingTaskMsg):
+                print("[Controller] :: .... >> received task >> " + str(message.task))
 
         else:
             print("[Controller] :: " + str(message))

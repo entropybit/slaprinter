@@ -56,6 +56,7 @@ class PrintingTaskData(Data):
         self.stl_file = None
         self.step_width = -1
         self.illumination_time = -1
+        self.illumination_intensity = -1
         self.stl_model = None
         self.finished = False
         self.slices_todo = None
@@ -65,7 +66,7 @@ class PrintingTaskData(Data):
 
     def is_valid(self,json_dump):
 
-        valid = 'step_width' in json_dump and 'illumination_time' in json_dump
+        valid = 'step_width' in json_dump and 'illumination_time' in json_dump and 'illumination_intensity' in json_dump
         valid = valid and 'slices' in json_dump and 'slice_number' in json_dump
         valid = valid and 'stl_file' in json_dump and 'file_name' in json_dump
 
@@ -85,6 +86,7 @@ class PrintingTaskData(Data):
 
             self.step_width = float(json_dump["step_width"])
             self.illumination_time = float(json_dump["illumination_time"])
+            self.illumination_intensity = float(json_dump["illumination_intensity"])
 
             self.slices = json_dump["slices"]
             self.slices_todo = list(np.zeros(len(self.slices), dtype=bool))

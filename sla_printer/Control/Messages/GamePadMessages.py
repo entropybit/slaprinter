@@ -32,6 +32,16 @@ class GamePadDownPressed(Message):
     def __init__(self, sender, msg):
         Message.__init__(self,sender, msg)
 
+class GamePadRightPressed(Message):
+
+    def __init__(self, sender, msg):
+        Message.__init__(self,sender, msg)
+
+class GamePadLeftPressed(Message):
+
+    def __init__(self, sender, msg):
+        Message.__init__(self,sender, msg)
+
 class GamePadSelectPressed(Message):
 
     def __init__(self, sender, msg):
@@ -63,12 +73,3 @@ class GamePadBPressed(Message):
         Message.__init__(self,sender, msg)
 
 
-class DataReceivedMessage(Message):
-
-    def __init__(self, sender, msg):
-        Message.__init__(self,sender, msg)
-
-class DataDeletedMessage(Message):
-
-    def __init__(self, sender, msg):
-        Message.__init__(self,sender, msg)
