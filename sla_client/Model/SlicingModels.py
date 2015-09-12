@@ -156,8 +156,13 @@ class EquiSlicer(Slicer):
 
         self.PlotListX = []
         self.PlotListY = []
+
+        zeit_slice = []
+        zeit_sort = []
+        anzahl_kanten = []
         for self.slicingLevel in self.slicingLevelsList:
-            #self.slicingLevel = 97.70
+
+            asf = time.time()
             # this a specific filter for the current slicingLevel
             iteration_filter = lambda tri: decide_relevant_triangles_z(tri, self.slicingLevel)
 
@@ -189,6 +194,9 @@ class EquiSlicer(Slicer):
             self.results = results
             self.allresults.append(Slice(results)) #todo: what is this line used for? is it still necessary?
             self.allresults2.append(copy(results))
+
+            zeit_slice.append(time.time()-asf)
+            b = time.time()
 
             #SORTING happens here (important for plt.fill() ):
             shapes_counter = 0 #how many closed objects are in this slice
@@ -260,19 +268,25 @@ class EquiSlicer(Slicer):
                 self.currentPlotListY.append(None)
                 self.currentShape.append(None)
                 shapes_counter += 1
-                #print("shapes_counter:" + str(shapes_counter))
-                #print("finished with this slice:" + str(100*len(AlreadySeen)/len(results))+"%")
                 SortedShapesList.append(self.currentShape)
             self.PlotListX.append(self.currentPlotListX)
             self.PlotListY.append(self.currentPlotListY)
-            #self.plotSlice(self.slicingLevelsList.tolist().index(self.slicingLevel))
             print("slicenumber: " + str(self.slicingLevelsList.tolist().index(self.slicingLevel)) + " Slicinglevel: " + str(self.slicingLevel) + " Objects here: " + str(shapes_counter))
-           # print "time needed: ", time.time()-a
-        # compute scale from extremal x and y values
+
+
+            zeit_sort.append(time.time()-b)
+            anzahl_kanten.append(len(self.allresults2[-1]))
+
+
         self._scale = self.compute_scale(x_dims, y_dims)
         self.x_dims = x_dims
         self.y_dims = y_dims
-
+        print( "average time slice: " + str(sum(zeit_slice)/len(zeit_slice)) + ", average time sort: " + str(sum(zeit_sort)/len(zeit_sort)) )
+        #plt.figure(1)
+        #plt.plot(anzahl_kanten, zeit_slice, 'b*')
+        #plt.figure(2)
+        #plt.plot(anzahl_kanten, zeit_sort, 'r*')
+        #plt.show()
         return self.allresults
 
     def plotSlice(self, slicenummer):
@@ -311,5 +325,5 @@ class EquiSlicer(Slicer):
 if __name__ == "__main__":
     stl_model = StlModel('../Data/EiffelTowerTALL.stl')
     eiffel = EquiSlicer(stl_model)
-    eiffel.slice(1)
+    eiffel.slice(3)
     eiffel.plotSlice(2)
