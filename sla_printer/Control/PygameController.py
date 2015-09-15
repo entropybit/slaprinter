@@ -7,10 +7,16 @@ from ServiceFunctions import now
 import Control.MessageHandler as handler
 import Control.Config as conf
 import Control.Messages as msg
+
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.backends.backend_agg as agg
 #from Messages import *
 import Control.ServiceFunctions as srvfunc
 
 import os
+
 
 
 DATA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/Data"
@@ -41,6 +47,12 @@ class PygameController(handler.Observable, handler.Observer, Process):
 
         print("GamePadController Init")
 
+        #todo: die folgenden konstanten verfügbar machen (aka den datentransport vom client hierher)
+        #self.PlotListX            diese drei objekte heissen in sla_client/Model/slicingModels.py genauso und müssen hier verfügbar sein
+        #self.PlotListY
+        #self.sliceNummer = 1
+        #self.x_dims
+        #self.y_dims
 
     def updateGamePad(self, joysticks):
 
@@ -97,7 +109,6 @@ class PygameController(handler.Observable, handler.Observer, Process):
         else:
             self.main_surface = pygame.display.set_mode((int(1024), int(786)))
 
-
         while self.running: # main game loop
 
             if refresh:
@@ -106,16 +117,24 @@ class PygameController(handler.Observable, handler.Observer, Process):
             if self.disp_black:
                 self.display_black(self.main_surface)
             else:
-                picture = pygame.image.load("/home/pi/druckerskripte/sla_printer/temp.png")
-                self.main_surface.blit(picture, (0, 0))
-                pygame.display.update()
-                self.FPSCLOCK.tick(self.FPS)
+                fig = plt.figure(figsize=[4, 4], dpi=100, facecolor='k')# 100 dots per inch, so the resulting buffer is 400x400 pixels# )
+                #ax = fig.gca()
+                plt.subplot(1, 1, 1, axisbg='k')
+                plt.fill(self.PlotArrayX[self.slicenummer], self.PlotArrayY[self.slicenummer], 'white')
+                plt.xlim(self.x_dims)
+                plt.ylim(self.y_dims)
 
+                canvas = agg.FigureCanvasAgg(fig)
+                canvas.draw()
+                #renderer = canvas.get_renderer()
+                #raw_data = renderer.tostring_rgb()
+                screen = pygame.display.get_surface()
+                #size = canvas.get_width_height()
 
-                #if time.time()-zeit > Belichtungszeit:
-                    #motor.upOneStep()
-                    #zeit = time.time()
-
+                #surf = pygame.image.fromstring(raw_data, size, "RGB")
+                screen.blit(self.mainSurface, (0, 0))
+                pygame.display.flip()
+                self.update()
 
 
 
@@ -125,7 +144,6 @@ class PygameController(handler.Observable, handler.Observer, Process):
             #time.sleep(checking_interval)
 
             i = i +1
-
             refresh = (i % conf.refresh_cycle == 0 and i > 0)
 
 
@@ -141,7 +159,6 @@ class PygameController(handler.Observable, handler.Observer, Process):
         Process.terminate(self)
 
     def start(self):
-
         pygame.init()
         self.running = True
         Process.start(self)
