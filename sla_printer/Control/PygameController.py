@@ -1,11 +1,15 @@
 import pygame
 from pygame.locals import *
 from multiprocessing import Process
-from MessageHandler import Observable, MessageBus, Observer
-from Config import on_raspberry_pi
-from Messages import *
-from Config import checking_interval, refresh_cycle
+
 from ServiceFunctions import now
+#from threading import Thread
+import Control.MessageHandler as handler
+import Control.Config as conf
+import Control.Messages as msg
+#from Messages import *
+import Control.ServiceFunctions as srvfunc
+
 import os
 
 
@@ -21,12 +25,12 @@ class PygameControllerProto(object):
         return "joystick [" + self.joystick_name + "] found"
 
 
-class PygameController(Observable, Observer, Process):
+class PygameController(handler.Observable, handler.Observer, Process):
 
-    def __init__(self, sending_bus=MessageBus(), receiving_bus=MessageBus()):
+    def __init__(self, sending_bus=handler.MessageBus(), receiving_bus=handler.MessageBus()):
         Process.__init__(self)
-        Observable.__init__(self, sending_bus)
-        Observer.__init__(self, receiving_bus)
+        handler.Observable.__init__(self, sending_bus)
+        handler.Observer.__init__(self, receiving_bus)
 
         self.FPSCLOCK = pygame.time.Clock()
         self.FPS = 30
@@ -45,12 +49,12 @@ class PygameController(Observable, Observer, Process):
         if not self.hasGamePad and  hasGamePad:
             print("Recognized controller: USB Gamepad ")
             print("basedir: " + str(DATA_DIR))
-            self.put_message(GamePadConnected(PygameControllerProto(joystick_name=joysticks[0].get_name()), "USB Gamepad connected"))
+            self.put_message(msg.GamePadConnected(PygameControllerProto(joystick_name=joysticks[0].get_name()), "USB Gamepad connected"))
 
 
         if  self.hasGamePad and not hasGamePad:
             print("USB Gamepad disconnected, please reconnect")
-            self.put_message(GamePadDisconnected(PygameControllerProto(joystick_name=joysticks[0].get_name()), "USB Gamepad disconnected"))
+            self.put_message(msg.GamePadDisconnected(PygameControllerProto(joystick_name=joysticks[0].get_name()), "USB Gamepad disconnected"))
 
         # ToDO: do this later with iteration information
         #if not self.hasGamePad and not hasGamePad:
@@ -88,7 +92,7 @@ class PygameController(Observable, Observer, Process):
         pygame.mouse.set_visible(False)
         pygame.event.pump()
 
-        if on_raspberry_pi:
+        if conf.on_raspberry_pi:
             self.main_surface = pygame.display.set_mode((int(1920*scale), int(1080*scale)))
         else:
             self.main_surface = pygame.display.set_mode((int(1024), int(786)))
@@ -119,8 +123,11 @@ class PygameController(Observable, Observer, Process):
 
 
             #time.sleep(checking_interval)
-         #   i = i +1
-          #  refresh = (i % refresh_cycle == 0 and i > 0)
+
+            i = i +1
+
+            refresh = (i % conf.refresh_cycle == 0 and i > 0)
+
 
 
 
@@ -164,30 +171,30 @@ class PygameController(Observable, Observer, Process):
                     if event.type == JOYBUTTONUP:
                         if event.button == 8:
                             #print("Select Button Pressed")
-                            self.put_message(GamePadSelectPressed(PygameControllerProto(self.gamepad[0].get_name()), "Select Button Pressed"))
+                            self.put_message(msg.GamePadSelectPressed(PygameControllerProto(self.gamepad[0].get_name()), "Select Button Pressed"))
                             #self.stop()
 
                             #sys.exit()
                         if event.button == 0:
-                            self.put_message(GamePadXPressed(PygameControllerProto(self.gamepad[0].get_name()), "X Button Pressed"))
+                            self.put_message(msg.GamePadXPressed(PygameControllerProto(self.gamepad[0].get_name()), "X Button Pressed"))
                             #print("X pressed")
                         if event.button == 1:
-                            self.put_message(GamePadAPressed(PygameControllerProto(self.gamepad[0].get_name()), "A Button Pressed"))
+                            self.put_message(msg.GamePadAPressed(PygameControllerProto(self.gamepad[0].get_name()), "A Button Pressed"))
                             #print("A pressed")
                         if event.button == 2:
-                            self.put_message(GamePadBPressed(PygameControllerProto(self.gamepad[0].get_name()), "B Button Pressed"))
+                            self.put_message(msg.GamePadBPressed(PygameControllerProto(self.gamepad[0].get_name()), "B Button Pressed"))
                             #print("B pressed")
                         if event.button == 3:
-                            self.put_message(GamePadYPressed(PygameControllerProto(self.gamepad[0].get_name()), "Y Button Pressed"))
+                            self.put_message(msg.GamePadYPressed(PygameControllerProto(self.gamepad[0].get_name()), "Y Button Pressed"))
                             #print("Y pressed")
                         if event.button == 4:
                             self.black()
-                            self.put_message(GamePadShoulderLPressed(PygameControllerProto(self.gamepad[0].get_name()), "Left Shoulder Button Pressed"))
+                            self.put_message(msg.GamePadShoulderLPressed(PygameControllerProto(self.gamepad[0].get_name()), "Left Shoulder Button Pressed"))
                         if event.button == 5:
                             self.black()
-                            self.put_message(GamePadShoulderRPressed(PygameControllerProto(self.gamepad[0].get_name()), "Right Shoulder Button Pressed"))
+                            self.put_message(msg.GamePadShoulderRPressed(PygameControllerProto(self.gamepad[0].get_name()), "Right Shoulder Button Pressed"))
                         if event.button == 9:
-                            self.put_message(GamePadStartPressed(PygameControllerProto(self.gamepad[0].get_name()), "Start Button Pressed"))
+                            self.put_message(msg.GamePadStartPressed(PygameControllerProto(self.gamepad[0].get_name()), "Start Button Pressed"))
                             #print("Start Button Pressed")
                             #path = DATA_DIR + "/Portal Sentry - is anyone there.ogg"
                             #print("playing file " + path)
@@ -196,16 +203,16 @@ class PygameController(Observable, Observer, Process):
 
                     elif event.type == JOYAXISMOTION:
                         if event.joy == 0 and event.axis == 1 and event.value > 0.5:
-                            self.put_message(GamePadDownPressed(PygameControllerProto(self.gamepad[0].get_name()), "Down Pressed"))
+                            self.put_message(msg.GamePadDownPressed(PygameControllerProto(self.gamepad[0].get_name()), "Down Pressed"))
 
                         if event.joy == 0 and event.axis == 1 and event.value < -0.5:
-                            self.put_message(GamePadUpPressed(PygameControllerProto(self.gamepad[0].get_name()), "Up Pressed"))
+                            self.put_message(msg.GamePadUpPressed(PygameControllerProto(self.gamepad[0].get_name()), "Up Pressed"))
 
                         if event.joy == 0 and event.axis == 0 and event.value > 0.5:
-                            self.put_message(GamePadRightPressed(PygameControllerProto(self.gamepad[0].get_name()), "Right Pressed"))
+                            self.put_message(msg.GamePadRightPressed(PygameControllerProto(self.gamepad[0].get_name()), "Right Pressed"))
 
                         if event.joy == 0 and event.axis == 0 and event.value < -0.5:
-                            self.put_message(GamePadLeftPressed(PygameControllerProto(self.gamepad[0].get_name()), "Left Pressed"))
+                            self.put_message(msg.GamePadLeftPressed(PygameControllerProto(self.gamepad[0].get_name()), "Left Pressed"))
 
 
 
@@ -221,10 +228,9 @@ class PygameController(Observable, Observer, Process):
         pygame.display.update()
 
     def notify(self, msg):
-
-
         print("[" + str(now()) + "] PygameController :: " + str(msg))
 
 if __name__ == "__main__":
     jep = PygameController()
     jep.run()
+

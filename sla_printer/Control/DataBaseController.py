@@ -77,7 +77,7 @@ class DataBaseController(handler.Observable):
             if r.fetchone() is None:
 
                 c.execute('''CREATE TABLE jobs
-                    (jid integer primary key autoincrement, step_width real, illumination_time real,
+                    (jid integer primary key autoincrement, step_width real,
                         illumination_intensity real, file_name text, stl_file text, slices text, insertion_time date)
                 ''')
 
@@ -86,7 +86,7 @@ class DataBaseController(handler.Observable):
             if r.fetchone() is None:
 
                 c.execute('''CREATE TABLE slices
-                    (sid integer primary key autoincrement, job int)
+                    (sid integer primary key autoincrement, job int, illumination_time real, )
                 ''')
 
 
@@ -138,9 +138,11 @@ class DataBaseController(handler.Observable):
 
         for slice in slices:
 
+            illumination_time = slice[0]
+
             # insert slice row
             c.execute('INSERT INTO slices' +
-                '  (job) ' +
+                '  (job, illumination_time) ' +
                 ' VALUES ' +
                 '(' + str(jid) + ')'
             )
@@ -151,7 +153,7 @@ class DataBaseController(handler.Observable):
 
             #print("slice: " + str(slice ))
 
-            for line in slice:
+            for line in slice[1]:
                 # insert point row
 
                 pid0 = -1

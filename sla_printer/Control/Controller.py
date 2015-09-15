@@ -1,7 +1,7 @@
 __author__ = 'mithrawnuruodo'
 
-in_memory_database=False
-on_raspberry_pi = False
+
+from Config import in_memory_database, on_raspberry_pi, mode
 
 from MessageHandler import MessageBus, Observer
 from Messages import NewPrintingTaskMsg, QuitMessage
@@ -20,6 +20,7 @@ from DataBaseController import DataBaseController
 from multiprocessing import Process
 
 from ServiceFunctions import now
+
 
 
 
@@ -47,14 +48,16 @@ class SlaPrinterController(Observer):
 
         self.data_bus = MessageBus()
         self.data_bus.register(self)
-        self.db_controller = DataBaseController(in_memory_database, bus=self.data_bus)
+        if mode != "stepper_calibration":
+            self.db_controller = DataBaseController(in_memory_database, bus=self.data_bus)
 
         self.pygameIoController = PygameController(sending_bus=self.io_bus, receiving_bus=self.data_bus)
 
         #self.pygameRenderController = BeamerController(bus=self.data_bus)
 
 
-        self.server = Server.SlaPrinterApp(__name__, db_controller = self.db_controller, bus=self.data_bus)
+        if mode != "stepper_calibration":
+            self.server = Server.SlaPrinterApp(__name__, db_controller = self.db_controller, bus=self.data_bus)
 
 
 
@@ -73,7 +76,9 @@ class SlaPrinterController(Observer):
         #self.pygameRenderController.start()
             #self.stepperController.start() -> currently not used as process
 
-        self.server.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False, use_reloader=False)
+
+        if mode != "stepper_calibration":
+            self.server.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False, use_reloader=False)
 
 
 
