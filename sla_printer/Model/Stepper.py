@@ -51,7 +51,7 @@ class SoncebosStepper(Stepper):
         GPIO.setup(self.detectPinTop, GPIO.IN)
         GPIO.setup(self.detectPinBottom, GPIO.IN)
 
-        self.secondsToMove = 1
+        self.secondsToMove = 0.03
         self.frequency_slow = 300 #5000Hz @ 20s = 2,3cm
 
     def __str__(self):
