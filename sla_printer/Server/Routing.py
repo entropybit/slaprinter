@@ -10,6 +10,16 @@ from flask import Response
 
 from Model import PrintingTaskData
 
+#import sys
+#import os
+# set sytem path to be directory above so that a can be a
+# package namespace
+#DIRECTORY_SCRIPT = os.path.dirname(os.path.realpath(__file__))
+#sys.path.insert(0,DIRECTORY_SCRIPT+"/..")
+
+from Control.MessageHandler import Observable
+from Control.Messages import QuitMessage
+
 PROJECT_DIR = os.path.dirname(os.path.dirname(__file__)) + "/Server"
 TEMPLATE_DIR = PROJECT_DIR + '/templates'
 STATIC_DIR = PROJECT_DIR +'/static'
@@ -34,10 +44,14 @@ def route(*args, **kwargs):
         return fn
     return wrap
 
-class SlaPrinterApp(Flask):
-    def __init__(self, import_name, db_controller = None):
+class SlaPrinterAppProto(object):
+    pass
+
+class SlaPrinterApp(Flask, Observable):
+    def __init__(self, import_name, db_controller = None, bus = None):
         #super(SlaPrinterApp, self).__init__(import_name, template_folder=TEMPLATE_DIR, static_url_path=STATIC_DIR)
-        super(SlaPrinterApp, self).__init__(import_name, static_folder=STATIC_DIR, template_folder=TEMPLATE_DIR)
+        Flask.__init__(self,import_name, static_folder=STATIC_DIR, template_folder=TEMPLATE_DIR)
+        Observable.__init__(self, bus=bus)
 
         self.endpoint_prefix = None
         for name in dir(self):
@@ -65,6 +79,27 @@ class SlaPrinterApp(Flask):
 
         else:
             return render_template("index.html")
+
+    @route("/enqueue")
+    def enqueue(self):
+
+        return render_template("enqueue.html")
+
+    @route("/info")
+    def info(self):
+
+        return render_template("info.html")
+
+    @route("/quit", methods = ['POST', 'GET'])
+    def quit(self):
+
+
+        #self.shutdown_server()
+
+        msg = QuitMessage(SlaPrinterAppProto(),"sla printer shutting down")
+        self.put_message(msg)
+
+        return "quitting"
 
     @route("/post/raw/", methods = ['POST'])
     def post_data(self):
@@ -142,21 +177,11 @@ class SlaPrinterApp(Flask):
     def page_not_found(self, e):
         return render_template('404.html'), 404
 
-
-#if __name__ == "__main__":
-#    app.run(host='0.0.0.0',debug=True, port=4242)
-
-#class StartFlask(Thread):
-#
-#    def __init__(self, dispatcher):
-#        Thread.__init__(self)
-#        self.__dispatcher = dispatcher
-#
-#    def run(self):
-
-#def start_flask():
-#    app.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False)
-
+    def shutdown_server(self):
+        func = request.environ.get('werkzeug.server.shutdown')
+        if func is None:
+            raise RuntimeError('Not running with the Werkzeug Server')
+        func()
 
 
 if __name__ == "__main__":

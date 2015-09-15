@@ -1,13 +1,6 @@
 __author__ = 'mithrawnuruodo'
 
-class Message(object):
-
-    def __init__(self,sender,msg):
-        self.sender = sender
-        self.msg = msg
-
-    def __str__(self):
-        return "[" + str(self.sender) + "]: " + str(self.msg)
+from GeneralMessages import Message
 
 class GamePadConnected(Message):
 
@@ -26,8 +19,17 @@ class GamePadUpPressed(Message):
     def __init__(self, sender, msg):
         Message.__init__(self,sender, msg)
 
+class GamePadUpRightPressed(Message):
+
+    def __init__(self, sender, msg):
+        Message.__init__(self,sender, msg)
 
 class GamePadDownPressed(Message):
+
+    def __init__(self, sender, msg):
+        Message.__init__(self,sender, msg)
+
+class GamePadDownRightPressed(Message):
 
     def __init__(self, sender, msg):
         Message.__init__(self,sender, msg)
@@ -38,6 +40,16 @@ class GamePadRightPressed(Message):
         Message.__init__(self,sender, msg)
 
 class GamePadLeftPressed(Message):
+
+    def __init__(self, sender, msg):
+        Message.__init__(self,sender, msg)
+
+class GamePadLeftDownPressed(Message):
+
+    def __init__(self, sender, msg):
+        Message.__init__(self,sender, msg)
+
+class GamePadLeftUpPressed(Message):
 
     def __init__(self, sender, msg):
         Message.__init__(self,sender, msg)
@@ -71,5 +83,19 @@ class GamePadBPressed(Message):
 
     def __init__(self, sender, msg):
         Message.__init__(self,sender, msg)
+
+
+class GamePadShoulderLPressed(Message):
+
+    def __init__(self, sender, msg):
+        Message.__init__(self,sender, msg)
+
+
+class GamePadShoulderRPressed(Message):
+
+    def __init__(self, sender, msg):
+        Message.__init__(self,sender, msg)
+
+
 
 

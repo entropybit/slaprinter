@@ -3,6 +3,7 @@ __author__ = 'mithrawnuruodo'
 
 from multiprocessing import Process, Queue
 from abc import ABCMeta, abstractmethod
+from Config import checking_interval
 
 class Message(object):
 
@@ -50,7 +51,8 @@ class MessageBus(Process):
 
     def stop(self):
         self.running = False
-        Process.join(self)
+        Process.terminate(self)
+        #Process.join(self)
 
     def register(self, observer):
 
@@ -82,7 +84,9 @@ class MessageBus(Process):
 
                 #i = i +1
 
+            time.sleep(checking_interval)
 
+        return
 
 
 import string
@@ -110,7 +114,6 @@ class Worker(Process, Observable):
     def stop(self):
 
         self.running = False
-        Process.join(self)
 
     def run(self):
         import numpy as np

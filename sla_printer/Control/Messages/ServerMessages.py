@@ -1,6 +1,6 @@
 __author__ = 'mithrawnuruodo'
 
-from GamePadMessages import Message
+from GeneralMessages import Message
 
 
 

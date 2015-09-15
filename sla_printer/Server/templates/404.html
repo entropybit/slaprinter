@@ -4,8 +4,9 @@
 
 {% block menu %}
           <ul class="nav navbar-nav">
-            <li><a href="/"><span class="glyphicon glyphicon-info-sign"></span>Info</a></li>
+            <li class="active"><a href="/"><span class="glyphicon glyphicon-home"></span>Printer</a></li>
             <li><a href="/enqueue"><span class="glyphicon glyphicon-import"></span>Enqueue File</a></li>
+            <li><a href="/info"><span class="glyphicon glyphicon-question-sign"></span>Controller Info</a></li>
           </ul>
 {% endblock %}
 
@@ -30,46 +31,4 @@
 
 </div>
 
-{% endblock %}
-
-
-
-{% block js %}
-<script>
-
-
-console.log("within js");
-
-
-
-function executeQuery() {
-    console.log("worker");
-
-    /*$.get("url 'rssi_five_mins' %}",function (data) {
-
-        $.each(data, function() {
-            var string = "<div>"
-
-            $.each(this, function(k, v) {
-                    string
-            });
-        });
-
-        string = "<div>"
-        string += "[20:48:30] from receiver 18 received beacon (<b>uuid</b>=18f91819, <b>major</b>=1001, <b>minor</b>=18, <b>rssi</b>=19.81)"
-        string += "</div>"
-        $('#console').append(string)
-
-    });*/
-
-
-
-    console.log("worker has done something");
-    //setTimeout(executeQuery, time); // you could choose not to continue on failure...
-}
-
-//setTimeout(executeQuery, time);
-
-
-</script>
 {% endblock %}

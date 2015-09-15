@@ -1,3 +1,3 @@
 __author__ = 'aslan'
 
-from Routing import SlaPrinterApp
+from Routing import SlaPrinterApp, SlaPrinterAppProto
