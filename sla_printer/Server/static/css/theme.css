@@ -30,14 +30,106 @@ table td {
     margin-top: 10px;
 }
 
+.image {
+
+    position: absolute;
+    margin: 0;
+    padding: 0;
+}
+
+.image img {
+
+    position: relative;
+    width: 100%;
+    z-index: 111;
+
+}
+
 li span {
 
     margin-right: 5px;
 }
 
-l2 {
+#up, #left, #down, #right, #shoulderleft, #shoulderright, #buttonx, #buttona, #buttonb, #buttony, #buttonstart, #buttonselect {
 
-    z-index: 2;
     position: absolute;
+    width: 200px;
+    min-height: 30px;
+    z-index: 200;
+    border: 3px solid #8a0000;
+    padding-left: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 
 }
+
+#up {
+
+    top: 24.5%;
+    left: -17.8%;
+}
+
+#left {
+
+    top: 45.6%;
+    left: -20.7%;
+
+}
+
+#down {
+
+    top: 72%;
+    left: -17.1%;
+
+}
+
+#right {
+
+    top: 86.5%;
+    left: -19.3%;
+
+}
+
+#shoulderleft {
+
+    top: 10%;
+    left: -8.5%;
+}
+
+#shoulderright {
+
+    top: 8.6%;
+    left: 78.5%;
+}
+
+#buttonselect {
+    top: 91.5%;
+    left: 46%;
+}
+
+#buttonstart {
+    top: 91.5%;
+    left: 21%;
+}
+
+#buttonx {
+    top: 23.5%;
+    left: 99.8%;
+}
+
+#buttona {
+    top: 39.5%;
+    left: 96.8%;
+}
+
+#buttonb {
+    top: 75.5%;
+    left: 88.5%;
+}
+
+#buttony {
+    top: 93%;
+    left: 94.5%;
+}
+
+

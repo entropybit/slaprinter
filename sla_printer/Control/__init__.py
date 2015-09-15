@@ -1,7 +1,7 @@
 __author__ = 'mithrawnuruodo'
 
 from Controller import SlaPrinterController
-from GamePadController import GamePadController
+from PygameController import PygameController
 from MessageHandler import Observable, Observer, MessageBus
 from Messages import *
 from Controller import SlaPrinterController

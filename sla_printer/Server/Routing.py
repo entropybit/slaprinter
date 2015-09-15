@@ -9,6 +9,8 @@ from flask import request
 from flask import Response
 
 from Model import PrintingTaskData
+from Control.ServiceFunctions import now
+import base64
 
 #import sys
 #import os
@@ -17,7 +19,7 @@ from Model import PrintingTaskData
 #DIRECTORY_SCRIPT = os.path.dirname(os.path.realpath(__file__))
 #sys.path.insert(0,DIRECTORY_SCRIPT+"/..")
 
-from Control.MessageHandler import Observable
+from Control.MessageHandler import Observable, Observer
 from Control.Messages import QuitMessage
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(__file__)) + "/Server"
@@ -47,11 +49,12 @@ def route(*args, **kwargs):
 class SlaPrinterAppProto(object):
     pass
 
-class SlaPrinterApp(Flask, Observable):
+class SlaPrinterApp(Flask, Observable, Observer):
     def __init__(self, import_name, db_controller = None, bus = None):
         #super(SlaPrinterApp, self).__init__(import_name, template_folder=TEMPLATE_DIR, static_url_path=STATIC_DIR)
         Flask.__init__(self,import_name, static_folder=STATIC_DIR, template_folder=TEMPLATE_DIR)
-        Observable.__init__(self, bus=bus)
+        Observable.__init__(self, bus)
+        Observer.__init__(self, bus)
 
         self.endpoint_prefix = None
         for name in dir(self):
@@ -70,10 +73,9 @@ class SlaPrinterApp(Flask, Observable):
     @route("/index")
     def index(self):
 
-        #data = cntrl.PrintingTaskController()
-
         if self.db_controller is not None:
             tasks = self.db_controller.printing_tasks()
+            print("tasks: " + str(tasks))
             active_job = self.db_controller.active_job()
             return render_template("index.html", printing_tasks = tasks, active_job= active_job)
 
@@ -150,28 +152,29 @@ class SlaPrinterApp(Flask, Observable):
             return "invalid data"
 
 
-    @route("/download/<tid>/",  methods = ['POST', 'GET'])
-    def download_zip(self, tid):
+    @route("/download/<jid>/",  methods = ['POST', 'GET'])
+    def download_zip(self, jid):
 
         # data_pool = cntrl.DataPool()
         #
         #
-        # task = data_pool.get_by_id(tid)
-        #
-        # if task is not None:
-        #
-        #     zip = task.stl_file
-        #     zip = base64.decodestring(zip)
-        #
-        # else:
-        zip = ''
+        task = self.db_controller.get_by_id(jid)
 
-        file_name = "bla"
+        if task is not None:
+
+            zip = task.stl_file
+            zip = base64.decodestring(zip)
+            filename = task.file_name
+
+        else:
+            zip = ''
+            filename = ''
+
 
         return Response(zip,
                 mimetype='application/zip',
-                #headers={'Content-Disposition':'attachment;filename=' + str(task.file_name) + '.zip'})
-                headers={'Content-Disposition':'attachment;filename=' + str(file_name) + '.zip'})
+                headers={'Content-Disposition':'attachment;filename=' + str(filename) + '.zip'})
+                #headers={'Content-Disposition':'attachment;filename=' + str(file_name) + '.zip'})
 
 
     def page_not_found(self, e):
@@ -182,6 +185,9 @@ class SlaPrinterApp(Flask, Observable):
         if func is None:
             raise RuntimeError('Not running with the Werkzeug Server')
         func()
+
+    def notify(self, msg):
+        print("[" + str(now()) + "] Server :: " + str(msg))
 
 
 if __name__ == "__main__":

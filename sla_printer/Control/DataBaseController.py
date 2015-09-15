@@ -4,14 +4,43 @@ __author__ = 'mithrawnuruodo'
 import sqlite3
 import Control.MessageHandler as handler
 import Control.Messages as messages
+import datetime
+import pytz
+from time import strftime
+
+#berlin = pytz.timezone('Europe/Berlin')
+gmt = pytz.timezone('GMT')
+
+from ServiceFunctions import now_unix
 import pickle
 
+class PrintingTaskData(object):
+
+    def __init__(self):
+        self.slices = None
+        self.stl_file =""
+        self.illumination_time = 0
+        self.illumination_intensity = 0
+
+        self.step_width = 0
+        self.slice_number = 0
+        self.file_name = ""
+        self.id = -1
+        self.insert_time = 0
+
+    @property
+    def time(self):
+        print("time in time")
+        t = datetime.datetime.utcfromtimestamp(int(self.insert_time))
+        t = pytz.utc.localize(t)
+        t = t.strftime('%Y-%m-%d %H:%M:%S')
+        return t
 
 
 class DataBaseController(handler.Observable):
 
 
-    def __init__(self, in_memory_mode=True, bus=None, connect_on_init=True):
+    def __init__(self, in_memory_mode=True, bus=handler.MessageBus(), connect_on_init=True):
 
         handler.Observable.__init__(self, bus=bus)
         self.__in_memory_mode = in_memory_mode
@@ -49,7 +78,7 @@ class DataBaseController(handler.Observable):
 
                 c.execute('''CREATE TABLE jobs
                     (jid integer primary key autoincrement, step_width real, illumination_time real,
-                        illumination_intensity real, file_name text, stl_file text, slices text)
+                        illumination_intensity real, file_name text, stl_file text, slices text, insertion_time date)
                 ''')
 
 
@@ -96,10 +125,10 @@ class DataBaseController(handler.Observable):
         # insert job row
         c.execute(
                   'INSERT INTO jobs' +
-                  '  (step_width, illumination_time, illumination_intensity, file_name, stl_file, slices)' +
+                  '  (step_width, illumination_time, illumination_intensity, file_name, stl_file, slices, insertion_time)' +
                     ' VALUES ' +
                     '(' + str(task.step_width) + ', ' + str(task.illumination_time) + ', ' + str(task.illumination_intensity) + ', "'  +
-                    str(task.file_name) + '", "' +  str(task.stl_file) + '", "' + str(task.slice_number) +'")'
+                    str(task.file_name) + '", "' +  str(task.stl_file) + '", "' + str(task.slice_number) + '", "'+ str(now_unix()) + '")'
                 )
 
         jid = c.lastrowid
@@ -120,6 +149,8 @@ class DataBaseController(handler.Observable):
             sid = c.lastrowid
             #print("sid="+str(sid))
 
+            #print("slice: " + str(slice ))
+
             for line in slice:
                 # insert point row
 
@@ -128,9 +159,10 @@ class DataBaseController(handler.Observable):
                 i = 0
                 for p in line:
 
+                    #print("p in line : " + str(p))
 
                     #c.execute('SELECT pid from points WHERE sid=' + str(sid) + ' AND x = ' + str(p[0]) + ' AND y = ' + str(p[1]) + '')
-
+                    #print('insert into points ... (' + str(p[0]) + ', ' + str(p[1]) + ',' + str(sid) + ')')
                     c.execute(
                     'INSERT INTO points' +
                     '  (x,y, sid)' +
@@ -170,7 +202,7 @@ class DataBaseController(handler.Observable):
         c = self.__database.cursor()
 
 
-        # insert job row
+        # get sli job row
         c.execute('''
                     SELECT * FROM slices
                 ''')
@@ -180,13 +212,40 @@ class DataBaseController(handler.Observable):
 
 
     def printing_tasks(self):
+        # get sli job row
+        c = self.__database.cursor()
+        ret = []
+        for row in c.execute('SELECT jid, file_name, stl_file, insertion_time FROM jobs'):
 
-        return []
+            #print("res : " + str(row))
+            task = PrintingTaskData()
+            task.id = int(row[0])
+            task.file_name = row[1]
+            task.stl_file = row[2]
+            task.insert_time = row[3]
+            print("tid : " +str(task.id) + " | " + str(int(row[0])))
+            print("task " + str(task))
+            ret.append(task)
+
+
+        return ret
 
 
     def active_job(self):
 
         return 0
+
+    def get_by_id(self, jid):
+
+        c = self.__database.cursor()
+        for row in c.execute('SELECT file_name, stl_file, insertion_time FROM jobs WHERE jid=' + str(int(jid)) + ''):
+
+            task = PrintingTaskData()
+            task.id = int(jid)
+            task.file_name = row[0]
+            task.stl_file = row[1]
+            task.insert_time = row[2]
+            return task
 
 
 
@@ -202,17 +261,7 @@ import random
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-class PrintingTaskData(object):
 
-    def __init__(self):
-        self.slices = None
-        self.stl_file =""
-        self.illumination_time = 0
-        self.illumination_intensity = 0
-
-        self.step_width = 0
-        self.slice_number = 0
-        self.file_name = ""
 
 def draw_printing_tasks(n=100):
 
@@ -236,9 +285,11 @@ def draw_printing_tasks(n=100):
             points =int(ceil(np.random.rand()*n))
 
             for p in range(0,points):
-                x = np.random.rand()
-                y = np.random.rand()
-                slice.append([x,y])
+                x0 = np.random.rand()
+                y0 = np.random.rand()
+                x1 = np.random.rand()
+                y1 = np.random.rand()
+                slice.append([[x0,y0],[x1,y1]])
 
             slices.append(slice)
 
@@ -275,14 +326,15 @@ def task_worker(n = 100):
     db_controller = DataBaseController(in_memory_mode=False)
 
     while True:
-
-
         #if id is not None:
         #    print("last_insert_id: " + str(id))
-        print("printing slices: ")
-        print(db_controller.get_all_slices())
-        print("")
-        print("")
+
+        slices = db_controller.get_all_slices()
+        if slices is not None:
+            print("printing slices: ")
+            print(slices)
+            print("")
+            print("")
 
 
     db_controller.release()
@@ -306,11 +358,11 @@ if __name__=="__main__":
     # prepare for parallel working on db
     n = 20
     inserter = lambda: task_inserter(n)
-    worker = lambda: task_worker(n)
+    #worker = lambda: task_worker(n)
 
-    worker_process = m.Process(target=inserter)
-    inserter_process = m.Process(target=worker)
+    #worker_process = m.Process(target=worker)
+    inserter_process = m.Process(target=inserter)
 
-    worker_process.start()
+    #worker_process.start()
     inserter_process.start()
 
