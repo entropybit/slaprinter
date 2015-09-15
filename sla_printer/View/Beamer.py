@@ -1,55 +1,38 @@
-__author__ = 'aslan'
+#!/usr/bin/env python
 
 
-import array
-import cairo
-import pygame
-import rsvg
+__author__ = 'mithrawnuruodo'
 
-class Beamer(object):
+import pygame, time
+import pygame.image, pygame.display
+from pygame.locals import *
+import Model.Stepper as Stepper
+pygame.init()
 
-    def __init__(self, *svgfile):
-        #initialising the display
-        self.WIDTH = int(round(1920*0.9)) # should be fullHD, the pi throws an error though. 90% of the resolution work
-        self.HEIGHT = int(round(1080*0.9))
-        self.svgfile = svgfile
-        self.data = array.array('c', chr(0) * self.WIDTH * self.HEIGHT * 4)
-        self.surface = cairo.ImageSurface.create_for_data(self.data, cairo.FORMAT_ARGB32, self.WIDTH, self.HEIGHT, self.WIDTH * 4)
-        pygame.init()
+FPS = 30 # frames per second, the general speed of the program
+def main():
+    FPSCLOCK = pygame.time.Clock()
 
-        self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+    motor = Stepper.SoncebosStepper()
 
-        if svgfile.__len__() == 0:
-            self.svg = rsvg.Handle(file="black.svg") #instancing a Beamer() without loading a picture makes the screen go black - this way the resin doesnt get unnecessarily radiated
-        else:
-            self.svg = rsvg.Handle(file=self.svgfile[0])
-        """
-        #neuer code experimentell
-        print self.svg.__sizeof__()
-        self.pixbuf = self.svg.get_pixbuf(id='#layer30')
-        print self.pixbuf
-        #self.pixbuf.render_cairo(self.ctx)
-        """
-        self.ctx = cairo.Context(self.surface)
-        self.svg.render_cairo(self.ctx)
+    Belichtungszeit = 600
+    scale = 0.8
+    main_surface = pygame.display.set_mode((int(1920*scale), int(1080*scale)))
+    printingmode = False
+    while True: # main game loop
 
-        self.screen = pygame.display.get_surface()
-        self.image = pygame.image.frombuffer(self.data.tostring(), (self.WIDTH, self.HEIGHT), "ARGB")
+        picture = pygame.image.load("/home/pi/druckerskripte/sla_printer/black.png")
+        main_surface.blit(picture, (0, 0))
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
 
-        self.screen.blit(self.image, (self.WIDTH/2, self.HEIGHT/2))
-        pygame.display.flip()
+        if printingmode == True:
+            if time.time()-zeit > Belichtungszeit:
+                motor.upOneStep()
+                zeit = time.time()
 
-        clock = pygame.time.Clock()
-        while True:
-            clock.tick(15)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    raise SystemExit
+#            time.sleep(Belichtungszeit)
 
 
-
-#display = Beamer("pimpstick.svg")
-if __name__ == "__main__":
-    display = Beamer("pimpstick.svg")
-
-#todo: anderes svg-layer anzeigen
+if __name__ == '__main__':
+    main()

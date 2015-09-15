@@ -1,6 +1,6 @@
 __author__ = 'mithrawnuruodo'
 
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from StlModels import Model, StlModel
 import numpy as np
 import matplotlib.pyplot as plt
@@ -290,12 +290,14 @@ class EquiSlicer(Slicer):
         return self.allresults
 
     def plotSlice(self, slicenummer):
-        plt.figure(str(self.slicingLevelsList.tolist().index(self.slicingLevel)), facecolor='black')
+        plt.figure(str(self.slicingLevelsList.tolist().index(self.slicingLevel)), facecolor='k')
         plt.subplot(1, 1, 1, axisbg='k')
         plt.fill(self.PlotListX[slicenummer], self.PlotListY[slicenummer], 'white') #todo: find an algorithm that can tell outside from inside and plot the holes accurately
         plt.xlim(self.x_dims)
         plt.ylim(self.y_dims)
+        #plt.savefig('temp.png', facecolor='k', edgecolor='k', dpi=170)
         plt.show()
+
 
     def PlotSlice_cheapPlot(self, slicenummer):
         plt.plot(self.allresults2[slicenummer, 1:, :, 0], self.allresults2[slicenummer, 1:, :, 1], 'b')
@@ -325,5 +327,5 @@ class EquiSlicer(Slicer):
 if __name__ == "__main__":
     stl_model = StlModel('../Data/EiffelTowerTALL.stl')
     eiffel = EquiSlicer(stl_model)
-    eiffel.slice(3)
+    eiffel.slice(100)
     eiffel.plotSlice(2)

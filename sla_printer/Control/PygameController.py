@@ -1,14 +1,12 @@
-import random, pygame, sys
+import pygame
 from pygame.locals import *
 from multiprocessing import Process
-#from threading import Thread
 from MessageHandler import Observable, MessageBus, Observer
-from Controller import on_raspberry_pi
+from Config import on_raspberry_pi
 from Messages import *
 from Config import checking_interval, refresh_cycle
 from ServiceFunctions import now
 import os
-import time
 
 
 DATA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/Data"
@@ -30,8 +28,11 @@ class PygameController(Observable, Observer, Process):
         Observable.__init__(self, sending_bus)
         Observer.__init__(self, receiving_bus)
 
+        self.FPSCLOCK = pygame.time.Clock()
+        self.FPS = 30
+
         self.hasGamePad = False
-        self.disp_black = False
+        self.disp_black = True
         self.running = True
 
         print("GamePadController Init")
@@ -81,9 +82,8 @@ class PygameController(Observable, Observer, Process):
     def run(self):
 
         refresh = True
-        i = 0
+        #i = 0
         self.gamepad = self.refresh_gamepad()
-
         scale = 0.8
         pygame.mouse.set_visible(False)
         pygame.event.pump()
@@ -96,18 +96,22 @@ class PygameController(Observable, Observer, Process):
 
         while self.running: # main game loop
 
-            #print(" ...refreshing gamepad... ")
-
             if refresh:
                self.gamepad = self.refresh_gamepad()
 
             if self.disp_black:
-                #print("displaying black screen")
-                self.display_blank(self.main_surface)
+                self.display_black(self.main_surface)
             else:
-                #print("displaying white screen")
-                self.display_white(self.main_surface)
-            #print(" ...refreshing gamepad done... ")
+                picture = pygame.image.load("/home/pi/druckerskripte/sla_printer/temp.png")
+                self.main_surface.blit(picture, (0, 0))
+                pygame.display.update()
+                self.FPSCLOCK.tick(self.FPS)
+
+
+                #if time.time()-zeit > Belichtungszeit:
+                    #motor.upOneStep()
+                    #zeit = time.time()
+
 
 
 
@@ -115,9 +119,8 @@ class PygameController(Observable, Observer, Process):
 
 
             #time.sleep(checking_interval)
-            i = i +1
-
-            refresh = (i % refresh_cycle == 0 and i > 0)
+         #   i = i +1
+          #  refresh = (i % refresh_cycle == 0 and i > 0)
 
 
 
@@ -140,7 +143,7 @@ class PygameController(Observable, Observer, Process):
     def release(self):
         pygame.quit()
 
-    def display_blank(self, surface):
+    def display_black(self, surface):
         black = (0,0,0)
         self.main_surface.fill(black)
         self.update()
@@ -221,3 +224,7 @@ class PygameController(Observable, Observer, Process):
 
 
         print("[" + str(now()) + "] PygameController :: " + str(msg))
+
+if __name__ == "__main__":
+    jep = PygameController()
+    jep.run()
