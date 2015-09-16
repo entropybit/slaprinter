@@ -24,7 +24,7 @@ def main():
 
     motor = Stepper.SoncebosStepper()
 
-    Belichtungszeit = 600
+    Belichtungszeit = 15 #in seconds
     scale = 0.8
     main_surface = pygame.display.set_mode((int(1920*scale), int(1080*scale)))
     printingmode = False
@@ -78,6 +78,10 @@ def main():
         if printingmode == True:
             if time.time()-zeit > Belichtungszeit:
                 motor.upOneStep()
+                motor.upOneStep()
+                motor.upOneStep()
+                motor.downOneStep()
+                motor.downOneStep()
                 zeit = time.time()
 
 #            time.sleep(Belichtungszeit)

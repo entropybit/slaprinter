@@ -8,8 +8,6 @@ try:
 except RuntimeError:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
 
-
-
 class Stepper(object):
     __metaclass__ = ABCMeta
 
@@ -25,8 +23,6 @@ class Stepper(object):
     def init_gpio(self):
         GPIO.setmode(GPIO.BOARD)
 
-
-
 class SoncebosStepper(Stepper):
 
     def __init__(self):
@@ -37,7 +33,6 @@ class SoncebosStepper(Stepper):
         #self.__enable = 0.0     # power on 0/1 <--> off/on respectively
         GPIO.setmode(GPIO.BOARD)
 
-        self.laserPin = 7
         self.directionPin = 16 #cw/ccw - the directional pin (False=cw)
         self.startPin = 18 #move yes/no pwm
         self.enablePin = 22 #enable engine yes/no
@@ -51,7 +46,7 @@ class SoncebosStepper(Stepper):
         GPIO.setup(self.detectPinTop, GPIO.IN)
         GPIO.setup(self.detectPinBottom, GPIO.IN)
 
-        self.secondsToMove = 0.03
+        self.secondsToMove = 0.06
         self.frequency_slow = 300 #5000Hz @ 20s = 2,3cm
 
     def __str__(self):
@@ -129,6 +124,10 @@ class SoncebosStepper(Stepper):
         raw_input("Press return to stop going down...")
         pwm.stop()
         GPIO.output(self.enablePin, True)
+
+if __name__ == "__main__":
+    yep = SoncebosStepper()
+    yep.upOneStepManual()
 
 """
     def up_old(self): #probieren verschiedener frequenzen -  nichts geht. warum? WEIL time.sleep() keine werte unter 1/1000 annimmt. shit.
