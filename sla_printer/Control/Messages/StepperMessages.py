@@ -34,4 +34,8 @@ class SeveralStepsUpAndDown(Message):
         Message.__init__(self,sender, msg)
         self.steps = steps
 
+class SeveralStepsDownAndUp(Message):
 
+    def __init__(self, sender, msg, steps):
+        Message.__init__(self,sender, msg)
+        self.steps = steps

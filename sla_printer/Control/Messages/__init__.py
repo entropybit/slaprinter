@@ -13,4 +13,4 @@ from ServerMessages import DataDeletedMessage, DataReceivedMessage, NewPrintingT
 from ControlMessages import RequestActiveTaskMessage, ActiveTaskMessage
 from ControlMessages import SetNewActiveTaskMessage, SliceFinishedMessage
 
-from StepperCommands import OneStepDown, OneStepUp, SeveralStepsDown, SeveralStepsUp, SeveralStepsUpAndDown
+from StepperMessages import OneStepDown, OneStepUp, SeveralStepsDown, SeveralStepsUp, SeveralStepsUpAndDown,SeveralStepsDownAndUp

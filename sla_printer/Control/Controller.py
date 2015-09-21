@@ -1,18 +1,14 @@
 __author__ = 'mithrawnuruodo'
 
 
-from Config import in_memory_database, on_raspberry_pi, mode
+from Config import in_memory_database,log_controller_input
 
 from MessageHandler import MessageBus, Observer
 from Messages import NewPrintingTaskMsg, QuitMessage
 from PygameController import PygameController, PygameControllerProto
 from Messages import GamePadConnected, GamePadShoulderLPressed, GamePadShoulderRPressed
 from Messages import GamePadAPressed, DataReceivedMessage
-
-if on_raspberry_pi:
-    from StepperController import StepperController
-
-from BeamerController import BeamerController
+from StepperController import StepperController
 import Server
 from Messages import GamePadSelectPressed
 #from DataController import DataPool, PrintingTaskController
@@ -42,22 +38,20 @@ class SlaPrinterController(Observer):
         #self.broadcast_bus = MessageBus()
         #self.broadcast_bus.register(self)
 
-
-        if on_raspberry_pi:
-            self.stepperController = StepperController(self.io_bus)
+        self.stepperController = StepperController(bus=self.io_bus)
 
         self.data_bus = MessageBus()
         self.data_bus.register(self)
-        if mode != "stepper_calibration":
-            self.db_controller = DataBaseController(in_memory_database, bus=self.data_bus)
+        #if mode != "stepper_calibration":
+        self.db_controller = DataBaseController(in_memory_database, bus=self.data_bus)
 
         self.pygameIoController = PygameController(sending_bus=self.io_bus, receiving_bus=self.data_bus)
 
         #self.pygameRenderController = BeamerController(bus=self.data_bus)
 
 
-        if mode != "stepper_calibration":
-            self.server = Server.SlaPrinterApp(__name__, db_controller = self.db_controller, bus=self.data_bus)
+        #if mode != "stepper_calibration":
+        self.server = Server.SlaPrinterApp(__name__, db_controller = self.db_controller, bus=self.data_bus)
 
 
 
@@ -73,12 +67,9 @@ class SlaPrinterController(Observer):
         self.pygameIoController.start()
 
 
-        #self.pygameRenderController.start()
-            #self.stepperController.start() -> currently not used as process
+        self.stepperController.start()
 
-
-        if mode != "stepper_calibration":
-            self.server.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False, use_reloader=False)
+        self.server.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False, use_reloader=False)
 
 
 
@@ -90,8 +81,8 @@ class SlaPrinterController(Observer):
         #self.pygameIoController.terminate()
         #self.pygameIoController.join()
 
-        if on_raspberry_pi:
-            self.stepperController.stop()
+
+        self.stepperController.stop()
 
         #self.pygameRenderController.stop()
 
@@ -119,20 +110,25 @@ class SlaPrinterController(Observer):
         if isinstance(message, GamePadSelectPressed) or isinstance(message, QuitMessage):
 
             if isinstance(message.sender, PygameControllerProto):
-                print("[" + str(now()) + "] Controller :: received message GamePadController >> " + message.msg)
+                if log_controller_input:
+                    print("[" + str(now()) + "] Controller :: received message GamePadController >> " + message.msg)
 
 
-            print("[" + str(now()) + "] Controller :: received Quitmessage >> shutting down ...")
+            if log_controller_input:
+                print("[" + str(now()) + "] Controller :: received Quitmessage >> shutting down ...")
 
             self.release()
 
 
         # handle Data related Messages
         if isinstance(message.sender, DataBaseController):
-            print("[" + str(now()) + "] Controller :: received message from Database >> " + message.msg)
+
+            if log_controller_input:
+                print("[" + str(now()) + "] Controller :: received message from Database >> " + message.msg)
 
             if isinstance(message, NewPrintingTaskMsg):
-                print("[" + str(now()) + "] Controller :: .... >> received task >> " + str(message.task))
+                if log_controller_input:
+                    print("[" + str(now()) + "] Controller :: .... >> received task >> " + str(message.task))
 
 
 
@@ -140,14 +136,20 @@ class SlaPrinterController(Observer):
         # handle IO messages
         if isinstance(message.sender, PygameControllerProto):
 
-            print("[" + str(now()) + "] Controller :: received message GamePadController >> " + message.msg)
+
+            if log_controller_input:
+                print("[" + str(now()) + "] Controller :: received message GamePadController >> " + message.msg)
 
             if isinstance(message, GamePadConnected):
-                print("[" + str(now()) + "] Controller :: .... >> found controller >> " + str(message.sender))
+
+                if log_controller_input:
+                    print("[" + str(now()) + "] Controller :: .... >> found controller >> " + str(message.sender))
+
             if isinstance(message, GamePadAPressed):
                 msg = DataReceivedMessage(None, "bla")
                 self.data_bus.put(msg)
             else:
-                print("[" + str(now()) + "] Controller :: " + str(message))
+                if log_controller_input:
+                    print("[" + str(now()) + "] Controller :: " + str(message))
 
 

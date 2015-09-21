@@ -3,7 +3,9 @@ __author__ = 'mithrawnuruodo'
 
 from multiprocessing import Process, Queue
 from abc import ABCMeta, abstractmethod
-from Config import checking_interval
+from Config import checking_period
+
+
 
 class Message(object):
 
@@ -84,7 +86,7 @@ class MessageBus(Process):
 
                 #i = i +1
 
-            time.sleep(checking_interval)
+            time.sleep(checking_period)
 
         return
 

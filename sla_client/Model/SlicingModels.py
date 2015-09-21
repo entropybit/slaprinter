@@ -325,7 +325,8 @@ class EquiSlicer(Slicer):
         return 1.0/s
 
 if __name__ == "__main__":
-    stl_model = StlModel('../Data/EiffelTowerTALL.stl')
+    #stl_model = StlModel('../Data/EiffelTowerTALL.stl')
+    stl_model = StlModel('../Data/square.stl')
     eiffel = EquiSlicer(stl_model)
     eiffel.slice(100)
     eiffel.plotSlice(2)
