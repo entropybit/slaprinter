@@ -278,7 +278,7 @@ class EquiSlicer(Slicer):
 
             #zeit_sort.append(time.time()-b)
             anzahl_kanten.append(len(self.allresults2[-1]))
-            self.plotSlice(self.slicingLevelsList.tolist().index(self.slicingLevel))
+            #self.plotSlice(self.slicingLevelsList.tolist().index(self.slicingLevel))
 
 
         self._scale = self.compute_scale(x_dims, y_dims)
@@ -297,11 +297,11 @@ class EquiSlicer(Slicer):
         plt.figure(str(self.slicingLevelsList.tolist().index(self.slicingLevel)), facecolor='k')
         plt.subplot(1, 1, 1, axisbg='k')
         plt.fill(self.PlotListX[slicenummer], self.PlotListY[slicenummer], 'white') #todo: find an algorithm that can tell outside from inside and plot the holes accurately
-        #plt.xlim(self.x_dims)
-        #plt.ylim(self.y_dims)
-        plt.savefig(str(self.slicingLevelsList.tolist().index(self.slicingLevel)) + '.png', facecolor='k', edgecolor='k', dpi=170)
-        plt.close()
-        #plt.show()
+        plt.xlim(self.x_dims)
+        plt.ylim(self.y_dims)
+        #plt.savefig(str(self.slicingLevelsList.tolist().index(self.slicingLevel)) + '.png', facecolor='k', edgecolor='k', dpi=170)
+        plt.show()
+        #plt.close()
 
 
     def PlotSlice_cheapPlot(self, slicenummer):
@@ -330,7 +330,9 @@ class EquiSlicer(Slicer):
         return 1.0/s
 
 if __name__ == "__main__":
-    stl_model = StlModel('../Data/iGEM.stl')
+
+    #stl_model = StlModel('../Data/EiffelTowerTALL.stl')
+    stl_model = StlModel('../Data/square.stl')
     eiffel = EquiSlicer(stl_model)
     eiffel.slice(0.13)
     #eiffel.plotSlice(2)

@@ -2,89 +2,133 @@ __author__ = 'mithrawnuruodo'
 
 from MessageHandler import Observer, Observable, MessageBus
 from Model import SoncebosStepper
-from Messages import OneStepDown, OneStepUp, SeveralStepsDown, SeveralStepsUp, SeveralStepsUpAndDown
+from Messages import OneStepDown, OneStepUp, SeveralStepsDown, SeveralStepsUp, SeveralStepsUpAndDown, SeveralStepsDownAndUp
 from ServiceFunctions import now
 from multiprocessing import Process, Queue
-from Messages import GamePadUpPressed, GamePadDownPressed, GamePadShoulderLPressed, GamePadShoulderRPressed
+from Messages import GamePadUpPressed, GamePadDownPressed
+from Messages import GamePadShoulderLPressed, GamePadShoulderRPressed
+from Messages import GamePadLeftPressed, GamePadRightPressed
+from Messages import GamePadAPressed, GamePadBPressed
 
 
-from Config import  mode,multiple_steps
+from Config import several_steps, multiplier_base, log_steppercontroller
 
-class StepperController(Observer, Observable, Process):
+class StepperControllerProto(object):
+
+    def __init__(self):
+        self.stepper = SoncebosStepperProto()
+
+class SoncebosStepperProto(object):
+
+
+    def __init__(self):
+            self.__name = "8660R013"
+            self.__version = 1.0
+
+class StepperController(Observer, Observable):
 
     def __init__(self, bus):
+        print("StepperController Init")
         Observable.__init__(self,bus)
         Observer.__init__(self,bus)
+        #Process.__init__(self)
 
-        self.commands= Queue()
+        #self.commands= Queue()
 
-        self.stepper = SoncebosStepper()
+
+        self.control_bus = MessageBus()
+        self.stepper = SoncebosStepper(bus=self.control_bus)
         self.running = False
+        self.multiplier = multiplier_base
 
-        print("stepper created")
 
 
     def start(self):
+        print("StepperController started")
         self.start = False
-        Process.start()
+        #Process.start(self)
+        self.control_bus.start()
+        self.stepper.start()
 
 
     def stop(self):
         self.stepper.release()
 
 
-    def run(self):
-
-        while self.running:
-
-            while not self.commands.empty():
-
-                command = self.commands.get()
-
-                #OneStepDown, OneStepUp, SeveralStepsDown, SeveralStepsUp, SeveralStepsUpAndDown
-                if isinstance(command, OneStepDown):
-                    self.stepper.downOneStep()
-
-                elif isinstance(command, OneStepUp):
-                    self.stepper.upOneStep()
-
-                elif isinstance(command, SeveralStepsUp):
-                    for i in range(multiple_steps):
-                        self.stepper.upOneStep()
-
-                elif isinstance(command, SeveralStepsDown):
-                    for i in range(multiple_steps):
-                        self.stepper.downOneStep()
-
-                elif isinstance(command, SeveralStepsUpAndDown):
-                    for i in range(multiple_steps):
-                        self.stepper.upOneStep()
-
-                    for i in range(multiple_steps):
-                        self.stepper.downOneStep()
-
-
-
-
     def notify(self,Message):
-         print("[" + str(now()) + "] stepper :: " + str(Message.msg))
+        #print("[" + str(now()) + "] StepperController :: " + str(Message.msg))
+        #print("                               msg   classname: " + str(Message.__class__.__name__))
 
-         if mode == "stepper_calibration":
+        #GamePadUpPressed, GamePadDownPressed, GamePadShoulderLPressed, GamePadShoulderRPressed
 
-             #GamePadUpPressed, GamePadDownPressed, GamePadShoulderLPressed, GamePadShoulderRPressed
+        if isinstance(Message, GamePadUpPressed):
 
-             if isinstance(Message, GamePadUpPressed):
-                 self.commands.put(OneStepUp(self, "Move one step upwards"))
+            if log_steppercontroller:
+                print("[" + str(now()) + "] StepperController :: GamePadUpPressed")
 
-             if isinstance(Message, GamePadDownPressed):
-                self.commands.put(OneStepDown(self, "Move one step downwards"))
+            self.control_bus.put(OneStepUp(StepperControllerProto(), "Move one step upwards"))
+
+        elif isinstance(Message, GamePadLeftPressed):
+
+            if log_steppercontroller:
+                print("[" + str(now()) + "] StepperController :: GamePadLeftPressed")
+
+            self.control_bus.put(SeveralStepsDown(StepperControllerProto(), "Move multiple step downwards", self.multiplier*several_steps))
 
 
-             if isinstance(Message, GamePadShoulderLPressed):
-                self.commands.put(SeveralStepsUp(self, "Move multiple steps upwards"))
+        elif isinstance(Message, GamePadRightPressed):
 
-             if isinstance(Message, GamePadShoulderRPressed):
-                self.commands.put(SeveralStepsDown(self, "Move multiple steps downwards"))
+            if log_steppercontroller:
+                print("[" + str(now()) + "] StepperController :: GamePadRightPressed")
+
+            self.control_bus.put(SeveralStepsUp(StepperControllerProto(), "Move multiple steps upwards", self.multiplier*several_steps))
+
+
+        elif isinstance(Message, GamePadDownPressed):
+
+            if log_steppercontroller:
+                print("[" + str(now()) + "] StepperController :: GamePadDownPressed")
+
+            self.control_bus.put(OneStepDown(StepperControllerProto(), "Move one step down"))
+
+        elif isinstance(Message, GamePadShoulderLPressed):
+
+            if log_steppercontroller:
+                print("[" + str(now()) + "] StepperController :: GamePadShoulderLPressed")
+
+            self.control_bus.put(SeveralStepsUpAndDown(StepperControllerProto(), "Move multiple steps up and down", self.multiplier*several_steps))
+
+        elif isinstance(Message, GamePadShoulderRPressed):
+
+            if log_steppercontroller:
+                print("[" + str(now()) + "] StepperController :: GamePadShoulderRPressed")
+
+            self.control_bus.put(SeveralStepsDownAndUp(StepperControllerProto(), "Move multiple steps down and up", self.multiplier*several_steps))
+
+        elif isinstance(Message, GamePadBPressed):
+
+            if log_steppercontroller:
+                print("[" + str(now()) + "] StepperController :: GamePadBPressed")
+
+            self.multiply()
+            print("new multiplier = " + str(self.multiplier))
+
+
+        elif isinstance(Message, GamePadAPressed):
+
+            if log_steppercontroller:
+                print("[" + str(now()) + "] StepperController :: GamePadAPressed")
+
+            self.divide()
+            print("new multiplier = " + str(self.multiplier))
+
+
+
+    def multiply(self):
+        self.multiplier *= multiplier_base
+
+    def divide(self):
+        self.multiplier /= multiplier_base
 
 
 

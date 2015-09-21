@@ -25,7 +25,6 @@ class PygameControllerProto(object):
 
     def __init__(self, joystick_name="unknown"):
         self.joystick_name = joystick_name
-        self.main_surface = None
 
     def __str__(self):
         return "joystick [" + self.joystick_name + "] found"
@@ -47,8 +46,8 @@ class PygameController(handler.Observable, handler.Observer, Process):
 
         print("GamePadController Init")
 
-        #todo: die folgenden konstanten verfügbar machen (aka den datentransport vom client hierher)
-        #self.PlotListX            diese drei objekte heissen in sla_client/Model/slicingModels.py genauso und müssen hier verfügbar sein
+        #todo: die folgenden konstanten verfuegbar machen (aka den datentransport vom client hierher)
+        #self.PlotListX            diese drei objekte heissen in sla_client/Model/slicingModels.py genauso und muessen hier verfuegbar sein
         #self.PlotListY
         #self.sliceNummer = 1
         #self.x_dims
@@ -98,16 +97,16 @@ class PygameController(handler.Observable, handler.Observer, Process):
     def run(self):
 
         refresh = True
-        #i = 0
+        i = 0
         self.gamepad = self.refresh_gamepad()
         scale = 0.8
         pygame.mouse.set_visible(False)
         pygame.event.pump()
 
-        if conf.on_raspberry_pi:
-            self.main_surface = pygame.display.set_mode((int(1920*scale), int(1080*scale)))
-        else:
-            self.main_surface = pygame.display.set_mode((int(1024), int(786)))
+        #if conf.on_raspberry_pi:
+        #    self.main_surface = pygame.display.set_mode((int(1920*scale), int(1080*scale)))
+        #else:
+        self.main_surface = pygame.display.set_mode((int(1024), int(786)))
 
         while self.running: # main game loop
 
@@ -119,21 +118,21 @@ class PygameController(handler.Observable, handler.Observer, Process):
             else:
                 fig = plt.figure(figsize=[4, 4], dpi=100, facecolor='k')# 100 dots per inch, so the resulting buffer is 400x400 pixels# )
                 #ax = fig.gca()
-                plt.subplot(1, 1, 1, axisbg='k')
-                plt.fill(self.PlotArrayX[self.slicenummer], self.PlotArrayY[self.slicenummer], 'white')
-                plt.xlim(self.x_dims)
-                plt.ylim(self.y_dims)
+                #plt.subplot(1, 1, 1, axisbg='k')
+                #plt.fill(self.PlotArrayX[self.slicenummer], self.PlotArrayY[self.slicenummer], 'white')
+                #plt.xlim(self.x_dims)
+                #plt.ylim(self.y_dims)
 
-                canvas = agg.FigureCanvasAgg(fig)
-                canvas.draw()
+                #canvas = agg.FigureCanvasAgg(fig)
+                #canvas.draw()
                 #renderer = canvas.get_renderer()
                 #raw_data = renderer.tostring_rgb()
-                screen = pygame.display.get_surface()
+                #screen = pygame.display.get_surface()
                 #size = canvas.get_width_height()
 
                 #surf = pygame.image.fromstring(raw_data, size, "RGB")
-                screen.blit(self.mainSurface, (0, 0))
-                pygame.display.flip()
+                #screen.blit(self.mainSurface, (0, 0))
+                #pygame.display.flip()
                 self.update()
 
 
@@ -141,7 +140,7 @@ class PygameController(handler.Observable, handler.Observer, Process):
             self.event_handling()
 
 
-            #time.sleep(checking_interval)
+            #time.sleep(checking_period)
 
             i = i +1
             refresh = (i % conf.refresh_cycle == 0 and i > 0)
@@ -190,33 +189,34 @@ class PygameController(handler.Observable, handler.Observer, Process):
                             #print("Select Button Pressed")
                             self.put_message(msg.GamePadSelectPressed(PygameControllerProto(self.gamepad[0].get_name()), "Select Button Pressed"))
                             #self.stop()
-
                             #sys.exit()
+
                         if event.button == 0:
                             self.put_message(msg.GamePadXPressed(PygameControllerProto(self.gamepad[0].get_name()), "X Button Pressed"))
                             #print("X pressed")
+
                         if event.button == 1:
                             self.put_message(msg.GamePadAPressed(PygameControllerProto(self.gamepad[0].get_name()), "A Button Pressed"))
                             #print("A pressed")
+
                         if event.button == 2:
                             self.put_message(msg.GamePadBPressed(PygameControllerProto(self.gamepad[0].get_name()), "B Button Pressed"))
                             #print("B pressed")
+
                         if event.button == 3:
                             self.put_message(msg.GamePadYPressed(PygameControllerProto(self.gamepad[0].get_name()), "Y Button Pressed"))
                             #print("Y pressed")
+
                         if event.button == 4:
-                            self.black()
+                            #self.black()
                             self.put_message(msg.GamePadShoulderLPressed(PygameControllerProto(self.gamepad[0].get_name()), "Left Shoulder Button Pressed"))
+
                         if event.button == 5:
-                            self.black()
+                            #self.black()
                             self.put_message(msg.GamePadShoulderRPressed(PygameControllerProto(self.gamepad[0].get_name()), "Right Shoulder Button Pressed"))
+
                         if event.button == 9:
                             self.put_message(msg.GamePadStartPressed(PygameControllerProto(self.gamepad[0].get_name()), "Start Button Pressed"))
-                            #print("Start Button Pressed")
-                            #path = DATA_DIR + "/Portal Sentry - is anyone there.ogg"
-                            #print("playing file " + path)
-                            #JumpSound = pygame.mixer.Sound(path)
-                            #JumpSound.play()
 
                     elif event.type == JOYAXISMOTION:
                         if event.joy == 0 and event.axis == 1 and event.value > 0.5:
