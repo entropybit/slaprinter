@@ -17,9 +17,18 @@ The raspberry pi within the printer is used to control the illumination as well 
 
 The script folder contains some scripts produced for analysis of our 3D printer. Currently there are only two scripts contained, the measurement script and the manual_printing script. The measurement script is a simple analysis of printer step height distributions. Which were produced by measuring the height of single steps with a digital ruler.
 
-The more interesting script would be the manual_printing script which as the name suggest is used for actual printing. This script needs to run on the raspberry pi controlling the printer. To select from one of the several possible working modes of the manual_printing script an input device is needed. In our case this was a simple USB gamepad with a SNES controller layout.
+The more interesting script would be the manual_printing script which as the name suggest is used for actual printing. This script needs to run on the raspberry pi controlling the printer. To select from one of the several possible working modes of the manual_printing script an input device is needed. In our case this was a simple USB gamepad with a SNES controller layout. The specific layout regarding the according functionality with the script is as illustrated here:
 
 ![gamepad layout ](https://raw.githubusercontent.com/entropybit/slaprinter/master/scripts/manual_printing/controller.png) 
+
+So the arrow keys are used to move the stepper motor around. The shoulder keys can be used to move the board for holding the printed object to the lower or upper end of the printer,e.g., for moving the finished object out of the basin.
+
+After starting the script it looks for folders within the subfolder slices, containing png files. 
+Each such subfolder will be loaded as series of slices. With the **Y** button the actual slice in the actually selected slice series will be displayed for about 1s (enough time to see the picture on the bottom of the basin without causing significant hardening). With **B** one can iterate through the slices of the current slice series. And with the **A** button it is possible to go through the slice series which were generated according to the found subfolders of */slices* and there contained *.png* files. 
+Upon pressing **X** a rectangle illustrating the displaying area will be shown on the display.
+
+Finnally the functionality of the select key is to just show or hide a eich picture which can be used to examine how stuff will be displayed on the basin ground.
+With start the printing procedure defined in the programm.dat will be started with the currently selected slice series.
 
 ## sla_client
 
