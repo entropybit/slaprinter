@@ -162,7 +162,7 @@ class EquiSlicer(Slicer):
         anzahl_kanten = []
         for self.slicingLevel in self.slicingLevelsList:
 
-            asf = time.time()
+            #asf = time.time()
             # this a specific filter for the current slicingLevel
             iteration_filter = lambda tri: decide_relevant_triangles_z(tri, self.slicingLevel)
 
@@ -194,9 +194,11 @@ class EquiSlicer(Slicer):
             self.results = results
             self.allresults.append(Slice(results)) #todo: what is this line used for? is it still necessary?
             self.allresults2.append(copy(results))
+            self.x_dims = x_dims
+            self.y_dims = y_dims
 
-            zeit_slice.append(time.time()-asf)
-            b = time.time()
+           # zeit_slice.append(time.time()-asf)
+           # b = time.time()
 
             #SORTING happens here (important for plt.fill() ):
             shapes_counter = 0 #how many closed objects are in this slice
@@ -274,19 +276,21 @@ class EquiSlicer(Slicer):
             print("slicenumber: " + str(self.slicingLevelsList.tolist().index(self.slicingLevel)) + " Slicinglevel: " + str(self.slicingLevel) + " Objects here: " + str(shapes_counter))
 
 
-            zeit_sort.append(time.time()-b)
+            #zeit_sort.append(time.time()-b)
             anzahl_kanten.append(len(self.allresults2[-1]))
+            #self.plotSlice(self.slicingLevelsList.tolist().index(self.slicingLevel))
 
 
         self._scale = self.compute_scale(x_dims, y_dims)
         self.x_dims = x_dims
         self.y_dims = y_dims
-        print( "average time slice: " + str(sum(zeit_slice)/len(zeit_slice)) + ", average time sort: " + str(sum(zeit_sort)/len(zeit_sort)) )
+        #print( "average time slice: " + str(sum(zeit_slice)/len(zeit_slice)) + ", average time sort: " + str(sum(zeit_sort)/len(zeit_sort)) )
         #plt.figure(1)
         #plt.plot(anzahl_kanten, zeit_slice, 'b*')
         #plt.figure(2)
         #plt.plot(anzahl_kanten, zeit_sort, 'r*')
         #plt.show()
+
         return self.allresults
 
     def plotSlice(self, slicenummer):
@@ -295,8 +299,9 @@ class EquiSlicer(Slicer):
         plt.fill(self.PlotListX[slicenummer], self.PlotListY[slicenummer], 'white') #todo: find an algorithm that can tell outside from inside and plot the holes accurately
         plt.xlim(self.x_dims)
         plt.ylim(self.y_dims)
-        #plt.savefig('temp.png', facecolor='k', edgecolor='k', dpi=170)
+        #plt.savefig(str(self.slicingLevelsList.tolist().index(self.slicingLevel)) + '.png', facecolor='k', edgecolor='k', dpi=170)
         plt.show()
+        #plt.close()
 
 
     def PlotSlice_cheapPlot(self, slicenummer):
@@ -325,8 +330,9 @@ class EquiSlicer(Slicer):
         return 1.0/s
 
 if __name__ == "__main__":
+
     #stl_model = StlModel('../Data/EiffelTowerTALL.stl')
     stl_model = StlModel('../Data/square.stl')
     eiffel = EquiSlicer(stl_model)
-    eiffel.slice(100)
-    eiffel.plotSlice(2)
+    eiffel.slice(0.13)
+    #eiffel.plotSlice(2)
