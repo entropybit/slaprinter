@@ -36,7 +36,7 @@ This is the case because the entire software layout follows the *Model-View-Cont
 
 In the following you can see a basic demonstration of how the client software works:
 
-![software demo video](https://github.com/entropybit/slaprinter/blob/master/demo.mkv?raw=true)
+[![software demo video](http://img.youtube.com/vi/ugnCqa_hhho/0.jpg)](https://www.youtube.com/watch?v=ugnCqa_hhho)
 
 ## sla_printer
 
