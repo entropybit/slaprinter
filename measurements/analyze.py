@@ -22,8 +22,15 @@ mu2 = np.median(two_steps)
 avg1 = np.mean(one_step)
 avg2 = np.mean(two_steps)
 
+
+sig1 = np.std(one_step)
+sig2 = np.std(two_steps)
+
 print("mu1 =" + str(mu1))
 print("mu2 =" + str(mu2))
 
 print("avg1 =" + str(avg1))
 print("avg2 =" + str(avg2))
+
+print("std1 =" + str(sig1))
+print("std2 =" + str(sig2))

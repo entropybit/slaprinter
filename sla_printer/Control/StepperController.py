@@ -4,7 +4,6 @@ from MessageHandler import Observer, Observable, MessageBus
 from Model import SoncebosStepper
 from Messages import OneStepDown, OneStepUp, SeveralStepsDown, SeveralStepsUp, SeveralStepsUpAndDown, SeveralStepsDownAndUp
 from ServiceFunctions import now
-from multiprocessing import Process, Queue
 from Messages import GamePadUpPressed, GamePadDownPressed
 from Messages import GamePadShoulderLPressed, GamePadShoulderRPressed
 from Messages import GamePadLeftPressed, GamePadRightPressed
@@ -28,7 +27,7 @@ class SoncebosStepperProto(object):
 class StepperController(Observer, Observable):
 
     def __init__(self, bus):
-        print("StepperController Init")
+        print("StepperController initializing")
         Observable.__init__(self,bus)
         Observer.__init__(self,bus)
         #Process.__init__(self)
@@ -52,7 +51,8 @@ class StepperController(Observer, Observable):
 
 
     def stop(self):
-        self.stepper.release()
+        self.stepper.stop()
+        self.control_bus.stop()
 
 
     def notify(self,Message):

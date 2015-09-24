@@ -10,7 +10,9 @@ from flask import Response
 
 from Model import PrintingTaskData
 from Control.ServiceFunctions import now
+from multiprocessing import Event, Process
 import base64
+import time
 
 #import sys
 #import os
@@ -49,12 +51,15 @@ def route(*args, **kwargs):
 class SlaPrinterAppProto(object):
     pass
 
-class SlaPrinterApp(Flask, Observable, Observer):
+class SlaPrinterApp(Flask, Observable, Observer, Process):
     def __init__(self, import_name, db_controller = None, bus = None):
         #super(SlaPrinterApp, self).__init__(import_name, template_folder=TEMPLATE_DIR, static_url_path=STATIC_DIR)
         Flask.__init__(self,import_name, static_folder=STATIC_DIR, template_folder=TEMPLATE_DIR)
         Observable.__init__(self, bus)
         Observer.__init__(self, bus)
+        Process.__init__(self)
+        self.exit = Event()
+
 
         self.endpoint_prefix = None
         for name in dir(self):
@@ -67,6 +72,11 @@ class SlaPrinterApp(Flask, Observable, Observer):
 
         self.register_error_handler(404, self.page_not_found)
         self.db_controller = db_controller
+
+        print("Flask Server initializing")
+
+        #func = lambda: self.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False, use_reloader=False)
+        #self.runner_process = Process(target=func)
 
 
     @route("/")
@@ -176,18 +186,51 @@ class SlaPrinterApp(Flask, Observable, Observer):
                 headers={'Content-Disposition':'attachment;filename=' + str(filename) + '.zip'})
                 #headers={'Content-Disposition':'attachment;filename=' + str(file_name) + '.zip'})
 
+    @route("/stepper/down/<steps>/",  methods = ['POST', 'GET'])
+    def steps_down(self, steps):
+        print(" received " + str(steps) + " down message")
+
 
     def page_not_found(self, e):
         return render_template('404.html'), 404
 
-    def shutdown_server(self):
-        func = request.environ.get('werkzeug.server.shutdown')
-        if func is None:
-            raise RuntimeError('Not running with the Werkzeug Server')
-        func()
 
     def notify(self, msg):
         print("[" + str(now()) + "] Server :: " + str(msg))
+
+
+
+    def start(self):
+        print("[" + str(now()) + "] Server :: starting ")
+        #self.runner_process.start()
+        #self.running = True
+        Process.start(self)
+
+
+
+    def stop(self):
+        self.exit.set()
+        self.terminate()
+        #self.join()
+
+    def run(self):
+
+        # run server
+        Flask.run(self, host='0.0.0.0',debug=True, port=4242,  use_evalex=False, use_reloader=False)
+
+
+        while not self.exit.is_set():
+
+            print("[" + str(now()) + "] server heartbeat ")
+            time.sleep(0.5)
+
+
+        print("[" + str(now()) + "] server shutting down ")
+
+        return
+
+
+
 
 
 if __name__ == "__main__":

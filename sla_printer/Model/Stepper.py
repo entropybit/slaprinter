@@ -3,7 +3,7 @@ __author__ = 'mithrawnuruodo'
 import time
 from abc import ABCMeta, abstractmethod
 import Control as cntrl
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Event
 
 stepper_processing_period = cntrl.Config.stepper_processing_period
 now = cntrl.ServiceFunctions.now
@@ -33,13 +33,19 @@ class Stepper(cntrl.MessageHandler.Observer, Process):
         self._running = False
         self._queue = Queue()
 
+
     def release(self):
         print("RPIO cleanup")
-        self.reset()
+        if stepper_mode:
+            self.reset()
         print("...done...")
 
     @abstractmethod
     def reset(self):
+        pass
+
+    @abstractmethod
+    def stop(self):
         pass
 
 
@@ -59,6 +65,7 @@ class SoncebosStepper(Stepper):
         self.detectPinBottom = 27
         self.secondsToMove =  0.1
         self.frequency_slow = 5000 #5000Hz @ 20s = 2,3cm
+        self.exit = Event()
 
     def reset(self):
         self._pi.write(self.directionPin, 0)
@@ -187,7 +194,7 @@ class SoncebosStepper(Stepper):
 
     def run(self):
 
-        while self._running:
+        while not self.exit.is_set():
 
             while not self._queue.empty():
 
@@ -216,6 +223,14 @@ class SoncebosStepper(Stepper):
                     print("[" + str(now()) + "] SoncebosStepper :: invalid command")
 
             time.sleep(0.0001)
+
+        print(" ... exiting stepper instance ... ")
+        return
+
+
+    def stop(self):
+        self.exit.set()
+        self.release()
 
     def notify(self, msg):
         #from StepperMessages import OneStepDown, OneStepUp, SeveralStepsDown, SeveralStepsUp, SeveralStepsUpAndDown

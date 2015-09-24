@@ -11,16 +11,32 @@ import xml.etree.ElementTree as ET
 from pygame.locals import *
 import sys
 
-stepper_enabled = False
+
+working_mode = "test"
+#working_mode = "raspberry_pi"
+
+if working_mode == "raspberry_pi":
+    path = "/home/pi/scripts/"
+    stepper_enabled = True
+    XRES = 1600
+    YRES = 900
+
+else:
+    path = "/home/mithrawnuruodo/Dev/slaprinter/scripts/"
+    stepper_enabled = False
+    XRES = 1333
+    YRES = 666
 
 import numpy as np
 import os
 #PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROJECT_PATH = "/home/pi/"
+#PROJECT_PATH = "/home/pi/"
 
 
-XRES = 1600
-YRES = 900
+#XRES = 1600
+#YRES = 900
+
+
 
 try:
     if stepper_enabled:
@@ -158,6 +174,7 @@ class PygameController(object):
         self.curr_series = 0
         self.path = path
         self.curr_slice = 0
+	self.showing_border = False
 
         #worker_func = lambda: self.check_and_execute_commands()
         #self.processor = Process(target=worker_func)
@@ -208,26 +225,28 @@ class PygameController(object):
         h = img_r.height
 
 
-        if w > int(1920*self.scale):
-            r = h/w
+        if w > h:
+            r = h/(1.0*w)
 
-            w2 = 0.9*int(1920*self.scale)
-            h2 = r*w2
-            picture = pygame.transform.scale(picture, (int(1920*self.scale), int(1080*self.scale)))
+            w2 = int(0.9*XRES)
+            h2 = int(r*w2)
+            picture = pygame.transform.scale(picture, (w2,h2))
         else:
 
-            r = w/h
+            r = w/(1.0*w)
 
-            h2 = 0.9*int(1080*self.scale)
-            w2 = r*h2
-            picture = pygame.transform.scale(picture, (int(1920*self.scale), int(1080*self.scale)))
-
-
+            h2 = int(0.9*YRES)
+            w2 = int(r*h2)
+            picture = pygame.transform.scale(picture, (w2,h2))
 
 
 
 
-        self.screen.blit(picture, (0, 0))
+        x = int((XRES - w2)/2.0)
+        y = int((YRES - h2)/2.0)
+
+
+        self.screen.blit(picture, (x, y))
         print("display image")
         pygame.display.update()
 
@@ -400,6 +419,22 @@ class PygameController(object):
         self.display_current()
 
 
+
+
+    def show_border(self, pixel):
+
+        self.showing_border = not self.showing_border
+        self.display_black()
+
+        if self.showing_border:
+
+            red=(255,0,0)
+            pygame.draw.rect(self.screen,red,(0,0,XRES,YRES), pixel)
+            pygame.display.update()
+
+
+
+
     def main_processing(self, program):
 
         #FPSCLOCK = pygame.time.Clock()
@@ -439,7 +474,7 @@ class PygameController(object):
                         self.eich_bild()
                     # x buton
                     if event.button == 0:
-                        pass
+                        self.show_border(4)
                     # y button
                     if event.button == 3:
                         self.display_current()
@@ -463,20 +498,22 @@ class PygameController(object):
                     # down pressed
                     if event.joy == 0 and event.axis == 1 and event.value > 0.5:
                         #main_bus.put(["down_one_step"])
-                        self.stepper.downOneStep()
+			for i in range(1):
+	                        self.stepper.downOneStep()
 
                     # up pressed
                     if event.joy == 0 and event.axis == 1 and event.value < -0.5:
                         #main_bus.put(["up_one_step"])
-                        self.stepper.upOneStep()
+			for i in range(1):
+		        	self.stepper.upOneStep()
                     # right pressed
                     if event.joy == 0 and event.axis == 0 and event.value > 0.5:
-                        for i in range(20):
+                        for i in range(5):
                             #main_bus.put(["up_one_step"])
                             self.stepper.upOneStep()
                     # left pressed
                     if event.joy == 0 and event.axis == 0 and event.value < -0.5:
-                        for i in range(20):
+                        for i in range(5):
                             self.stepper.downOneStep()
 
 
@@ -598,8 +635,8 @@ class SliceSeriesContainer(object):
 #slice_path = "white.png"
 #steps = 5
 
-#path = "/home/pi/scripts/"
-path = "/home/mithrawnuruodo/Dev/slaprinter/scripts/"
+
+
 program_path = path + "programm.dat"
 
 slices = SliceSeriesContainer(path=path)

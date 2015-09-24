@@ -1,7 +1,7 @@
 __author__ = 'mithrawnuruodo'
 
 
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Event
 from abc import ABCMeta, abstractmethod
 from Config import checking_period
 
@@ -45,6 +45,7 @@ class MessageBus(Process):
         Process.__init__(self)
         self.msg_que = Queue()
         self.observers = []
+        self.exit = Event()
 
     def start(self):
         self.running = True
@@ -53,8 +54,9 @@ class MessageBus(Process):
 
     def stop(self):
         self.running = False
-        Process.terminate(self)
+        #Process.terminate(self)
         #Process.join(self)
+        self.exit.set()
 
     def register(self, observer):
 
@@ -67,7 +69,7 @@ class MessageBus(Process):
 
     def run(self):
 
-        while self.running:
+        while not self.exit.is_set():
 
             i =0
             while not self.msg_que.empty():
@@ -88,6 +90,8 @@ class MessageBus(Process):
 
             time.sleep(checking_period)
 
+
+        print(" ... exiting message bus instance ...")
         return
 
 
@@ -116,6 +120,8 @@ class Worker(Process, Observable):
     def stop(self):
 
         self.running = False
+        Process.terminate(self)
+        Process.join(self)
 
     def run(self):
         import numpy as np

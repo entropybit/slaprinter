@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from multiprocessing import Process
+from multiprocessing import Process, Event
 
 from ServiceFunctions import now
 #from threading import Thread
@@ -19,6 +19,7 @@ import os
 
 
 
+
 DATA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/Data"
 
 class PygameControllerProto(object):
@@ -30,12 +31,13 @@ class PygameControllerProto(object):
         return "joystick [" + self.joystick_name + "] found"
 
 
-class PygameController(handler.Observable, handler.Observer, Process):
+class PygameController(handler.Observable, handler.Observer):
 
     def __init__(self, sending_bus=handler.MessageBus(), receiving_bus=handler.MessageBus()):
-        Process.__init__(self)
+        #Process.__init__(self)
         handler.Observable.__init__(self, sending_bus)
         handler.Observer.__init__(self, receiving_bus)
+        self.exit = Event()
 
         self.FPSCLOCK = pygame.time.Clock()
         self.FPS = 30
@@ -44,7 +46,7 @@ class PygameController(handler.Observable, handler.Observer, Process):
         self.disp_black = True
         self.running = True
 
-        print("GamePadController Init")
+        print("PygameController initializing")
 
         #todo: die folgenden konstanten verfuegbar machen (aka den datentransport vom client hierher)
         #self.PlotListX            diese drei objekte heissen in sla_client/Model/slicingModels.py genauso und muessen hier verfuegbar sein
@@ -108,7 +110,7 @@ class PygameController(handler.Observable, handler.Observer, Process):
         #else:
         self.main_surface = pygame.display.set_mode((int(1024), int(786)))
 
-        while self.running: # main game loop
+        while not self.exit.is_set(): # main game loop
 
             if refresh:
                self.gamepad = self.refresh_gamepad()
@@ -116,7 +118,8 @@ class PygameController(handler.Observable, handler.Observer, Process):
             if self.disp_black:
                 self.display_black(self.main_surface)
             else:
-                fig = plt.figure(figsize=[4, 4], dpi=100, facecolor='k')# 100 dots per inch, so the resulting buffer is 400x400 pixels# )
+                self.display_white(self.main_surface)
+                #fig = plt.figure(figsize=[4, 4], dpi=100, facecolor='k')# 100 dots per inch, so the resulting buffer is 400x400 pixels# )
                 #ax = fig.gca()
                 #plt.subplot(1, 1, 1, axisbg='k')
                 #plt.fill(self.PlotArrayX[self.slicenummer], self.PlotArrayY[self.slicenummer], 'white')
@@ -146,25 +149,28 @@ class PygameController(handler.Observable, handler.Observer, Process):
             refresh = (i % conf.refresh_cycle == 0 and i > 0)
 
 
-
+        print(" ... exiting pygame controller ... ")
 
         return
 
 
     def stop(self):
+
         pygame.quit()
         self.running = False
-        self.release()
-        Process.terminate(self)
+        #Process.terminate(self)
+        #Process.join(self)
+        self.exit.set()
 
     def start(self):
+        print("pygame initializing")
         pygame.init()
-        self.running = True
-        Process.start(self)
-        print("GamePadController started")
+        #self.running = True
+        self.run()
+        #Process.start(self)
+        #print("GamePadController started")
 
-    def release(self):
-        pygame.quit()
+
 
     def display_black(self, surface):
         black = (0,0,0)
@@ -184,7 +190,7 @@ class PygameController(handler.Observable, handler.Observer, Process):
         if self.hasGamePad:
                 for event in pygame.event.get(): # event handling loop
 
-                    if event.type == JOYBUTTONUP:
+                    if event.type == JOYBUTTONDOWN:
                         if event.button == 8:
                             #print("Select Button Pressed")
                             self.put_message(msg.GamePadSelectPressed(PygameControllerProto(self.gamepad[0].get_name()), "Select Button Pressed"))
@@ -212,7 +218,7 @@ class PygameController(handler.Observable, handler.Observer, Process):
                             self.put_message(msg.GamePadShoulderLPressed(PygameControllerProto(self.gamepad[0].get_name()), "Left Shoulder Button Pressed"))
 
                         if event.button == 5:
-                            #self.black()
+                            self.black()
                             self.put_message(msg.GamePadShoulderRPressed(PygameControllerProto(self.gamepad[0].get_name()), "Right Shoulder Button Pressed"))
 
                         if event.button == 9:
@@ -238,7 +244,7 @@ class PygameController(handler.Observable, handler.Observer, Process):
         self.disp_black = not self.disp_black
         #print("disp_black :" + str(self.disp_black))
 
-        #self.update()
+        self.update()
 
 
     def update(self):

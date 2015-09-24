@@ -16,6 +16,7 @@ from DataBaseController import DataBaseController
 from multiprocessing import Process
 
 from ServiceFunctions import now
+import sys
 
 
 
@@ -27,7 +28,7 @@ class SlaPrinterController(Observer):
 
     def __init__(self):
 
-        print("Initalizing Controller")
+        print("Controller initializing")
 
         self.io_bus = MessageBus()
         self.io_bus.register(self)
@@ -53,53 +54,39 @@ class SlaPrinterController(Observer):
         #if mode != "stepper_calibration":
         self.server = Server.SlaPrinterApp(__name__, db_controller = self.db_controller, bus=self.data_bus)
 
+        #server_func = lambda: self.server.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False, use_reloader=False)
+        #self.server_p = Process(target=server_func)
 
 
     def start(self):
 
-
+        self.server.start()
 
         # start msg buses
         self.io_bus.start()
         self.data_bus.start()
-
-
         self.pygameIoController.start()
-
-
         self.stepperController.start()
 
-        self.server.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False, use_reloader=False)
+        #self.server.run(host='0.0.0.0',debug=True, port=4242,  use_evalex=False, use_reloader=False)
+
+        #self.server_p.start()
 
 
 
-
-    def release(self):
-
-        #self.pygameIoController.stop
-        print(self.pygameIoController)
-        #self.pygameIoController.terminate()
-        #self.pygameIoController.join()
+    def stop(self):
 
 
         self.stepperController.stop()
-
-        #self.pygameRenderController.stop()
-
-        # stop msg buses
-        print(self.io_bus)
-        self.io_bus.stop()
-        #self.io_bus.terminate()
-        #self.io_bus.join()
-
-        print(self.data_bus)
+        self.pygameIoController.stop()
         self.data_bus.stop()
-        #self.data_bus.terminate()
-        #self.data_bus.join()
+        self.io_bus.stop()
 
-        # somehow stop server
-        #self.server.stop()
+        self.server.stop()
 
+        #sys.exit(0)
+        #self.server_p.terminate()
+        #self.server_p.join()
 
 
 
@@ -117,7 +104,7 @@ class SlaPrinterController(Observer):
             if log_controller_input:
                 print("[" + str(now()) + "] Controller :: received Quitmessage >> shutting down ...")
 
-            self.release()
+            self.stop()
 
 
         # handle Data related Messages
