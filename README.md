@@ -25,6 +25,8 @@ In the following you can see a basic demonstration of how the client software wo
 
 ## sla_printer
 
+The server software comes with an actual webserver where a web api is implemented to receive files and commands. The client will send printing jobs to the server as a collection of the actually used *.stl* file, all slices and also for each slice information about the illumination time and motor steps. Upon receiving a job the server will enlist the job in a printing job queue so that multiple jobs can be received and processed. The jobs will be processed according to the *FIFO* stack used, so first in first out meaning the jobs will be processed in the order in which they arrive.
+The status of the sla printer can be viewed on a website which was build using bootstrap.
 
 
 ## scripts
