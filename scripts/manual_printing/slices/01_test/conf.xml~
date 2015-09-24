@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config>
+	<line name="01_1600_2.png">
+		<id>3</id>
+	</line>
+	<line name="02_1600_1.png">
+		<id>2</id>
+	</line>
+	<line name="03_1600.png">
+		<id>1</id>
+	</line>
+</config>
