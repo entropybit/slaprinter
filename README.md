@@ -13,9 +13,16 @@ A schematic of the printer together with the software is illustrated here:
 
 The raspberry pi within the printer is used to control the illumination as well as motor movement. To enable a simple acces to our printer the idea is that the slicing should be done with a client software communicating with the server software onboard the pi. The according pieces of software are the sla_client subproject as the client software and the sla_printer subproject as the server software running on the pi.
  
+## scripts
+
+The script folder contains some scripts produced for analysis of our 3D printer. Currently there are only two scripts contained, the measurement script and the manual_printing script. The measurement script is a simple analysis of printer step height distributions. Which were produced by measuring the height of single steps with a digital ruler.
+
+The more interesting script would be the manual_printing script which as the name suggest is used for actual printing. This script needs to run on the raspberry pi controlling the printer. To select from one of the several possible working modes of the manual_printing script an input device is needed. In our case this was a simple USB gamepad with a SNES controller layout.
+
+![gamepad layout ]() 
 
 ## sla_client
 
 ## sla_printer
 
-## scripts
+
