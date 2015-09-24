@@ -13,6 +13,20 @@ A schematic of the printer together with the software is illustrated here:
 
 The raspberry pi within the printer is used to control the illumination as well as motor movement. To enable a simple acces to our printer the idea is that the slicing should be done with a client software communicating with the server software onboard the pi. The according pieces of software are the sla_client subproject as the client software and the sla_printer subproject as the server software running on the pi.
  
+
+## sla_client
+
+The functionality of the client software is composed of visualization, slicing and communication with the printer. Currently only *.stl* files are supported, however there are several open source tools available which will produce *.stl* files from any given commonly used 3D file type. Therefore, this is not really a limitation, additionally support for othe types can of course be implemented. In fact this would be really easy, as it is only required to give a specification of how to read theses files. 
+This is the case because the entire software layout follows the *Model-View-Controller* Pattern, although this is not completely fulfilled in the main Controller class, which is partly due to the useage of QT. 
+
+In the following you can see a basic demonstration of how the client software works:
+
+[![software demo video](http://img.youtube.com/vi/ugnCqa_hhho/0.jpg)](https://www.youtube.com/watch?v=ugnCqa_hhho)
+
+## sla_printer
+
+
+
 ## scripts
 
 The script folder contains some scripts produced for analysis of our 3D printer. Currently there are only two scripts contained, the measurement script and the manual_printing script. The measurement script is a simple analysis of printer step height distributions. Which were produced by measuring the height of single steps with a digital ruler.
@@ -28,16 +42,4 @@ Each such subfolder will be loaded as series of slices. With the **Y** button th
 Upon pressing **X** a rectangle illustrating the displaying area will be shown on the display.
 
 The functionality of the **select** key is to just show or hide a control picture / eich picture which can be used to examine how stuff will be displayed on the basin ground. Finally, with pressing **start** the printing procedure defined in the programm.dat will be started with the currently selected slice series.
-
-## sla_client
-
-The functionality of the client software is composed of visualization, slicing and communication with the printer. Currently only *.stl* files are supported, however there are several open source tools available which will produce *.stl* files from any given commonly used 3D file type. Therefore, this is not really a limitation, additionally support for othe types can of course be implemented. In fact this would be really easy, as it is only required to give a specification of how to read theses files. 
-This is the case because the entire software layout follows the *Model-View-Controller* Pattern, although this is not completely fulfilled in the main Controller class, which is partly due to the useage of QT. 
-
-In the following you can see a basic demonstration of how the client software works:
-
-[![software demo video](http://img.youtube.com/vi/ugnCqa_hhho/0.jpg)](https://www.youtube.com/watch?v=ugnCqa_hhho)
-
-## sla_printer
-
 
