@@ -19,7 +19,7 @@ The script folder contains some scripts produced for analysis of our 3D printer.
 
 The more interesting script would be the manual_printing script which as the name suggest is used for actual printing. This script needs to run on the raspberry pi controlling the printer. To select from one of the several possible working modes of the manual_printing script an input device is needed. In our case this was a simple USB gamepad with a SNES controller layout.
 
-![gamepad layout ]() 
+![gamepad layout ](https://raw.githubusercontent.com/entropybit/slaprinter/master/scripts/manual_printing/controller.png) 
 
 ## sla_client
 
