@@ -27,10 +27,16 @@ After starting the script it looks for folders within the subfolder slices, cont
 Each such subfolder will be loaded as series of slices. With the **Y** button the actual slice in the actually selected slice series will be displayed for about 1s (enough time to see the picture on the bottom of the basin without causing significant hardening). With **B** one can iterate through the slices of the current slice series. And with the **A** button it is possible to go through the slice series which were generated according to the found subfolders of */slices* and there contained *.png* files. 
 Upon pressing **X** a rectangle illustrating the displaying area will be shown on the display.
 
-Finnally the functionality of the select key is to just show or hide a eich picture which can be used to examine how stuff will be displayed on the basin ground.
-With start the printing procedure defined in the programm.dat will be started with the currently selected slice series.
+The functionality of the **select** key is to just show or hide a control picture / eich picture which can be used to examine how stuff will be displayed on the basin ground. Finally, with pressing **start** the printing procedure defined in the programm.dat will be started with the currently selected slice series.
 
 ## sla_client
+
+The functionality of the client software is composed of visualization, slicing and communication with the printer. Currently only *.stl* files are supported, however there are several open source tools available which will produce *.stl* files from any given commonly used 3D file type. Therefore, this is not really a limitation, additionally support for othe types can of course be implemented. In fact this would be really easy, as it is only required to give a specification of how to read theses files. 
+This is the case because the entire software layout follows the *Model-View-Controller* Pattern, although this is not completely fulfilled in the main Controller class, which is partly due to the useage of QT. 
+
+In the following you can see a basic demonstration of how the client software works:
+
+![software demo video](https://github.com/entropybit/slaprinter/blob/master/demo.mkv?raw=true)
 
 ## sla_printer
 
