@@ -4,7 +4,6 @@ from abc import ABCMeta, abstractmethod
 import argparse
 import time
 import pygame
-import os
 
 from multiprocessing import Process, Queue
 import xml.etree.ElementTree as ET
@@ -13,8 +12,8 @@ from pygame.locals import *
 import sys
 
 
-working_mode = "test"
-#working_mode = "raspberry_pi"
+#working_mode = "test"
+working_mode = "raspberry_pi"
 
 if working_mode == "raspberry_pi":
     path = "/home/pi/scripts/"
@@ -470,7 +469,6 @@ class PygameController(object):
                             self.proces_display_line(program[i])
 
                         print(">> ... printing executed ... <<")
-                        
                     # select button
                     if event.button == 8:
                         self.eich_bild()
@@ -500,15 +498,14 @@ class PygameController(object):
                     # down pressed
                     if event.joy == 0 and event.axis == 1 and event.value > 0.5:
                         #main_bus.put(["down_one_step"])
-                        for i in range(1):
-                            self.stepper.downOneStep()
+			for i in range(1):
+	                        self.stepper.downOneStep()
 
                     # up pressed
                     if event.joy == 0 and event.axis == 1 and event.value < -0.5:
                         #main_bus.put(["up_one_step"])
-                        for i in range(1):
-                            self.stepper.upOneStep()
-
+			for i in range(1):
+		        	self.stepper.upOneStep()
                     # right pressed
                     if event.joy == 0 and event.axis == 0 and event.value > 0.5:
                         for i in range(5):
@@ -520,7 +517,7 @@ class PygameController(object):
                             self.stepper.downOneStep()
 
 
-
+import os
 
 class SliceSeriesContainer(object):
 
