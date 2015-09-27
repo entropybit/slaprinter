@@ -291,7 +291,7 @@ class SlaController(QApplication):
         # only slice if new model has been loaded
         if  self.__slices is None and self.__slicing_model is None:
             self.__slicing_model = EquiSlicer(self.__stl_model)
-            self.__slices = self.__slicing_model.slice(3)
+            self.__slices = self.__slicing_model.slice(100)
 
         slice = self.__slices[self.__slicing_index]
         scale = self.__slicing_model.scale

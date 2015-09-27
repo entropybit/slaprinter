@@ -303,6 +303,27 @@ class EquiSlicer(Slicer):
         plt.show()
         #plt.close()
 
+    def save_slice(self, slicenummer):
+        print("saving slice [" + str(slicenummer) + "]")
+        plt.figure(str(self.slicingLevelsList.tolist().index(self.slicingLevel)), facecolor='k')
+        plt.subplot(1, 1, 1, axisbg='k')
+        plt.fill(self.PlotListX[slicenummer], self.PlotListY[slicenummer], 'white') #todo: find an algorithm that can tell outside from inside and plot the holes accurately
+        plt.xlim(self.x_dims)
+        plt.ylim(self.y_dims)
+        plt.savefig("slices/" + str(slicenummer) + '.png', facecolor='k', edgecolor='k', dpi=170)
+        plt.clf()
+
+    def save_slices(self, number_of_slices):
+
+        print("saving slices")
+
+        for i in range(number_of_slices):
+
+            #print("saving slice [" + str(i) + "]")
+            self.save_slice(i)
+
+
+
 
     def PlotSlice_cheapPlot(self, slicenummer):
         plt.plot(self.allresults2[slicenummer, 1:, :, 0], self.allresults2[slicenummer, 1:, :, 1], 'b')
@@ -332,7 +353,7 @@ class EquiSlicer(Slicer):
 if __name__ == "__main__":
 
     #stl_model = StlModel('../Data/EiffelTowerTALL.stl')
-    stl_model = StlModel('../Data/square.stl')
-    eiffel = EquiSlicer(stl_model)
-    eiffel.slice(0.13)
-    #eiffel.plotSlice(2)
+    stl_model = StlModel('../Data/pyramids.stl')
+    slicer = EquiSlicer(stl_model)
+    slices =slicer.slice(0.32)
+    slicer.save_slices(len(slices))

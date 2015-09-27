@@ -106,8 +106,6 @@ class SlaPrinterApp(Flask, Observable, Observer, Process):
     def quit(self):
 
 
-        #self.shutdown_server()
-
         msg = QuitMessage(SlaPrinterAppProto(),"sla printer shutting down")
         self.put_message(msg)
 

@@ -247,7 +247,7 @@ class PygameController(object):
 
 
         self.screen.blit(picture, (x, y))
-        print("display image")
+        print("display image [" + str(path) + "]")
         pygame.display.update()
 
 
@@ -468,7 +468,15 @@ class PygameController(object):
                         for i in range(len(program)):
                             self.proces_display_line(program[i])
 
+
+                        # printing finished step up
+                        print("stepping up")
+
+                        self.stepper.step_up()
+
                         print(">> ... printing executed ... <<")
+
+
                     # select button
                     if event.button == 8:
                         self.eich_bild()

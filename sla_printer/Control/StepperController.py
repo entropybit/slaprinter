@@ -56,10 +56,6 @@ class StepperController(Observer, Observable):
 
 
     def notify(self,Message):
-        #print("[" + str(now()) + "] StepperController :: " + str(Message.msg))
-        #print("                               msg   classname: " + str(Message.__class__.__name__))
-
-        #GamePadUpPressed, GamePadDownPressed, GamePadShoulderLPressed, GamePadShoulderRPressed
 
         if isinstance(Message, GamePadUpPressed):
 
@@ -104,32 +100,6 @@ class StepperController(Observer, Observable):
                 print("[" + str(now()) + "] StepperController :: GamePadShoulderRPressed")
 
             self.control_bus.put(SeveralStepsDownAndUp(StepperControllerProto(), "Move multiple steps down and up", self.multiplier*several_steps))
-
-        elif isinstance(Message, GamePadBPressed):
-
-            if log_steppercontroller:
-                print("[" + str(now()) + "] StepperController :: GamePadBPressed")
-
-            self.multiply()
-            print("new multiplier = " + str(self.multiplier))
-
-
-        elif isinstance(Message, GamePadAPressed):
-
-            if log_steppercontroller:
-                print("[" + str(now()) + "] StepperController :: GamePadAPressed")
-
-            self.divide()
-            print("new multiplier = " + str(self.multiplier))
-
-
-
-    def multiply(self):
-        self.multiplier *= multiplier_base
-
-    def divide(self):
-        self.multiplier /= multiplier_base
-
 
 
 

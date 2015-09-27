@@ -260,11 +260,6 @@ class SoncebosStepper(Stepper):
             print("[" + str(now()) + "] SoncebosStepper :: SeveralStepsUpAndDown entering queue")
             self._queue.put(msg)
 
-        #else:
-        #    print("[SoncebosStepper] :: msg not interpreted as stepper command")
-
-        #print(msg.msg)
-
 
 
 if __name__ == "__main__":

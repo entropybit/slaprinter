@@ -93,6 +93,10 @@ class SlaPrinterController(Observer):
     def notify(self, message):
 
 
+        if isinstance(message, QuitMessage):
+            print("[" + str(now()) + "] Controller :: received Quitmessage >> shutting down ...")
+            self.stop()
+
 
         if isinstance(message, GamePadSelectPressed) or isinstance(message, QuitMessage):
 
