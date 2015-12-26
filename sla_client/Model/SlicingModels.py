@@ -310,7 +310,7 @@ class EquiSlicer(Slicer):
         plt.fill(self.PlotListX[slicenummer], self.PlotListY[slicenummer], 'white') #todo: find an algorithm that can tell outside from inside and plot the holes accurately
         plt.xlim(self.x_dims)
         plt.ylim(self.y_dims)
-        plt.savefig("slices/" + str(slicenummer) + '.png', facecolor='k', edgecolor='k', dpi=170)
+        plt.savefig("slices/" + str(slicenummer) + '.eps', facecolor='k', edgecolor='k')
         plt.clf()
 
     def save_slices(self, number_of_slices):

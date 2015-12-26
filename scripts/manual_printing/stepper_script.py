@@ -15,6 +15,9 @@ import sys
 #working_mode = "test"
 working_mode = "raspberry_pi"
 
+projection_rect = (590,268,420,300)
+projection_rect_png = (0,0,420,300)
+
 if working_mode == "raspberry_pi":
     path = "/home/pi/scripts/"
     stepper_enabled = True
@@ -213,6 +216,12 @@ class PygameController(object):
         self.screen.fill(black)
         pygame.display.update()
 
+    def display_white(self):
+        white = (255,255,255)
+        pygame.draw.rect(self.screen, white, projection_rect)
+        pygame.display.update()
+
+
     def display_png(self, path):
         black = (0,0,0)
         self.screen.fill(black)
@@ -221,32 +230,35 @@ class PygameController(object):
 
         img_r = picture.get_rect()
 
-        w = img_r.width
-        h = img_r.height
+        #w = img_r.width
+        #h = img_r.height
 
 
-        if w > h:
-            r = h/(1.0*w)
+        # if w > h:
+        #     r = h/(1.0*w)
+        #
+        #     w2 = int(0.9*XRES)
+        #     h2 = int(r*w2)
+        #     picture = pygame.transform.scale(picture, (w2,h2))
+        # else:
+        #
+        #     r = w/(1.0*w)
+        #
+        #     h2 = int(0.9*YRES)
+        #     w2 = int(r*h2)
+        #     picture = pygame.transform.scale(picture, (w2,h2))
+        #
+        #
+        #
+        #
+        # x = int((XRES - w2)/2.0)
+        # y = int((YRES - h2)/2.0)
 
-            w2 = int(0.9*XRES)
-            h2 = int(r*w2)
-            picture = pygame.transform.scale(picture, (w2,h2))
-        else:
 
-            r = w/(1.0*w)
+        x,y,w,h = (590,268,420,300)
+        pic = pygame.transform.scale(picture, (400,400))
 
-            h2 = int(0.9*YRES)
-            w2 = int(r*h2)
-            picture = pygame.transform.scale(picture, (w2,h2))
-
-
-
-
-        x = int((XRES - w2)/2.0)
-        y = int((YRES - h2)/2.0)
-
-
-        self.screen.blit(picture, (x, y))
+        self.screen.blit(picture, (560,280))
         print("display image [" + str(path) + "]")
         pygame.display.update()
 
@@ -482,7 +494,8 @@ class PygameController(object):
                         self.eich_bild()
                     # x buton
                     if event.button == 0:
-                        self.show_border(4)
+                        self.display_white()
+                        #self.show_border(4)
                     # y button
                     if event.button == 3:
                         self.display_current()
